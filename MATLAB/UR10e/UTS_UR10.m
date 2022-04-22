@@ -5,35 +5,13 @@ classdef UTS_UR10 < handle
         
         %> workspace
         workspace = [-3 3 -3 3 -0.91 4];   
-               
-        %> If we have a tool model which will replace the final links model, combined ply file of the tool model and the final link models
-        toolModelFilename = []; % Available are: 'DabPrintNozzleTool.ply';        
-        toolParametersFilename = []; % Available are: 'DabPrintNozzleToolParameters.mat';        
     end
     
     methods%% Class for UR10 robot simulation
-        function self = UTS_UR10(toolModelAndTCPFilenames)
-            if 0 < nargin
-                if length(toolModelAndTCPFilenames) ~= 2
-                    error('Please pass a cell with two strings, toolModelFilename and toolCenterPointFilename');
-                end
-                self.toolModelFilename = toolModelAndTCPFilenames{1};
-                self.toolParametersFilename = toolModelAndTCPFilenames{2};
-            end
-            
+        function self = UTS_UR10()
             self.GetUR10Robot();
-%             self.PlotAndColourRobot();%robot,workspace);
-% 
-%             drawnow            
-            % camzoom(2)
-            % campos([6.9744    3.5061    1.8165]);
-
-%             camzoom(4)
-%             view([122,14]);
-%             camzoom(8)
-%             teach(self.model);
+            campos([-6.9744    -3.5061    1.8165]);
         end
-
         %% GetUR10Robot
         % Given a name (optional), create and return a UR10 robot model
         function GetUR10Robot(self)
@@ -53,22 +31,13 @@ classdef UTS_UR10 < handle
         %% PlotAndColourRobot
         % Given a robot index, add the glyphs (vertices and faces) and
         % colour them in if data is available 
-        function PlotAndColourRobot(self)%robot,workspace)
+        function PlotAndColourRobot(self)
             for linkIndex = 0:self.model.n
                 [ faceData, vertexData, plyData{linkIndex + 1} ] = plyread(['UTS_UR10Link',num2str(linkIndex),'.ply'],'tri'); %#ok<AGROW>
                 self.model.faces{linkIndex + 1} = faceData;
                 self.model.points{linkIndex + 1} = vertexData;
             end
 
-            if ~isempty(self.toolModelFilename)
-                [ faceData, vertexData, plyData{self.model.n + 1} ] = plyread(self.toolModelFilename,'tri'); 
-                self.model.faces{self.model.n + 1} = faceData;
-                self.model.points{self.model.n + 1} = vertexData;
-                toolParameters = load(self.toolParametersFilename);
-                self.model.tool = toolParameters.tool;
-                self.model.qlim = toolParameters.qlim;
-                warning('Please check the joint limits. They may be unsafe')
-            end
             % Display robot
             self.model.plot3d(zeros(1,self.model.n),'noarrow','workspace',self.workspace);
             if isempty(findobj(get(gca,'Children'),'Type','Light'))
