@@ -1,0 +1,12 @@
+<launch>
+    <include file="$(find ur_robot_driver)/launch/ur10e_bringup.launch">
+        <arg name="robot_ip" value="127.0.0.1" />
+    </include>
+
+    <node name="joint_throttle" pkg="topic_tools" type="throttle"
+          args="'messages' 'joint_states' 10"/>
+    <node name="wrench_throttle" pkg="topic_tools" type="throttle"
+          args="'messages' 'wrench' 10"/>
+
+
+</launch>

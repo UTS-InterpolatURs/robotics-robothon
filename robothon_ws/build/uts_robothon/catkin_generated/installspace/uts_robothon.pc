@@ -1,0 +1,8 @@
+prefix=/home/rohan/git/robotics-robothon/robothon_ws/install
+
+Name: uts_robothon
+Description: Description of uts_robothon
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
