@@ -17,7 +17,7 @@ classdef urRosWrapper < handle
         function self = urRosWrapper(robot)
             %URROSWRAPPER Construct an instance of this class
             self.robot = robot;
-            self.jointStatesSubscriber = rossubscriber('/joint_states_throttle',@self.jointStatesCallback,"DataFormat","struct");
+            self.jointStatesSubscriber = rossubscriber('/joint_states',@self.jointStatesCallback,"DataFormat","struct");
             self.wrenchSubscriber = rossubscriber('/wrench',@self.wrenchCallback,"DataFormat","struct");
             self.jointPublisher = rospublisher('/scaled_pos_joint_traj_controller/follow_joint_trajectory/goal', 'control_msgs/FollowJointTrajectoryActionGoal');
             self.callback_counter = 0;

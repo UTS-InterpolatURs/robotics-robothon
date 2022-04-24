@@ -1,6 +1,7 @@
 %%
 clear all; clf; clc;
 addpath 'UR10e'
+addpath 'ROSwrapper'
 addpath 'Envi'
 
 %%
