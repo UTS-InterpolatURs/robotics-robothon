@@ -5,7 +5,6 @@ classdef IntColCompute < handle
     
     methods (Static)
         function [intersectionPoint,check] = LinePlaneIntersection(planeNormal,pointOnPlane,point1OnLine,point2OnLine)
-            
             intersectionPoint = [0 0 0];
             u = point2OnLine - point1OnLine;
             w = point1OnLine - pointOnPlane;
@@ -62,5 +61,18 @@ classdef IntColCompute < handle
             
             result = 1;                      % intersectP is in Triangle
         end
+        
+        function [trRobot] = ComputeJointTransforms(robot,qCurrent)
+            robotLinks = robot.model.links;
+            trRobot = zeros(4,4,robot.model.n+1);
+            trRobot(:,:,1) = robot.model.base;
+            for i = 1 : robot.model.n
+                trRobot(:,:,i+1) = trRobot(:,:,i) * trotz(qCurrent(i)+robotLinks(i).offset) * transl(0,0,robotLinks(i).d) * transl(robotLinks(i).a,0,0) * trotx(robotLinks(i).alpha);
+            end
+        end
+        
+%         function [checkCollision] = CheckCollision(robot, )
+%             
+%         end
     end
 end
