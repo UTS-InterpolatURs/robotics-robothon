@@ -7,6 +7,11 @@ classdef UTS_UR10 < handle
         workspace = [-3 3 -3 3 -0.91 4];   
     end
     
+    properties (Access = private)
+        %> Robot link parameters
+        L1; L2; L3; L4; L5; L6;
+    end
+    
     methods%% Class for UR10 robot simulation
         function self = UTS_UR10()
             self.GetUR10Robot();
@@ -18,16 +23,27 @@ classdef UTS_UR10 < handle
             pause(0.001);
             name = ['UR_10_',datestr(now,'yyyymmddTHHMMSSFFF')];
 
-            L1 = Link('d',0.128,'a',0,'alpha',pi/2,'qlim',deg2rad([-360 360]), 'offset', 0);
-            L2 = Link('d',0,'a',-0.6127,'alpha',0,'qlim', deg2rad([-360 360]), 'offset',0); % was 'offset',pi/2
-            L3 = Link('d',0,'a',-0.5716,'alpha',0,'qlim', deg2rad([-360 360]), 'offset', 0);
-            L4 = Link('d',0.16389,'a',0,'alpha',pi/2,'qlim',deg2rad([-360 360]),'offset', 0); % was 'offset',pi/2
-            L5 = Link('d',0.1157,'a',0,'alpha',-pi/2,'qlim',deg2rad([-360,360]), 'offset',0);
-            L6 = Link('d',0.09037,'a',0,'alpha',0,'qlim',deg2rad([-360,360]), 'offset', 0);
+            self.L1 = Link('d',0.128,'a',0,'alpha',pi/2,'qlim',deg2rad([-360 360]), 'offset', 0);
+            self.L2 = Link('d',0,'a',-0.6127,'alpha',0,'qlim', deg2rad([-360 360]), 'offset',0); % was 'offset',pi/2
+            self.L3 = Link('d',0,'a',-0.5716,'alpha',0,'qlim', deg2rad([-360 360]), 'offset', 0);
+            self.L4 = Link('d',0.16389,'a',0,'alpha',pi/2,'qlim',deg2rad([-360 360]),'offset', 0); % was 'offset',pi/2
+            self.L5 = Link('d',0.1157,'a',0,'alpha',-pi/2,'qlim',deg2rad([-360,360]), 'offset',0);
+            self.L6 = Link('d',0.09037,'a',0,'alpha',0,'qlim',deg2rad([-360,360]), 'offset', 0);
 
-            self.model = SerialLink([L1 L2 L3 L4 L5 L6],'name',name);
+            self.model = SerialLink([self.L1 self.L2 self.L3 self.L4 self.L5 self.L6],'name',name);
         end
 
+        %% Get Robot Link Parameters
+        % This function return all 6 links DH Parameters
+        function [L1, L2, L3, L4, L5, L6] = GetRobotLinks(self)
+            L1 = self.L1;
+            L2 = self.L2;
+            L3 = self.L3;
+            L4 = self.L4;
+            L5 = self.L5;
+            L6 = self.L6;
+        end
+        
         %% PlotAndColourRobot
         % Given a robot index, add the glyphs (vertices and faces) and
         % colour them in if data is available 
