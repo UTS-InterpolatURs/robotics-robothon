@@ -6,12 +6,13 @@ classdef UTS_UR10 < handle
         %> workspace
         workspace = [-3 3 -3 3 -0.91 4];   
     end
-    
+
     methods%% Class for UR10 robot simulation
         function self = UTS_UR10()
             self.GetUR10Robot();
             campos([-6.9744    -3.5061    1.8165]);
         end
+        
         %% GetUR10Robot
         % Given a name (optional), create and return a UR10 robot model
         function GetUR10Robot(self)
