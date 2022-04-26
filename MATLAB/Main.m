@@ -15,6 +15,7 @@ myUR10e.PlotAndColourRobot();
 [urL1, urL2, urL3, urL4, urL5, urL6] = myUR10e.GetRobotLinks();
 workbench = Workbench();
 workbench.PlotWorkbench();
+[wbVert,wbFace,wbFaceNorms] = workbench.GetModelVFNorm();
 
 %% Move to ready pose
 steps = 50;
