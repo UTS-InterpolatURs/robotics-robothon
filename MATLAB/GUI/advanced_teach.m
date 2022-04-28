@@ -22,7 +22,7 @@ function varargout = advanced_teach(varargin)
 
 % Edit the above text to modify the response to help advanced_teach
 
-% Last Modified by GUIDE v2.5 28-Apr-2022 19:46:34
+% Last Modified by GUIDE v2.5 28-Apr-2022 20:29:38
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -55,6 +55,11 @@ function advanced_teach_OpeningFcn(hObject, eventdata, handles, varargin)
 
 handles.robot = varargin{1};
 handles.speedScale = 1;
+handles.buttonDown = 0;
+set(handles.speed_slider, 'Min', 0);
+set(handles.speed_slider, 'Max', 1);
+set(handles.speed_slider, 'Value', 1);
+
 % Update handles structure
 guidata(hObject, handles);
 
@@ -82,9 +87,8 @@ function figure1_WindowButtonUpFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % set(handles.pushbutton1,'String','off');
-global buttonDown;
-buttonDown = 0;
-% guidata(hObject,handles);
+handles.buttonDown = 0;
+guidata(hObject,handles);
 
 
 % --- Executes on mouse press over figure background, over a disabled or
@@ -93,10 +97,8 @@ function figure1_WindowButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global buttonDown;
-buttonDown = 1;
-disp('button down')
-% guidata(hObject,handles);
+handles.buttonDown = 1;
+guidata(hObject,handles);
 
 
 % --- Executes on button press in z_plus_button.
@@ -113,9 +115,7 @@ function z_plus_button_ButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to z_plus_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-global buttonDown;
-while buttonDown
+while handles.buttonDown
 
      %tr = handles.robot.model.fkine(handles.robot.model.getpos());
 %     newtr = transl(0,0,0.01) * tr;
@@ -137,7 +137,7 @@ while buttonDown
     drawnow();
     pause(0.1);
 
-  
+  handles = guidata(hObject);
     
 end
 
@@ -168,8 +168,7 @@ function z_minus_button_ButtonDownFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-global buttonDown;
-while buttonDown
+while handles.buttonDown
 
    
 %     tr = handles.robot.model.fkine(handles.robot.model.getpos());
@@ -191,8 +190,8 @@ while buttonDown
     handles.robot.model.animate(newq);
     drawnow();
     pause(0.1);
-disp('down');
-    
+
+    handles = guidata(hObject);
 end
 
 
@@ -232,8 +231,8 @@ function x_plus_button_ButtonDownFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
-global buttonDown;
-while buttonDown
+
+while handles.buttonDown
 
      %tr = handles.robot.model.fkine(handles.robot.model.getpos());
 %     newtr = transl(0,0,0.01) * tr;
@@ -255,7 +254,7 @@ while buttonDown
     drawnow();
     pause(0.1);
 
-  
+  handles = guidata(hObject);
     
 end
 
@@ -268,8 +267,8 @@ function x_minus_button_ButtonDownFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
-global buttonDown;
-while buttonDown
+
+while handles.buttonDown
 
      %tr = handles.robot.model.fkine(handles.robot.model.getpos());
 %     newtr = transl(0,0,0.01) * tr;
@@ -291,7 +290,7 @@ while buttonDown
     drawnow();
     pause(0.1);
 
-  
+  handles = guidata(hObject);
     
 end
 
@@ -305,8 +304,8 @@ function y_minus_button_ButtonDownFcn(hObject, eventdata, handles)
 
 
 
-global buttonDown;
-while buttonDown
+
+while handles.buttonDown
 
      %tr = handles.robot.model.fkine(handles.robot.model.getpos());
 %     newtr = transl(0,0,0.01) * tr;
@@ -328,7 +327,7 @@ while buttonDown
     drawnow();
     pause(0.1);
 
-  
+  handles = guidata(hObject);
     
 end
 
@@ -342,8 +341,8 @@ function y_plus_button_ButtonDownFcn(hObject, eventdata, handles)
 
 
 
-global buttonDown;
-while buttonDown
+
+while handles.buttonDown
 
      %tr = handles.robot.model.fkine(handles.robot.model.getpos());
 %     newtr = transl(0,0,0.01) * tr;
@@ -364,7 +363,333 @@ while buttonDown
     handles.robot.model.animate(newq);
     drawnow();
     pause(0.1);
+    handles = guidata(hObject);
 
   
     
+end
+
+
+% --- Executes on button press in joint1_plus.
+function joint1_plus_Callback(hObject, eventdata, handles)
+% hObject    handle to joint1_plus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in joint2_plus.
+function joint2_plus_Callback(hObject, eventdata, handles)
+% hObject    handle to joint2_plus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in joint3_plus.
+function joint3_plus_Callback(hObject, eventdata, handles)
+% hObject    handle to joint3_plus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in joint4_plus.
+function joint4_plus_Callback(hObject, eventdata, handles)
+% hObject    handle to joint4_plus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in joint5_plus.
+function joint5_plus_Callback(hObject, eventdata, handles)
+% hObject    handle to joint5_plus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in joint6_plus.
+function joint6_plus_Callback(hObject, eventdata, handles)
+% hObject    handle to joint6_plus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in joint1_minus.
+function joint1_minus_Callback(hObject, eventdata, handles)
+% hObject    handle to joint1_minus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in joint2_minus.
+function joint2_minus_Callback(hObject, eventdata, handles)
+% hObject    handle to joint2_minus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in joint3_minus.
+function joint3_minus_Callback(hObject, eventdata, handles)
+% hObject    handle to joint3_minus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in joint4_minus.
+function joint4_minus_Callback(hObject, eventdata, handles)
+% hObject    handle to joint4_minus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in joint5_minus.
+function joint5_minus_Callback(hObject, eventdata, handles)
+% hObject    handle to joint5_minus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in joint6_minus.
+function joint6_minus_Callback(hObject, eventdata, handles)
+% hObject    handle to joint6_minus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over joint1_minus.
+function joint1_minus_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to joint1_minus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+while handles.buttonDown
+
+    currentQ = handles.robot.model.getpos();
+    currentQ(1) = currentQ(1) - (0.02 * handles.speedScale);
+
+    handles.robot.model.animate(currentQ);
+    drawnow();
+    handles = guidata(hObject);
+end
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over joint2_minus.
+function joint2_minus_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to joint2_minus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+while handles.buttonDown
+
+    currentQ = handles.robot.model.getpos();
+    currentQ(2) = currentQ(2) - (0.02 * handles.speedScale);
+
+    handles.robot.model.animate(currentQ);
+    drawnow();
+    handles = guidata(hObject);
+end
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over joint3_minus.
+function joint3_minus_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to joint3_minus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+while handles.buttonDown
+
+    currentQ = handles.robot.model.getpos();
+    currentQ(3) = currentQ(3) - (0.02 * handles.speedScale);
+
+    handles.robot.model.animate(currentQ);
+    drawnow();
+    handles = guidata(hObject);
+end
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over joint4_minus.
+function joint4_minus_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to joint4_minus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+while handles.buttonDown
+
+    currentQ = handles.robot.model.getpos();
+    currentQ(4) = currentQ(4) - (0.02 * handles.speedScale);
+
+    handles.robot.model.animate(currentQ);
+    drawnow();
+    handles = guidata(hObject);
+end
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over joint5_minus.
+function joint5_minus_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to joint5_minus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+while handles.buttonDown
+
+    currentQ = handles.robot.model.getpos();
+    currentQ(5) = currentQ(5) - (0.02 * handles.speedScale);
+
+    handles.robot.model.animate(currentQ);
+    drawnow();
+    handles = guidata(hObject);
+end
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over joint6_minus.
+function joint6_minus_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to joint6_minus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+while handles.buttonDown
+    currentQ = handles.robot.model.getpos();
+    currentQ(6) = currentQ(6) - (0.02 * handles.speedScale);
+
+    handles.robot.model.animate(currentQ);
+    drawnow();
+    handles = guidata(hObject);
+end
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over joint1_plus.
+function joint1_plus_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to joint1_plus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+while handles.buttonDown
+    currentQ = handles.robot.model.getpos();
+    currentQ(1) = currentQ(1) + (0.02 * handles.speedScale);
+
+    handles.robot.model.animate(currentQ);
+    drawnow();
+    handles = guidata(hObject);
+end
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over joint2_plus.
+function joint2_plus_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to joint2_plus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+while handles.buttonDown
+
+    currentQ = handles.robot.model.getpos();
+    currentQ(2) = currentQ(2) + (0.02 * handles.speedScale);
+
+    handles.robot.model.animate(currentQ);
+    drawnow();
+    handles = guidata(hObject);
+end
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over joint3_plus.
+function joint3_plus_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to joint3_plus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+while handles.buttonDown
+
+    currentQ = handles.robot.model.getpos();
+    currentQ(3) = currentQ(3) + (0.02 * handles.speedScale);
+
+    handles.robot.model.animate(currentQ);
+    drawnow();
+    handles = guidata(hObject);
+end
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over joint4_plus.
+function joint4_plus_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to joint4_plus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+while handles.buttonDown
+    currentQ = handles.robot.model.getpos();
+    currentQ(4) = currentQ(4) + (0.02 * handles.speedScale);
+
+    handles.robot.model.animate(currentQ);
+    drawnow();
+    handles = guidata(hObject);
+end
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over joint5_plus.
+function joint5_plus_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to joint5_plus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+while handles.buttonDown
+    currentQ = handles.robot.model.getpos();
+    currentQ(5) = currentQ(5) + (0.02 * handles.speedScale);
+
+    handles.robot.model.animate(currentQ);
+    drawnow();
+    handles = guidata(hObject);
+end
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over joint6_plus.
+function joint6_plus_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to joint6_plus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+while handles.buttonDown
+
+    currentQ = handles.robot.model.getpos();
+    currentQ(6) = currentQ(6) + (0.02 * handles.speedScale);
+
+    handles.robot.model.animate(currentQ);
+    drawnow();
+    handles = guidata(hObject);
+end
+
+
+% --- Executes on slider movement.
+function speed_slider_Callback(hObject, eventdata, handles)
+% hObject    handle to speed_slider (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+handles.speedScale = get(hObject, 'Value');
+guidata(hObject, handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function speed_slider_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to speed_slider (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
