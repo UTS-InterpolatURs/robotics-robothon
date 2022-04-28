@@ -22,7 +22,7 @@ function varargout = advanced_teach(varargin)
 
 % Edit the above text to modify the response to help advanced_teach
 
-% Last Modified by GUIDE v2.5 25-Apr-2022 15:22:14
+% Last Modified by GUIDE v2.5 28-Apr-2022 19:46:34
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -54,6 +54,7 @@ function advanced_teach_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for advanced_teach
 
 handles.robot = varargin{1};
+handles.speedScale = 1;
 % Update handles structure
 guidata(hObject, handles);
 
@@ -94,21 +95,22 @@ function figure1_WindowButtonDownFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global buttonDown;
 buttonDown = 1;
+disp('button down')
 % guidata(hObject,handles);
 
 
-% --- Executes on button press in up_button.
-function up_button_Callback(hObject, eventdata, handles)
-% hObject    handle to up_button (see GCBO)
+% --- Executes on button press in z_plus_button.
+function z_plus_button_Callback(hObject, eventdata, handles)
+% hObject    handle to z_plus_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
 
 
 % --- If Enable == 'on', executes on mouse press in 5 pixel border.
-% --- Otherwise, executes on mouse press in 5 pixel border or over up_button.
-function up_button_ButtonDownFcn(hObject, eventdata, handles)
-% hObject    handle to up_button (see GCBO)
+% --- Otherwise, executes on mouse press in 5 pixel border or over z_plus_button.
+function z_plus_button_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to z_plus_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
@@ -118,12 +120,18 @@ while buttonDown
      %tr = handles.robot.model.fkine(handles.robot.model.getpos());
 %     newtr = transl(0,0,0.01) * tr;
 %     xdot = (newtr - tr)/0.05;
-    xdot = [0,0,1,0,0,0];
-    q = handles.robot.model.getpos()
+    xdot = [0,0,(1*handles.speedScale),0,0,0];
+    q = handles.robot.model.getpos();
     J = handles.robot.model.jacob0(q);
     qdot = inv(J)*xdot';
-    
     newq = q + (0.01*qdot');
+    J2 = handles.robot.model.jacob0(newq);
+    if sqrt(det(J2*J2')) < 0.01
+        disp("Robot is close to singularity - Please use joint controls to move robot");
+        disp("manipuability: ");
+        disp(sqrt(det(J2*J2')));
+        break;
+    end
 
     handles.robot.model.animate(newq);
     drawnow();
@@ -146,17 +154,17 @@ delete(hObject);
  
 
 
-% --- Executes on button press in down_button.
-function down_button_Callback(hObject, eventdata, handles)
-% hObject    handle to down_button (see GCBO)
+% --- Executes on button press in z_minus_button.
+function z_minus_button_Callback(hObject, eventdata, handles)
+% hObject    handle to z_minus_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
 
 % --- If Enable == 'on', executes on mouse press in 5 pixel border.
-% --- Otherwise, executes on mouse press in 5 pixel border or over down_button.
-function down_button_ButtonDownFcn(hObject, eventdata, handles)
-% hObject    handle to down_button (see GCBO)
+% --- Otherwise, executes on mouse press in 5 pixel border or over z_minus_button.
+function z_minus_button_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to z_minus_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
@@ -167,13 +175,19 @@ while buttonDown
 %     tr = handles.robot.model.fkine(handles.robot.model.getpos());
 %     newtr = transl(0,0,-0.01) * tr;
 %     xdot = (newtr - tr)/0.05;
-    xdot = [0,0,-1,0,0,0];
+    xdot = [0,0,(-1*handles.speedScale),0,0,0];
     q = handles.robot.model.getpos();
     J = handles.robot.model.jacob0(q);
     qdot = inv(J)*xdot';
     
     newq = q + (0.01*qdot');
-
+    J2 = handles.robot.model.jacob0(newq);
+    if sqrt(det(J2*J2')) < 0.01
+        disp("Robot is close to singularity - Please use joint controls to move robot");
+        disp("manipuability: ");
+        disp(sqrt(det(J2*J2')));
+        break;
+    end
     handles.robot.model.animate(newq);
     drawnow();
     pause(0.1);
@@ -181,3 +195,176 @@ disp('down');
     
 end
 
+
+% --- Executes on button press in y_plus_button.
+function y_plus_button_Callback(hObject, eventdata, handles)
+% hObject    handle to y_plus_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in y_minus_button.
+function y_minus_button_Callback(hObject, eventdata, handles)
+% hObject    handle to y_minus_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in x_plus_button.
+function x_plus_button_Callback(hObject, eventdata, handles)
+% hObject    handle to x_plus_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in x_minus_button.
+function x_minus_button_Callback(hObject, eventdata, handles)
+% hObject    handle to x_minus_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over x_plus_button.
+function x_plus_button_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to x_plus_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+global buttonDown;
+while buttonDown
+
+     %tr = handles.robot.model.fkine(handles.robot.model.getpos());
+%     newtr = transl(0,0,0.01) * tr;
+%     xdot = (newtr - tr)/0.05;
+    xdot = [(1*handles.speedScale),0,0,0,0,0];
+    q = handles.robot.model.getpos();
+    J = handles.robot.model.jacob0(q);
+    qdot = inv(J)*xdot';
+    newq = q + (0.01*qdot');
+    J2 = handles.robot.model.jacob0(newq);
+    if sqrt(det(J2*J2')) < 0.01
+        disp("Robot is close to singularity - Please use joint controls to move robot");
+        disp("manipuability: ");
+        disp(sqrt(det(J2*J2')));
+        break;
+    end
+
+    handles.robot.model.animate(newq);
+    drawnow();
+    pause(0.1);
+
+  
+    
+end
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over x_minus_button.
+function x_minus_button_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to x_minus_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+global buttonDown;
+while buttonDown
+
+     %tr = handles.robot.model.fkine(handles.robot.model.getpos());
+%     newtr = transl(0,0,0.01) * tr;
+%     xdot = (newtr - tr)/0.05;
+    xdot = [(-1*handles.speedScale),0,0,0,0,0];
+    q = handles.robot.model.getpos();
+    J = handles.robot.model.jacob0(q);
+    qdot = inv(J)*xdot';
+    newq = q + (0.01*qdot');
+    J2 = handles.robot.model.jacob0(newq);
+    if sqrt(det(J2*J2')) < 0.01
+        disp("Robot is close to singularity - Please use joint controls to move robot");
+        disp("manipuability: ");
+        disp(sqrt(det(J2*J2')));
+        break;
+    end
+
+    handles.robot.model.animate(newq);
+    drawnow();
+    pause(0.1);
+
+  
+    
+end
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over y_minus_button.
+function y_minus_button_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to y_minus_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+global buttonDown;
+while buttonDown
+
+     %tr = handles.robot.model.fkine(handles.robot.model.getpos());
+%     newtr = transl(0,0,0.01) * tr;
+%     xdot = (newtr - tr)/0.05;
+    xdot = [0,(-1*handles.speedScale),0,0,0,0];
+    q = handles.robot.model.getpos();
+    J = handles.robot.model.jacob0(q);
+    qdot = inv(J)*xdot';
+    newq = q + (0.01*qdot');
+    J2 = handles.robot.model.jacob0(newq);
+    if sqrt(det(J2*J2')) < 0.01
+        disp("Robot is close to singularity - Please use joint controls to move robot");
+        disp("manipuability: ");
+        disp(sqrt(det(J2*J2')));
+        break;
+    end
+
+    handles.robot.model.animate(newq);
+    drawnow();
+    pause(0.1);
+
+  
+    
+end
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over y_plus_button.
+function y_plus_button_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to y_plus_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+global buttonDown;
+while buttonDown
+
+     %tr = handles.robot.model.fkine(handles.robot.model.getpos());
+%     newtr = transl(0,0,0.01) * tr;
+%     xdot = (newtr - tr)/0.05;
+    xdot = [0,(1*handles.speedScale),0,0,0,0];
+    q = handles.robot.model.getpos();
+    J = handles.robot.model.jacob0(q);
+    qdot = inv(J)*xdot';
+    newq = q + (0.01*qdot');
+    J2 = handles.robot.model.jacob0(newq);
+    if sqrt(det(J2*J2')) < 0.01
+        disp("Robot is close to singularity - Please use joint controls to move robot");
+        disp("manipuability: ");
+        disp(sqrt(det(J2*J2')));
+        break;
+    end
+
+    handles.robot.model.animate(newq);
+    drawnow();
+    pause(0.1);
+
+  
+    
+end
