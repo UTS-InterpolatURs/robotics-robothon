@@ -9,6 +9,9 @@ classdef UTS_UR10 < handle
 
     methods%% Class for UR10 robot simulation
         function self = UTS_UR10(basePose)
+            if nargin < 1
+                basePose = transl(0,0,0) * rpy2tr(0,0,0);
+            end
             self.GetUR10Robot();
             self.model.base = basePose;
             self.PlotAndColourRobot();
