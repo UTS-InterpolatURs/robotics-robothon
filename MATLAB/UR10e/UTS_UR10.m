@@ -10,7 +10,7 @@ classdef UTS_UR10 < handle
     methods%% Class for UR10 robot simulation
         function self = UTS_UR10(basePose)
             if nargin < 1
-                basePose = transl(0,0,0) * rpy2tr(0,0,0);
+                basePose = transl(0,0,0) * rpy2tr(0,0,0); %> Default base pose when no arguments is inputted
             end
             self.GetUR10Robot();
             self.model.base = basePose;
