@@ -8,8 +8,10 @@ classdef UTS_UR10 < handle
     end
 
     methods%% Class for UR10 robot simulation
-        function self = UTS_UR10()
+        function self = UTS_UR10(basePose)
             self.GetUR10Robot();
+            self.model.base = basePose;
+            self.PlotAndColourRobot();
             campos([-6.9744    -3.5061    1.8165]);
         end
         

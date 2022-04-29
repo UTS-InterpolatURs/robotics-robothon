@@ -9,12 +9,10 @@ addpath 'ROSwrapper'
 %%
 % rosinit('');
 hold on;
-myUR10e = UTS_UR10(); % <-- Any changes to initial pose pls edit UTS_UR10.m
-PlotFloor(); % <-- Plot the floor
-
 % Set initial robot base position:
-% myUR10e.model.base = transl(0, 0, 0) * rpy2tr(0, 0, 0);
-myUR10e.PlotAndColourRobot();
+robotBasePose = transl(0, 0, 0) * rpy2tr(0, 0, 0);
+myUR10e = UTS_UR10(robotBasePose); % <-- Any changes to initial pose pls edit UTS_UR10.m
+PlotFloor(); % <-- Plot the floor
 
 % Created workbench model and plot it
 wbPose = transl(0,-1.2,-0.423) * rpy2tr(0,0,0);
