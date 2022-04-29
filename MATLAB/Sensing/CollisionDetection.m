@@ -24,14 +24,25 @@ alpha_ur10 = [alpha_1 alpha_2 alpha_3 alpha_4 alpha_5 alpha_6];
 % hold on
 
 if true
-    num_image = 10;
-    msg_array = ImageStorage(480,num_image);
+    num_image = 3;
+    rows = 480;
+    cols = 848;
+    msg_array = ImageStorage(rows,cols,num_image);
     for i = 1:num_image
         A = rossubscriber('/camera/depth/image_rect_raw');
         pause(0.4);
         depthImage = readImage(A.LatestMessage);
-        msg_array.addImage(depthImage,i);
+        msg_array.addImage(double(depthImage),i);
     end
+    pc_object = PointCloud();
+
+    pc_object.setExtrinsic(422.3378,422.5609,424,240,480,848);
+    temp_pc = pc_object.getPointCloud(msg_array.getImage(1));
+    pClouds = zeros(length(temp_pc),3,num_image);
+
+for i = 1:num_image
+    pClouds(:,:,i) = pc_object.getPointCloud(msg_array.getImage(i));
+end
     
     %     JointStates = rossubcriber();
     JointStates = [0 0 0 -pi -pi/2 0];
