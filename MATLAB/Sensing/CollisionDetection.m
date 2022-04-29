@@ -8,7 +8,7 @@ rosinit();
 clear;
 clc;
 clf;
-
+%% testing
 addpath '../UR10e/'
 addpath '../'
 robot = UTS_UR10;
