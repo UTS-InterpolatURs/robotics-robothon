@@ -2,12 +2,14 @@
 clc;
 clf;
 cla;
-rosshutdown();
-rosinit();
+% rosshutdown();
+% rosinit();
 
 while true
 if true
-    A = rossubscriber('/head_camera/rgb/image_raw');
+%     A = rossubscriber('/head_camera/rgb/image_raw');
+    A = rossubscriber('/camera/color/image_raw');
+    
     pause(0.4);
     RGB = readImage(A.LatestMessage);
 end
@@ -38,32 +40,32 @@ Blue.SetBlue();
 
 %%
 
-fdx = 554.2547; fdy = 554.2547;
-u0 = 320.5; v0 = 240.5; h=480; w=640;
-if true
-    B = rossubscriber('/head_camera/depth_registered/image_raw');
-    pause(0.4);
-    depthImage = readImage(B.LatestMessage);
-end
-x = (depthImage(Y,X)*(X-u0))/fdx;
-y = -(depthImage(Y,X)*(Y-v0))/fdy;
-z = depthImage(Y,X);
-
-
-try node = ros.Node('/cameraTalker'); end
-
-pub = ros.Publisher(node,'/xyz3D','geometry_msgs/PointStamped');
-
-msg = rosmessage(pub);
-
-msg.Point.X = x;
-msg.Point.Y = y;
-msg.Point.Z = z;
-msg.Header.Seq = 1;
-msg.Header.FrameId = 'head_camera_depth_frame';
-msg.Header.Stamp = rostime('Now','system');
-send(pub,msg);
-pause(2);
+% fdx = 554.2547; fdy = 554.2547;
+% u0 = 320.5; v0 = 240.5; h=480; w=640;
+% if true
+%     B = rossubscriber('/head_camera/depth_registered/image_raw');
+%     pause(0.4);
+%     depthImage = readImage(B.LatestMessage);
+% end
+% x = (depthImage(Y,X)*(X-u0))/fdx;
+% y = -(depthImage(Y,X)*(Y-v0))/fdy;
+% z = depthImage(Y,X);
+% 
+% 
+% try node = ros.Node('/cameraTalker'); end
+% 
+% pub = ros.Publisher(node,'/xyz3D','geometry_msgs/PointStamped');
+% 
+% msg = rosmessage(pub);
+% 
+% msg.Point.X = x;
+% msg.Point.Y = y;
+% msg.Point.Z = z;
+% msg.Header.Seq = 1;
+% msg.Header.FrameId = 'head_camera_depth_frame';
+% msg.Header.Stamp = rostime('Now','system');
+% send(pub,msg);
+% pause(2);
 
 
 %%
