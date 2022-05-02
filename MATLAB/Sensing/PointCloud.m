@@ -1,4 +1,4 @@
-classdef PointCloud
+classdef PointCloud <handle
     properties
         fdx_ = 0;
         fdy_ = 0;
@@ -22,6 +22,7 @@ classdef PointCloud
         end
         
         function [pt] = getPointCloud(self,depthImage)
+           
             u = repmat(1:self.w_,[self.h_,1]);
             v = repmat(1:self.h_,[self.w_,1])';
             Z = depthImage;
