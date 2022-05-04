@@ -31,5 +31,11 @@ classdef PointCloud <handle
             Y = (double(Z(:)).*(v(:)-self.v0_))/self.fdy_;
             pt = [X(:),Y(:),Z(:)];
         end
+        
+        function [world_geo] = getGeometry(self,x,y,z)
+            x = z*(x-self.u0_)/self.fdx_;
+            y = z*(y-self.v0_)/self.fdy_;
+            world_geo = [x y z];
+        end
     end
 end
