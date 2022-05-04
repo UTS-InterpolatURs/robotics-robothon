@@ -65,6 +65,10 @@ classdef UTS_UR10 < handle
                     continue;
                 end
             end
-        end        
+        end
+        
+        function SetGripperState(self, gripperState)
+            
+        end
     end
 end
