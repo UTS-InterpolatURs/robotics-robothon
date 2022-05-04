@@ -1,6 +1,5 @@
 %%
 clear all; clf; clc;
-close all;
 addpath 'UR10e'
 addpath 'ROSwrapper'
 addpath 'Envi'
@@ -23,7 +22,7 @@ workbench.PlotModel();
 %% Move to ready pose
 steps = 50;
 qInit = myUR10e.model.getpos();
-qHome = deg2rad([90 -30 90 -150 -90 90]);
+qHome = deg2rad([90 -60 90 -120 -90 90]);
 MoveRobot.MoveOneRobot(myUR10e, qInit, qHome, steps);
 
 %% Check Intersection
