@@ -32,6 +32,10 @@ classdef UTS_UR10 < handle
         function GetUR10Robot(self)
             pause(0.001);
             name = ['UR_10_',datestr(now,'yyyymmddTHHMMSSFFF')];
+            handles = findobj('Tag', name);
+            if ~isempty(handles)
+                error("Existed a robot with the same name");
+            end
             
             L1 = Link('d',0.128,'a',0,'alpha',pi/2,'qlim',deg2rad([-360 360]), 'offset', 0);
             L2 = Link('d',0,'a',-0.6127,'alpha',0,'qlim', deg2rad([-360 360]), 'offset',0); % was 'offset',pi/2
@@ -44,10 +48,8 @@ classdef UTS_UR10 < handle
             
             [self.openFaceData, self.openVertexData, self.openPlyData] = plyread('UTS_UR10Link6_RG6open.ply', 'tri');
             [self.closeFaceData, self.closeVertexData, self.closePlyData] = plyread('UTS_UR10Link6_RG6close.ply', 'tri');
-            length(self.openVertexData)
-            length(self.closeVertexData)
         end
-        
+
         %% PlotAndColourRobot
         % Given a robot index, add the glyphs (vertices and faces) and
         % colour them in if data is available
@@ -57,8 +59,8 @@ classdef UTS_UR10 < handle
                 self.model.faces{linkIndex + 1} = faceData;
                 self.model.points{linkIndex + 1} = vertexData;
             end
-            self.model.faces{self.model.n + 1} = self.closeFaceData;
-            self.model.points{self.model.n + 1} = self.closeVertexData;
+            self.model.faces{self.model.n + 1} = self.openFaceData;
+            self.model.points{self.model.n + 1} = self.openVertexData;
             
             % Display robot
             self.model.plot3d(zeros(1,self.model.n),'noarrow','workspace',self.workspace);
@@ -87,22 +89,18 @@ classdef UTS_UR10 < handle
             arguments
                 self;
                 args.gripperState;
-                args.model;
             end
+            gripperVertexData = LinearInterp(self.openVertexData, self.closeVertexData, args.gripperState);
+            gripperFaceData = LinearInterp(self.openFaceData, self.closeFaceData(1:end-4,:), args.gripperState);
             
-            gripperVertexData = LinearInterp(self.closeVertexData, self.openVertexData, args.gripperState);
-            
-%             correctTr = eye(4);
-%             gripperVertexData = [gripperVertexData, ones(size(gripperVertexData, 1), 1)];
-%             gripperVertexData = gripperVertexData * (correctTr^-1)';
-%             gripperVertexData = gripperVertexData(:, 1:3);
-            
-            args.model.points{args.model.n + 1} = gripperVertexData;
-            handles = findobj('Tag', args.model.name);
+            self.model.points{self.model.n + 1} = gripperVertexData;
+            self.model.faces{self.model.n + 1} = gripperFaceData;
+            handles = findobj('Tag', self.model.name);
             h = get(handles, 'UserData');
-            h.link(args.model.n+1).Children.Vertices = args.model.points{args.model.n + 1};
-            
-            self.model.plot3d(zeros(1,self.model.n),'noarrow','workspace',self.workspace);
+            h.link(self.model.n+1).Children.Vertices = self.model.points{self.model.n + 1};
+
+            hold on;
+            self.model.animate(self.model.getpos());
             drawnow();
         end
     end
