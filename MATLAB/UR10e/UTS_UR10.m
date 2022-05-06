@@ -14,6 +14,8 @@ classdef UTS_UR10 < handle
         closeFaceData;
         closeVertexData;
         closePlyData;
+        
+        toolOffset = 0.275354;
     end
     
     methods%% Class for UR10 robot simulation
@@ -37,12 +39,12 @@ classdef UTS_UR10 < handle
                 error("Existed a robot with the same name");
             end
             
-            L1 = Link('d',0.128,'a',0,'alpha',pi/2,'qlim',deg2rad([-360 360]), 'offset', 0);
-            L2 = Link('d',0,'a',-0.6127,'alpha',0,'qlim', deg2rad([-360 360]), 'offset',0); % was 'offset',pi/2
-            L3 = Link('d',0,'a',-0.5716,'alpha',0,'qlim', deg2rad([-360 360]), 'offset', 0);
-            L4 = Link('d',0.16389,'a',0,'alpha',pi/2,'qlim',deg2rad([-360 360]),'offset', 0); % was 'offset',pi/2
-            L5 = Link('d',0.1157,'a',0,'alpha',-pi/2,'qlim',deg2rad([-360,360]), 'offset',0);
-            L6 = Link('d',0.09037,'a',0,'alpha',0,'qlim',deg2rad([-360,360]), 'offset', 0);
+            L1 = Link('d',0.128,'a',0,'alpha',pi/2,'qlim',deg2rad([-180 180]), 'offset', 0);
+            L2 = Link('d',0,'a',-0.6127,'alpha',0,'qlim', deg2rad([-180 180]), 'offset',0); % was 'offset',pi/2
+            L3 = Link('d',0,'a',-0.5716,'alpha',0,'qlim', deg2rad([-180 180]), 'offset', 0);
+            L4 = Link('d',0.16389,'a',0,'alpha',pi/2,'qlim',deg2rad([-180 180]),'offset', 0); % was 'offset',pi/2
+            L5 = Link('d',0.1157,'a',0,'alpha',-pi/2,'qlim',deg2rad([-180 180]), 'offset',0);
+            L6 = Link('d',0.09037,'a',0,'alpha',0,'qlim',deg2rad([-360 360]), 'offset', 0);
             
             self.model = SerialLink([L1 L2 L3 L4 L5 L6],'name',name);
             
@@ -102,6 +104,11 @@ classdef UTS_UR10 < handle
             hold on;
             self.model.animate(self.model.getpos());
             drawnow();
+        end
+        
+        function endEffPose = GetEndEffPose(self)
+            endEffPose = self.model.fkine(self.model.getpos());
+            endEffPose = endEffPose * transl(0,0,self.toolOffset);
         end
     end
 end
