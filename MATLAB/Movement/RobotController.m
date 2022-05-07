@@ -22,18 +22,18 @@ classdef RobotController< handle
         end
 
         function qMatrix = GenerateLinearTrajectory(self,goalPose,steps)
+            if(self.useRos)
+                self.robot.model.animate(self.realBot.current_joint_states.Position);
+            end
             model = self.robot.model;
             currentPose = model.fkine(model.getpos());
             X = zeros(3,steps);
             qMatrix = zeros(steps,6);
             t = 10;             % Total time (s)
             deltaT = steps*t;      % Control frequency
-            W = diag([1 1 1 0.1 0.1 0.1]);    % Weighting matrix for the velocity vector
+            W = diag([1 1 1 0.15 0.15 0.15]);    % Weighting matrix for the velocity vector
             epsilon = 0.01;      % Threshold value for manipulability/Damped Least Squares
             theta = zeros(3,steps);         % Array for roll-pitch-yaw angles
-
-
-
 
 
             x1 = currentPose(1:3,4);

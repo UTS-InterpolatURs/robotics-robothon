@@ -1,15 +1,11 @@
-function PickAndPlaceKey(robot,keyStartPose,keyFinishPose, realBot)
+function PickAndPlaceKey(controller,keyStartPose,keyFinishPose)
 %PICKANDPLACEKEY Summary of this function goes here
 %   Detailed explanation goes here
 
 %move to location above key
 
-if ~exist('realBot','var') || isempty(realBot)
-t = RobotController(robot);
-else
-t = RobotController(robot, realBot);
-end
 
+t = controller;
 p1 = transl(0,0,0.1) * keyStartPose;
 
 

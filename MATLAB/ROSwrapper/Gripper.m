@@ -28,7 +28,18 @@ classdef Gripper
             msg = rosmessage(self.gripperPublisher);
 
             msg.Name = {'left_jaw', 'right_jaw'};
-            msg.Position = [0.15,-0.15];
+            msg.Position = [0.17,-0.17];
+
+            send(self.gripperPublisher,msg);
+
+        end
+
+        function setGripper(self, percentageOpen)
+            msg = rosmessage(self.gripperPublisher);
+            angle = 0.3 - (0.67 * (percentageOpen/100));
+            disp(angle);
+            msg.Name = {'left_jaw', 'right_jaw'};
+            msg.Position = [angle,-angle];
 
             send(self.gripperPublisher,msg);
 
