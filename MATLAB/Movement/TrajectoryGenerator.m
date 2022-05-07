@@ -20,7 +20,7 @@ classdef TrajectoryGenerator< handle
             qMatrix = zeros(steps,6);
             t = 10;             % Total time (s)
             deltaT = steps*t;      % Control frequency
-            W = diag([1 1 1 0 0 0]);    % Weighting matrix for the velocity vector
+            W = diag([1 1 1 0.1 0.1 0.1]);    % Weighting matrix for the velocity vector
             epsilon = 0.01;      % Threshold value for manipulability/Damped Least Squares
             theta = zeros(3,steps);         % Array for roll-pitch-yaw angles
 
@@ -31,15 +31,18 @@ classdef TrajectoryGenerator< handle
             x1 = currentPose(1:3,4);
             x2 = goalPose(1:3,4);
 
+            a1 = tr2rpy(currentPose);
+            a2 = tr2rpy(goalPose);
+
             s = lspb(0,1,steps);
 
             for i = 1:steps
                 X(1,i) = x1(1)*(1-s(i)) + s(i)*x2(1);
                 X(2,i) = x1(2)*(1-s(i)) + s(i)*x2(2);
                 X(3,i) = x1(3)*(1-s(i)) + s(i)*x2(3);
-                theta(1,i) = 0;                 % Roll angle
-                theta(2,i) = 0;            % Pitch angle
-                theta(3,i) = 0;                 % Yaw angle
+                theta(1,i) = a1(1)*(1-s(i)) + s(i)*a2(1);                 % Roll angle
+                theta(2,i) = a1(2)*(1-s(i)) + s(i)*a2(2);            % Pitch angle
+                theta(3,i) = a1(3)*(1-s(i)) + s(i)*a2(3);                % Yaw angle
             end
 
             qMatrix(1,:) = model.getpos();
