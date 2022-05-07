@@ -1,35 +1,46 @@
-classdef TrajectoryGenerator< handle
+classdef RobotController< handle
     %TRAJECTORYGENERATOR Summary of this class goes here
     %   Detailed explanation goes here
 
     properties
         robot
+        useRos
+        realBot
     end
 
     methods
-        function self = TrajectoryGenerator(robot)
+        function self = RobotController(robot, realBot)
             %TRAJECTORYGENERATOR Construct an instance of this class
             %   Detailed explanation goes here
             self.robot = robot;
+            if ~exist('realBot','var') || isempty(realBot)
+                self.useRos=false;
+            else
+                self.useRos = true;
+                self.realBot = realBot;
+            end
         end
 
-        function qMatrix = LinearTrajectory(self,goalPose,steps)
+        function qMatrix = GenerateLinearTrajectory(self,goalPose,steps)
+            if(self.useRos)
+                self.robot.model.animate(self.realBot.current_joint_states.Position);
+            end
             model = self.robot.model;
             currentPose = model.fkine(model.getpos());
             X = zeros(3,steps);
             qMatrix = zeros(steps,6);
             t = 10;             % Total time (s)
             deltaT = steps*t;      % Control frequency
-            W = diag([1 1 1 0 0 0]);    % Weighting matrix for the velocity vector
+            W = diag([1 1 1 0.15 0.15 0.15]);    % Weighting matrix for the velocity vector
             epsilon = 0.01;      % Threshold value for manipulability/Damped Least Squares
             theta = zeros(3,steps);         % Array for roll-pitch-yaw angles
 
 
-
-
-
             x1 = currentPose(1:3,4);
             x2 = goalPose(1:3,4);
+
+            a1 = tr2rpy(currentPose);
+            a2 = tr2rpy(goalPose);
 
             s = lspb(0,1,steps);
 
@@ -37,9 +48,9 @@ classdef TrajectoryGenerator< handle
                 X(1,i) = x1(1)*(1-s(i)) + s(i)*x2(1);
                 X(2,i) = x1(2)*(1-s(i)) + s(i)*x2(2);
                 X(3,i) = x1(3)*(1-s(i)) + s(i)*x2(3);
-                theta(1,i) = 0;                 % Roll angle
-                theta(2,i) = 0;            % Pitch angle
-                theta(3,i) = 0;                 % Yaw angle
+                theta(1,i) = a1(1)*(1-s(i)) + s(i)*a2(1);                 % Roll angle
+                theta(2,i) = a1(2)*(1-s(i)) + s(i)*a2(2);            % Pitch angle
+                theta(3,i) = a1(3)*(1-s(i)) + s(i)*a2(3);                % Yaw angle
             end
 
             qMatrix(1,:) = model.getpos();
@@ -82,6 +93,40 @@ classdef TrajectoryGenerator< handle
             goalPose = transl(x) * currentPose;
 
             qMatrix = self.LinearTrajectory(goalPose,steps);
+        end
+
+        function ExecuteTrajectory(self, qMatrix)
+            if(self.useRos)
+                self.robot.model.animate(self.realBot.current_joint_states.Position);
+            end
+
+            if(self.useRos)
+                self.realBot.sendJointTrajectory(qMatrix);
+            end
+
+
+            for i=1:size(qMatrix,1)
+
+                self.robot.model.animate(qMatrix(i,:))
+                drawnow();
+                pause(0.1);
+
+            end
+
+        end
+
+        function OpenGripper(self)
+            if(self.useRos)
+                self.realBot.gripper.openGripper;
+            end
+            self.robot.SetGripperState("gripperState", 0)
+        end
+
+        function CloseGripper(self)
+            if(self.useRos)
+                self.realBot.gripper.closeGripper;
+            end
+            self.robot.SetGripperState("gripperState", 1)
         end
     end
 end

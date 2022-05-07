@@ -11,6 +11,7 @@ classdef urRosWrapper < handle
         robot
         jointPublisher
         callback_counter
+        gripper
     end
 
     methods
@@ -22,6 +23,7 @@ classdef urRosWrapper < handle
             self.jointPublisher = rospublisher('/scaled_pos_joint_traj_controller/follow_joint_trajectory/goal', 'control_msgs/FollowJointTrajectoryActionGoal');
             self.callback_counter = 0;
             self.current_joint_states = zeros(1,6);
+            self.gripper = Gripper();
         end
 
         function jointStatesCallback(self,~,msg)
@@ -32,14 +34,14 @@ classdef urRosWrapper < handle
 
 
             self.current_joint_states.Position = [currentJointState_321456(3:-1:1),currentJointState_321456(4:6)];
-            self.robot.model.animate(self.current_joint_states.Position);
-            test = isalmost(self.robot.model.getpos(),self.current_joint_states.Position, 0.001);
-            if all(test) == 0
-                self.robot.model.animate(self.current_joint_states.Position);
-                drawnow();
-                %self.callback_counter = 0;
-            end
-            self.callback_counter = self.callback_counter + 1;
+            %self.robot.model.animate(self.current_joint_states.Position);
+%             test = isalmost(self.robot.model.getpos(),self.current_joint_states.Position, 0.001);
+%             if all(test) == 0
+%                 %self.robot.model.animate(self.current_joint_states.Position);
+%                 drawnow();
+%                 %self.callback_counter = 0;
+%             end
+%             self.callback_counter = self.callback_counter + 1;
            % disp(self.callback_counter);
 
 
@@ -52,6 +54,7 @@ classdef urRosWrapper < handle
         end
 
         function sendJointTrajectory(self,traj)
+            pause(0.2);
             test = isalmost(traj(1,:),self.current_joint_states.Position, 0.001);
             if all(test) == 0
                 disp('Start of Traj does not match current robot position');
