@@ -5,80 +5,37 @@ function PickAndPlaceKey(robot,keyStartPose,keyFinishPose, realBot)
 %move to location above key
 
 if ~exist('realBot','var') || isempty(realBot)
-    useRos=false;
+t = RobotController(robot);
 else
-useRos = true;
+t = RobotController(robot, realBot);
 end
 
 p1 = transl(0,0,0.1) * keyStartPose;
 
-t = TrajectoryGenerator(robot);
-
-pause(2);
-if(useRos)
-    robot.model.animate(realBot.current_joint_states.Position);
-end
-q1 = t.LinearTrajectory(p1,50);
-
-if(useRos)
-    realBot.sendJointTrajectory(q1);
-end
 
 
-for i=1:size(q1,1)
 
-    robot.model.animate(q1(i,:))
-    drawnow();
-    pause(0.1);
 
-end
+q1 = t.GenerateLinearTrajectory(p1,50);
 
-robot.SetGripperState("gripperState", 0)
+t.ExecuteTrajectory(q1);
 
-q2 = t.LinearTrajectory(keyStartPose,10);
-if(useRos)
-    realBot.sendJointTrajectory(q2);
-end
+t.OpenGripper
 
-for i=1:size(q2,1)
 
-    robot.model.animate(q2(i,:))
-    drawnow();
-    pause(0.1);
+q2 = t.GenerateLinearTrajectory(keyStartPose,10);
+t.ExecuteTrajectory(q2);
 
-end
+t.CloseGripper
 
-robot.SetGripperState("gripperState", 1)
-
-q1 = t.LinearTrajectory(p1,10);
-if(useRos)
-    realBot.sendJointTrajectory(q1);
-end
-
-for i=1:size(q1,1)
-
-    robot.model.animate(q1(i,:))
-    drawnow();
-    pause(0.1);
-
-end
+q3 = t.GenerateLinearTrajectory(p1,10);
+t.ExecuteTrajectory(q3);
 
 p4 = transl(0,0,0.1) * keyFinishPose;
 
-t = TrajectoryGenerator(robot);
 
-q4 = t.LinearTrajectory(p4,50);
-if(useRos)
-    realBot.sendJointTrajectory(q4);
-end
-
-for i=1:size(q4,1)
-
-    robot.model.animate(q4(i,:))
-    drawnow();
-    pause(0.1);
-
-end
+q4 = t.GenerateLinearTrajectory(p4,50);
+t.ExecuteTrajectory(q4);
 
 
 

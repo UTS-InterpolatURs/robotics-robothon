@@ -1,19 +1,27 @@
-classdef TrajectoryGenerator< handle
+classdef RobotController< handle
     %TRAJECTORYGENERATOR Summary of this class goes here
     %   Detailed explanation goes here
 
     properties
         robot
+        useRos
+        realBot
     end
 
     methods
-        function self = TrajectoryGenerator(robot)
+        function self = RobotController(robot, realBot)
             %TRAJECTORYGENERATOR Construct an instance of this class
             %   Detailed explanation goes here
             self.robot = robot;
+            if ~exist('realBot','var') || isempty(realBot)
+                self.useRos=false;
+            else
+                self.useRos = true;
+                self.realBot = realBot;
+            end
         end
 
-        function qMatrix = LinearTrajectory(self,goalPose,steps)
+        function qMatrix = GenerateLinearTrajectory(self,goalPose,steps)
             model = self.robot.model;
             currentPose = model.fkine(model.getpos());
             X = zeros(3,steps);
@@ -85,6 +93,40 @@ classdef TrajectoryGenerator< handle
             goalPose = transl(x) * currentPose;
 
             qMatrix = self.LinearTrajectory(goalPose,steps);
+        end
+
+        function ExecuteTrajectory(self, qMatrix)
+            if(self.useRos)
+                self.robot.model.animate(self.realBot.current_joint_states.Position);
+            end
+
+            if(self.useRos)
+                self.realBot.sendJointTrajectory(qMatrix);
+            end
+
+
+            for i=1:size(qMatrix,1)
+
+                self.robot.model.animate(qMatrix(i,:))
+                drawnow();
+                pause(0.1);
+
+            end
+
+        end
+
+        function OpenGripper(self)
+            if(self.useRos)
+                self.realBot.gripper.openGripper;
+            end
+            self.robot.SetGripperState("gripperState", 0)
+        end
+
+        function CloseGripper(self)
+            if(self.useRos)
+                self.realBot.gripper.closeGripper;
+            end
+            self.robot.SetGripperState("gripperState", 1)
         end
     end
 end
