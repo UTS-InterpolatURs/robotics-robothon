@@ -26,18 +26,21 @@ classdef Gripper < handle
         end
 
 
-        function closeGripper(self)
+        function closeGripper(self, closingEffort)
+            if ~exist('closingEffort','var') || isempty(closingEffort)
+                closingEffort = 0.5;
+            end
             msg = rosmessage(self.gripperPublisher);
             msg.Name = {'left_jaw', 'right_jaw'};
             msg.Position = self.jointStates.Position';
             while 1
                 currentJointPos = self.jointStates.Position;
-                currentJointEffort = abs(self.jointStates.Effort)
+                currentJointEffort = abs(self.jointStates.Effort);
 
                 if currentJointPos(1) < 0 || currentJointPos(2) < 0
                     break;
                 end
-                if currentJointEffort(1) >= 0.5 || currentJointEffort(2) >= 0.5
+                if currentJointEffort(1) >= closingEffort || currentJointEffort(2) >= closingEffort
                     break;
                 end
                 msg.Position(1) = msg.Position(1) - 0.01;
