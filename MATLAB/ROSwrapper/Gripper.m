@@ -18,7 +18,7 @@ classdef Gripper < handle
             msg = rosmessage(self.gripperPublisher);
 
             msg.Name = {'left_jaw', 'right_jaw'};
-            msg.Position = [0.3,0.3];
+            msg.Position = [0.4,0.4];
 
 
             send(self.gripperPublisher,msg);

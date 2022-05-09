@@ -122,9 +122,9 @@ classdef RobotController< handle
             self.robot.SetGripperState("gripperState", 0)
         end
 
-        function CloseGripper(self)
+        function CloseGripper(self, effort)
             if(self.useRos)
-                self.realBot.gripper.closeGripper;
+                self.realBot.gripper.closeGripper(effort);
             end
             self.robot.SetGripperState("gripperState", 1)
         end
