@@ -22,7 +22,7 @@ classdef PointCloud <handle
         end
         
         function [pt] = getPointCloud(self,depthImage)
-           
+            
             u = repmat(1:self.w_,[self.h_,1]);
             v = repmat(1:self.h_,[self.w_,1])';
             Z = depthImage;
@@ -32,6 +32,26 @@ classdef PointCloud <handle
             pt = [X(:),Y(:),Z(:)];
         end
         
+        function [pt] = getUR10PointCloud(self,depthImage)
+            
+            u = repmat(1:self.w_,[self.h_,1]);
+            v = repmat(1:self.h_,[self.w_,1])';
+            Z = depthImage;
+            for i = length(Z(:)) : -1 : 1
+                if Z(i) > 500
+                    Z(i) = nan;
+                end
+            end
+            Z = double(Z(:));
+            X = (double(Z(:)).*(u(:)-self.u0_))/self.fdx_;
+            Y = (double(Z(:)).*(v(:)-self.v0_))/self.fdy_;
+%             for i = length(Z(:)) : -1 : 1
+%                 X = rmmissing(X);
+%                 Y = rmmissing(Y);
+%                 Z = rmmissing(Z);
+%             end
+            pt = [X(:), Y(:), Z(:)];
+        end
         function [world_geo] = getGeometry(self,x,y,z)
             x = z*(x-self.u0_)/self.fdx_;
             y = z*(y-self.v0_)/self.fdy_;

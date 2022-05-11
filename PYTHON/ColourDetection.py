@@ -1,14 +1,14 @@
 #!/usr/bin/env python
-from ctypes import sizeof
-from unittest import result
+
 from sensor_msgs.msg import Image
 import rospy
-from std_msgs.msg import String
 from cv_bridge import CvBridge
 import cv2 as cv
 import numpy as np
 from geometry_msgs.msg import PointStamped
 import message_filters
+from std_msgs.msg import Float32MultiArray
+import math
 
 
 class DetectandDraw:
@@ -94,24 +94,71 @@ class DetectandDraw:
         return contours
         
 
+def FuncLx(x,y,Z):
+    Lx = np.zeros((2,6))
+    if Z != 0:
+        Lx[0][0] = -1/Z
+        Lx[0][1] = 0
+        Lx[0][2] = x/Z
+        Lx[0][3] = x*y
+        Lx[0][4] = -(1+pow(x,2))
+        Lx[0][5] = y
 
+        Lx[1][0] = 0
+        Lx[1][1] = -1/Z
+        Lx[1][2] = y/Z
+        Lx[1][3] = 1+pow(y,2)
+        Lx[1][4] = -x*y
+        Lx[1][5] = -x
+    return Lx
+
+
+def VServoing(target, obs, Z, lambda_):
+    Lx =  np.zeros((len(target)*2,6))
+    index = len(target)
+    count = 0
+    for i in range (0,index):
+        Lx1 = FuncLx(obs[i][0],obs[i][1],Z[i])
+        Lx[i+count] = Lx1[0][:]
+        Lx[i+1+count] = Lx1[1][:]
+        count = count + 1
+    e2 = obs - target
+    e = e2.flatten()
+    transpose_Lx = Lx.T
+    Lx2 = np.dot(np.linalg.inv(np.dot(transpose_Lx,Lx)),transpose_Lx)
+    Vc = -lambda_*np.dot(Lx2,e)
+    return Vc
 
 
 
 def callback(image, depth):
     
-    bridge = CvBridge()
-    cv_image = bridge.imgmsg_to_cv2(image, 'bgr8')
-    Blue = DetectandDraw(cv_image)
-    Blue.setRed()
+    bridgeRGB = CvBridge()
+    RGB = bridgeRGB.imgmsg_to_cv2(image, "bgr8")
+    gray = cv.cvtColor(RGB,cv.COLOR_BGR2GRAY)
+    gray_float32 = np.float32(gray)
+    gray_uint8 = np.uint8(gray)
+    dst = cv.cornerHarris(gray_float32,2,3,0.2)
+    dst = cv.dilate(dst,None)
+    ret, dst = cv.threshold(dst,0.01*dst.max(),255,0)
+    dst = np.uint8(dst)
+    edges = cv.Canny(gray_uint8,100,200)
+    
+
+    Obj = DetectandDraw(RGB)
+    Obj.setRed()
+
+    Blue_Obj = DetectandDraw(RGB)
+    Blue_Obj.setBlue()
     # mask = Blue.getMask()
     # res = cv.bitwise_and(cv_image,cv_image,mask = mask)
     # cv.imshow("Image Window", res)
-    
     # cv.imshow("RGB",cv_image)
-    result = cv_image.copy()
+    copy_RGB= RGB.copy()
+    test_RGB = RGB.copy()
+    
     try:
-        contours = Blue.getContours()
+        contours = Obj.getContours()
         
         temp_area = 0
         selected_contour=0
@@ -123,33 +170,54 @@ def callback(image, depth):
         M = cv.moments(selected_contour)
         x_centre = int(M["m10"]/M["m00"])
         y_centre = int(M["m01"]/M["m00"])
-        cv.rectangle(result, (x, y), (x+w, y+h), (0, 0, 255), 2)
+        cv.rectangle(copy_RGB, (x, y), (x+w, y+h), (0, 0, 255), 2)
     except:
         x_centre = 0
         y_centre = 0
+        x = 0
+        y = 0
         w = 0
         h = 0
-    cv.imshow("bounding_box", result)
-    cv.waitKey(1)
+    
+    # cv.imshow("bounding_box", edges)
+    # cv.waitKey(2)
+    # print(x,y,w,h)
+    # try:
+    #     Bcontours = Blue_Obj.getContours()
+        
+    #     Btemp_area = 0
+    #     Bselected_contour=0
+    #     for contour in Bcontours:
+    #         if cv.contourArea(contour) > Btemp_area:
+    #             Btemp_area = cv.contourArea(contour)
+    #             Bselected_contour = contour
+    #     Bx,By,Bw,Bh = cv.boundingRect(Bselected_contour)
+    #     BM = cv.moments(Bselected_contour)
+    #     Bx_centre = int(BM["m10"]/BM["m00"])
+    #     By_centre = int(BM["m01"]/BM["m00"])
+    #     cv.rectangle(copy_RGB, (Bx, By), (Bx+Bw, By+Bh), (0, 0, 255), 2)
+    # except:
+    #     Bx_centre = 0
+    #     By_centre = 0
+    #     Bx = 0
+    #     By = 0
+    #     Bw = 0
+    #     Bh = 0
 
+    # desired_angle  = 0.39
+    # R2B = math.hypot(x_centre-Bx_centre,y_centre-By_centre)
+    # angle_ = math.sin((By_centre-y_centre)/R2B)
+    # print(angle_)
 
-    # for cntr in contours:
-    #         if cv.contourArea(cntr) < 
-    #         x,y,w,h = cv.boundingRect(cntr)
-    #         cv.rectangle(result, (x, y), (x+w, y+h), (0, 0, 255), 2)
-    #         print(x,y)
+    fdx = 918.7401
+    fdy = 918.3084
 
-    fdx = 420.3378
-    fdy = 422.5609
+    u0 = 640.5
+    v0 = 360.5
 
-    u0 = 424
-    v0 = 240
-
-    h = 480
-    w = 848
-    converted_x = 424 + (x_centre - 640)
-    converted_y = 240 + (y_centre - 360)
-
+    # h = 480
+    # w = 848
+    
     # fdx = 554.2547
     # fdy = 554.2547
 
@@ -163,42 +231,64 @@ def callback(image, depth):
 
     
     bridgeDepth = CvBridge()
-    depthImage = bridgeDepth.imgmsg_to_cv2(depth, "16UC1")
-    try:
-        
-        print(x_centre,y_centre)
-    except:
-        print('no size')
+    depthImage = bridgeDepth.imgmsg_to_cv2(depth, "32FC1" )
+    target_corner_1 = np.array([874,225])
+    target_corner_2 = np.array([874+72,225])                          
+    target_corner_3 = np.array([874,225+137])
+    target_corner_4 = np.array([874+72,225+137])
 
+    cv.rectangle(copy_RGB, (target_corner_1[0], target_corner_1[1]), (target_corner_4[0], target_corner_4[1]), (0, 0, 255), 2)
+    cv.imshow("bounding_box", copy_RGB)
+    cv.waitKey(2)
+
+    obs_corner_1 = np.array([x,y])
+    obs_corner_2 = np.array([x+w,y])                        
+    obs_corner_3 = np.array([x,y+h])
+    obs_corner_4 = np.array([x+w,y+h])
+
+    x_ = np.array([(target_corner_1[0]-u0)/fdx,(target_corner_2[0]-u0)/fdx,(target_corner_3[0]-u0)/fdx,(target_corner_4[0]-u0)/fdx]) #change here
+    y_ = np.array([(target_corner_1[1]-v0)/fdy,(target_corner_2[1]-v0)/fdy,(target_corner_3[1]-v0)/fdy,(target_corner_4[1]-v0)/fdy])
+
+    x_obs = np.array([(obs_corner_1[0]-u0)/fdx,(obs_corner_2[0]-u0)/fdx,(obs_corner_3[0]-u0)/fdx,(obs_corner_4[0]-u0)/fdx]) #change here
+    y_obs = np.array([(obs_corner_1[1]-v0)/fdy,(obs_corner_2[1]-v0)/fdy,(obs_corner_3[1]-v0)/fdy,(obs_corner_4[1]-v0)/fdy]) 
+
+    lambda_ = 0.1
+    Z = np.array([depthImage[obs_corner_1[1]][obs_corner_1[0]],depthImage[obs_corner_2[1]][obs_corner_2[0]],depthImage[obs_corner_3[1]][obs_corner_3[0]],depthImage[obs_corner_4[1]][obs_corner_4[0]]]) #change here
+    Target = np.array([[x_[0],y_[0]],[x_[1],y_[1]],[x_[2],y_[2]],[x_[3],y_[3]]])
+    Obs = np.array([[x_obs[0],y_obs[0]],[x_obs[1],y_obs[1]],[x_obs[2],y_obs[2]],[x_obs[3],y_obs[3]]])
+    Vc = VServoing(Target,Obs,Z,lambda_)
+    for i in range(0,len(Vc)):
+        if abs(Vc[i])<0.000001:
+            Vc[i] = float(0)  
+    
     
 
-    try:
-        # x_w = (depthImage[y_centre][x_centre]*(x_centre-u0))/fdx
-        # y_w = -(depthImage[y_centre][x_centre]*(y_centre-v0))/fdy
-        # z_w = depthImage[y_centre][x_centre]
-        x_w = (depthImage[converted_y][converted_x]*(converted_x-u0))/fdx
-        y_w = -(depthImage[converted_y][converted_x]*(converted_y-v0))/fdy
-        z_w = depthImage[converted_y][converted_x]
-    except:
-        x_w = 0
-        y_w = 0
-        z_w = 0
-
+    # print(Vc)
+    xy = [float(x_centre),float(y_centre)]
     
+    talker(Vc,xy)
+    
+    # pub = rospy.Publisher('/colourChatter', PointStamped, queue_size=10)
+    # point = PointStamped()
+    # rate = rospy.Rate(10) 
 
-    pub = rospy.Publisher('/colourChatter', PointStamped, queue_size=10)
-    point = PointStamped()
-    rate = rospy.Rate(10) 
-
-    point.header.stamp = rospy.Time.now()
-    point.header.frame_id = "/odom"
-    point.point.x = x_w
-    point.point.y = y_w
-    point.point.z = z_w
-    pub.publish(point)
-    rate.sleep()
+    # point.header.stamp = rospy.Time.now()
+    # point.header.frame_id = "/odom"
+    # point.point.x = x_centre
+    # point.point.y = y_centre
+    # point.point.z = 0
+    # pub.publish(point)
+    # rate.sleep()
             
+def talker(Vc,xy):
+    pub = rospy.Publisher('ColourDetectionChatter', Float32MultiArray, queue_size=10)
+    rate = rospy.Rate(10) # 10hz
+    array_ = ([Vc[0],Vc[1],Vc[2],Vc[3],Vc[4],Vc[5],xy[0],xy[1]])
     
+    pub_data = Float32MultiArray(data = array_)
+    rospy.loginfo(pub_data)
+    pub.publish(pub_data)  
+    rate.sleep()   
     
     
 
@@ -209,13 +299,13 @@ def listener():
     # anonymous=True flag means that rospy will choose a unique
     # name for our 'listener' node so that multiple listeners can
     # run simultaneously.
-    rospy.init_node('colourListener', anonymous=True)
+    rospy.init_node('colourDetection', anonymous=True)
 
     # image_sub = message_filters.Subscriber('/head_camera/rgb/image_raw', Image)
     # depth_sub = message_filters.Subscriber('/head_camera/depth_registered/image_raw', Image)
     
     image_sub = message_filters.Subscriber('/camera/color/image_raw', Image)
-    depth_sub = message_filters.Subscriber('/camera/depth/image_rect_raw', Image)
+    depth_sub = message_filters.Subscriber('/camera/aligned_depth_to_color/image_raw', Image)
     
     ts = message_filters.ApproximateTimeSynchronizer([image_sub, depth_sub], 10,0.1,allow_headerless=True)
     
