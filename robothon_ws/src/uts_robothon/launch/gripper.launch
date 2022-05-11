@@ -2,4 +2,6 @@
   <node name="dynamixel_interface_node" pkg="dynamixel_interface" type="dynamixel_interface_controller_node" output="screen">
     <rosparam command="load" file="$(find uts_robothon)/config/controller_config.yaml" />
   </node>
+  <node name="gripper_throttle" pkg="topic_tools" type="throttle"
+        args="'messages' 'gripper_joint_states' 10"/>
 </launch>
