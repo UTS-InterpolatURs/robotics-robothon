@@ -2,8 +2,8 @@ classdef urCollisionDetection < handle
     properties
         imageSubcriber
         jointStatesSubscriber
-        rows = 480
-        cols = 848
+        rows = 720
+        cols = 1280
         d_ur
         a_ur
         alpha_ur
@@ -11,76 +11,84 @@ classdef urCollisionDetection < handle
         pClouds_mask
         qmatrix
         robot
+        A
+        B
     end
     methods
         function self = urCollisionDetection(robot)
             self.robot = robot;
-            self.jointStatesCallback();
-            %             self.imageSubcriber = rossubscriber('/camera/depth/image_rect_raw',@self.imageCallback,"DataFormat","struct");
-            self.imageSubcriber = rossubscriber('/camera/depth/image_rect_raw');
-            pause(0.4);
             [d_1 d_2 d_3 d_4 d_5 d_6] = self.robot.model.links.d;
             self.d_ur = [d_1 d_2 d_3 d_4 d_5 d_6];
             [a_1 a_2 a_3 a_4 a_5 a_6] = self.robot.model.links.a;
             self.a_ur = [a_1 a_2 a_3 a_4 a_5 a_6];
             [alpha_1 alpha_2 alpha_3 alpha_4 alpha_5 alpha_6] = robot.model.links.alpha;
             self.alpha_ur = [alpha_1 alpha_2 alpha_3 alpha_4 alpha_5 alpha_6];
-            self.imageCallback();
+            self.jointStatesCallback();
+            self.imageSubcriber = rossubscriber('/camera/aligned_depth_to_color/image_raw_throttle',@self.imageCallback);
+            %             self.imageSubcriber = rossubscriber('/camera/aligned_depth_to_color/image_raw');
+            %             pause(0.4);
+            %             self.imageCallback();
         end
         function imageCallback(self,~,msg)
             msg_array = ImageStorage(self.rows,self.cols,self.num_image);
-            depthImage = readImage(self.imageSubcriber.LatestMessage);
+            %             depthImage = readImage(self.imageSubcriber.LatestMessage);
+            depthImage = readImage(msg);
             msg_array.addDepthImage(double(depthImage),self.num_image);
             pc = PointCloud();
-            pc.setExtrinsic(422.3378,422.5609,424,240,480,848);
-            testpc = pc.getPointCloud(msg_array.getDepthImage(1));
+            pc.setExtrinsic(918.7401,918.3084,647.22,345.83,720,1280);
+            testpc = rmmissing(pc.getUR10PointCloud(msg_array.getDepthImage(1)));
             pClouds = zeros(length(testpc),3,self.num_image);
             for i = 1:self.num_image
-                pClouds(:,:,i) = pc.getPointCloud(msg_array.getDepthImage(i));
+                pClouds(:,:,i) = rmmissing(pc.getUR10PointCloud(msg_array.getDepthImage(i)));
             end
+            %             shortest_dist = 1000;
+            %             for i = 1:self.num_image
+            %                 for j = 1:length(pClouds(:,1,1))
+            %                     if pClouds(j,3,i) > 1000
+            %                         pClouds(j,3,i) = nan;
+            %                     elseif pClouds(j,3,i) < 300
+            %                         pClouds(j,3,i) = nan;
+            %                     elseif pClouds(j,3,i) < shortest_dist
+            %                         shortest_dist = pClouds(j,3,i);
+            %
+            %                     end
+            %                 end
+            %             end
+            %             for i = 1:self.num_image
+            %                 for j = 1:length(pClouds(:,1,1))
+            %                     if pClouds(j,3,i) > shortest_dist + 300
+            %                         pClouds(j,3,i) = nan;
+            %                     end
+            %                 end
+            %             end
             
-            for i = 1:self.num_image
-                for j = 1:length(pClouds(:,1,1))
-                    if pClouds(j,3,i) > 1000
-                        pClouds(j,3,i) = nan;
-                    elseif pClouds(j,3,i) < 200
-                        pClouds(j,3,i) = nan;
-                    end
-                end
-            end
-            shortest_dist = 1000;
-            for i = 1:self.num_image
-                for j = 1:length(pClouds(:,1,1))
-                    if pClouds(j,3,i) < shortest_dist
-                        shortest_dist = pClouds(j,3,i);
-                    end
-                end
-            end
-            
-            for i = 1:self.num_image
-                for j = 1:length(pClouds(:,1,1))
-                    if pClouds(j,3,i) > shortest_dist + 500
-                        pClouds(j,3,i) = nan;
-                    end
-                end
-            end
-            
-            for i = 1:length(pClouds(:,1,1))
-                X_cor(i,1) = pClouds(i,1,1) + pClouds(i,1,1) + pClouds(i,1,1)/3;
-                Y_cor(i,1) = pClouds(i,2,1) + pClouds(i,2,1) + pClouds(i,2,1)/3;
-                Z_w(i,1) = pClouds(i,3,1) + pClouds(i,3,1) + pClouds(i,3,1)/3;
-            end
+            %             for i = 1:length(pClouds(:,1,1))
+            %                 %                 X_cor(i,1) = pClouds(i,1,1) + pClouds(i,1,1) + pClouds(i,1,1)/3;
+            %                 %                 Y_cor(i,1) = pClouds(i,2,1) + pClouds(i,2,1) + pClouds(i,2,1)/3;
+            %                 %                 Z_w(i,1) = pClouds(i,3,1) + pClouds(i,3,1) + pClouds(i,3,1)/3;
+            %                 X_cor(i,1) = pClouds(i,1,1);
+            %                 Y_cor(i,1) = pClouds(i,2,1);
+            %                 Z_w(i,1) = pClouds(i,3,1);
+            %             end
+            X_cor(:,1) = pClouds(:,1,1);
+            Y_cor(:,1) = pClouds(:,2,1);
+            Z_w(:,1) = pClouds(:,3,1);
             self.pClouds_mask = [X_cor(:), Y_cor(:), Z_w(:)]/1000;
             endEffector = self.robot.model.fkine(self.qmatrix(1,:));
             for c = 1: length(self.pClouds_mask(:,1))
                 if ~isnan(self.pClouds_mask(c,3))
-                    temp_cor = transl(self.pClouds_mask(c,1),self.pClouds_mask(c,2),self.pClouds_mask(c,3)); %takes lots of time to execute
+                    %                     temp_cor = transl(self.pClouds_mask(c,1),self.pClouds_mask(c,2),self.pClouds_mask(c,3)); %takes lots of time to execute
+                    temp_cor = [1 0 0 self.pClouds_mask(c,1) ;
+                        0 1 0 self.pClouds_mask(c,2);
+                        0 0 1 self.pClouds_mask(c,3);
+                        0 0 0 1];
                     tr_cor = endEffector*temp_cor;
                     self.pClouds_mask(c,1) = tr_cor(1,4);
                     self.pClouds_mask(c,2) = tr_cor(2,4);
                     self.pClouds_mask(c,3) = tr_cor(3,4);
                 end
             end
+            self.plotPointCloud();
         end
         
         function plotPointCloud(self)
@@ -103,33 +111,52 @@ classdef urCollisionDetection < handle
             self.qmatrix = [q2];
         end
         
-        function [intersectionPoint,check] = getCollisionStatus(self)
-            count = 0;
+        function [pointsInside] = getCollisionStatus(self)
+            %             count = 0;
+            
             for q = 1 : length(self.qmatrix(:,1))
                 endEffector = self.robot.model.fkine(self.qmatrix(q,:));
-                point1OnLine = [endEffector(1,4) endEffector(2,4) endEffector(3,4)];
-                joinNumber = 5;
-                jointState = self.robot.model.base;
-                for j = 1:joinNumber
-                    joinState = jointState * trotz(self.qmatrix(q,j)) * transl(a_ur10(1,j), 0, d_ur10(1,j)) * trotx(alpha_ur10(1,j));
-                end
-                point2OnLine = [joinState(1,4) joinState(2,4) joinState(3,4)];
-                for c = 1: length(self.pClouds_mask(:,1))
-                    try
-                        p1 = [self.pClouds_mask(c,1) self.pClouds_mask(c,2) self.pClouds_mask(c,3)];
-                        p2 = [self.pClouds_mask(c+1,1) self.pClouds_mask(c+1,2) self.pClouds_mask(c+1,3)];
-                        p3 = [self.pClouds_mask(c+2,1) self.pClouds_mask(c+2,2) self.pClouds_mask(c+2,3)];
-                        % Three points on the triangle are in verts
-                        triangleNormal = cross((p1-p2),(p2-p3));
-                        triangleNormal = triangleNormal / norm(triangleNormal);
-                        trianglePoint = (p1+p2+p3)/3;
-                        [intersectionPoint,check] = LinePlaneIntersection(triangleNormal,trianglePoint,point1OnLine,point2OnLine);
-                        if check ~= 0
-                            count = count +1;
-                        end
-                    end
-                end
+                centerPoint = [endEffector(1,4),endEffector(2,4),endEffector(3,4)];
+                radii = [1,0.5,0.5];
+                cubePointsAndOnes = [inv(endEffector) * [self.pClouds_mask,ones(size(self.pClouds_mask,1),1)]']';
+                updatedCubePoints = cubePointsAndOnes(:,1:3);
+                algebraicDist = self.GetAlgebraicDist(updatedCubePoints, centerPoint, radii);
+                pointsInside = find(algebraicDist < 1);
+                %                 point1OnLine = [endEffector(1,4) endEffector(2,4) endEffector(3,4)];
+                %                 joinNumber = 5;
+                %                 jointState = self.robot.model.base;
+                %                 for j = 1:joinNumber
+                %                     joinState = jointState * trotz(self.qmatrix(q,j)) * transl(self.a_ur(1,j), 0, self.d_ur(1,j)) * trotx(self.alpha_ur(1,j));
+                %                 end
+                %                 point2OnLine = [joinState(1,4) joinState(2,4) joinState(3,4)];
+                %
+                %
+                %                 for c = 1: length(self.pClouds_mask(:,1))
+                %                     if ~isnan(self.pClouds_mask(c,3))
+                %                         try
+                %                             p1 = [self.pClouds_mask(c,1) self.pClouds_mask(c,2) self.pClouds_mask(c,3)];
+                %                             p2 = [self.pClouds_mask(c+1,1) self.pClouds_mask(c+1,2) self.pClouds_mask(c+1,3)];
+                %                             p3 = [self.pClouds_mask(c+2,1) self.pClouds_mask(c+2,2) self.pClouds_mask(c+2,3)];
+                %                             % Three points on the triangle are in verts
+                %                             triangleNormal = cross((p1-p2),(p2-p3));
+                %                             triangleNormal = triangleNormal / norm(triangleNormal);
+                %                             trianglePoint = (p1+p2+p3)/3;
+                %                             [intersectionPoint,check] = LinePlaneIntersection(triangleNormal,trianglePoint,point1OnLine,point2OnLine);
+                %                             if check == 1
+                %                                 count = count +1;
+                %                             end
+                %                         end
+                %                     end
+                %                 end
+                
+                
             end
+        end
+        function algebraicDist = GetAlgebraicDist(self,points, centerPoint, radii)
+            
+            algebraicDist = ((points(:,1)-centerPoint(1))/radii(1)).^2 ...
+                + ((points(:,2)-centerPoint(2))/radii(2)).^2 ...
+                + ((points(:,3)-centerPoint(3))/radii(3)).^2;
         end
     end
 end
