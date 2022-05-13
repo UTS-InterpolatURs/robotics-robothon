@@ -2,6 +2,7 @@ classdef UTS_UR10 < handle
     properties
         %> Robot model
         model;
+        eStopStatus;
         
         %> workspace
         workspace = [-3 3 -3 3 -0.91 4];
@@ -27,6 +28,8 @@ classdef UTS_UR10 < handle
             self.model.base = basePose;
             self.PlotAndColourRobot();
             campos([-4.5 -2.5 3.0]);
+            
+            self.eStopStatus = 0;
         end
         
         %% GetUR10Robot

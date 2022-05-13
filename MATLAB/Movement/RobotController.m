@@ -32,7 +32,7 @@ classdef RobotController< handle
             t = 10;             % Total time (s)
             deltaT = steps*t;      % Control frequency
             W = diag([1 1 1 0.15 0.15 0.15]);    % Weighting matrix for the velocity vector
-            epsilon = 0.01;      % Threshold value for manipulability/Damped Least Squares
+            epsilon = 0.015;      % Threshold value for manipulability/Damped Least Squares
             theta = zeros(3,steps);         % Array for roll-pitch-yaw angles
 
 
@@ -70,6 +70,7 @@ classdef RobotController< handle
                 m(i) = sqrt(det(J*J'));
                 if m(i) < epsilon  % If manipulability is less than given threshold
                     lambda = (1 - m(i)/epsilon)*5E-2;
+                    disp("Approaching singularity - activating DLS");
                 else
                     lambda = 0;
                 end
@@ -96,24 +97,37 @@ classdef RobotController< handle
         end
 
         function ExecuteTrajectory(self, qMatrix)
+            restartFlag = false;
             if(self.useRos)
                 self.robot.model.animate(self.realBot.current_joint_states.Position);
-            end
-
-            if(self.useRos)
                 self.realBot.sendJointTrajectory(qMatrix);
             end
 
 
             for i=1:size(qMatrix,1)
+                if(self.robot.eStopStatus == 1)
+                    if(self.useRos)
+                        self.realBot.pause();
+                        restartFlag = true;
+                    end
+
+                end
+                while(self.robot.eStopStatus == 1)
+                    pause(0.1);
+                end
+
+                if restartFlag == true
+                    self.realBot.play();
+                end
 
                 self.robot.model.animate(qMatrix(i,:))
                 drawnow();
                 pause(0.1);
-
             end
 
         end
+
+
 
         function OpenGripper(self)
             if(self.useRos)

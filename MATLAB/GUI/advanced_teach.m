@@ -98,7 +98,6 @@ function figure1_WindowButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-disp(handles.eStop);
 if(handles.eStop == 0)
     handles.buttonDown = 1;
 else
@@ -133,7 +132,7 @@ while handles.buttonDown
     qdot = inv(J)*xdot';
     newq = q + (0.01*qdot');
     J2 = handles.robot.model.jacob0(newq);
-    if sqrt(det(J2*J2')) < 0.01
+    if sqrt(det(J2*J2')) < 0.02
         disp("Robot is close to singularity - Please use joint controls to move robot");
         disp("manipuability: ");
         disp(sqrt(det(J2*J2')));
@@ -188,7 +187,7 @@ while handles.buttonDown
 
     newq = q + (0.01*qdot');
     J2 = handles.robot.model.jacob0(newq);
-    if sqrt(det(J2*J2')) < 0.01
+    if sqrt(det(J2*J2')) < 0.02
         disp("Robot is close to singularity - Please use joint controls to move robot");
         disp("manipuability: ");
         disp(sqrt(det(J2*J2')));
@@ -250,7 +249,7 @@ while handles.buttonDown
     qdot = inv(J)*xdot';
     newq = q + (0.01*qdot');
     J2 = handles.robot.model.jacob0(newq);
-    if sqrt(det(J2*J2')) < 0.01
+    if sqrt(det(J2*J2')) < 0.02
         disp("Robot is close to singularity - Please use joint controls to move robot");
         disp("manipuability: ");
         disp(sqrt(det(J2*J2')));
@@ -286,7 +285,7 @@ while handles.buttonDown
     qdot = inv(J)*xdot';
     newq = q + (0.01*qdot');
     J2 = handles.robot.model.jacob0(newq);
-    if sqrt(det(J2*J2')) < 0.01
+    if sqrt(det(J2*J2')) < 0.02
         disp("Robot is close to singularity - Please use joint controls to move robot");
         disp("manipuability: ");
         disp(sqrt(det(J2*J2')));
@@ -323,7 +322,7 @@ while handles.buttonDown
     qdot = inv(J)*xdot';
     newq = q + (0.01*qdot');
     J2 = handles.robot.model.jacob0(newq);
-    if sqrt(det(J2*J2')) < 0.01
+    if sqrt(det(J2*J2')) < 0.02
         disp("Robot is close to singularity - Please use joint controls to move robot");
         disp("manipuability: ");
         disp(sqrt(det(J2*J2')));
@@ -360,7 +359,7 @@ while handles.buttonDown
     qdot = inv(J)*xdot';
     newq = q + (0.01*qdot');
     J2 = handles.robot.model.jacob0(newq);
-    if sqrt(det(J2*J2')) < 0.01
+    if sqrt(det(J2*J2')) < 0.02
         disp("Robot is close to singularity - Please use joint controls to move robot");
         disp("manipuability: ");
         disp(sqrt(det(J2*J2')));
@@ -711,6 +710,7 @@ function start_button_Callback(hObject, eventdata, handles)
 
 if (handles.eStop == 1)
     handles.eStop = 0;
+    handles.robot.eStopStatus = 0;
     guidata(hObject,handles);
 
 end
@@ -743,7 +743,9 @@ function e_stop_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of e_stop
 
 if (get(hObject,'Value') == 1)
+    disp("EMERGENCY STOP PRESSED");
     handles.eStop = get(hObject,'Value');
+    handles.robot.eStopStatus = 1;
     guidata(hObject,handles);
 
 end
