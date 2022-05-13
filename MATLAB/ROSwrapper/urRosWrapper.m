@@ -95,6 +95,13 @@ classdef urRosWrapper < handle
             call(playClient,req,"Timeout",1);
         end
 
+        function SetSpeedSlider(self, slider)
+            sliderClient = rossvcclient("/ur_hardware_interface/set_speed_slider","DataFormat","struct");
+            req = rosmessage(sliderClient);
+            req.Speed_Slider_Fraction = slider;
+            call(sliderClient,req,"Timeout",1);
+        end
+
     end
 end
 

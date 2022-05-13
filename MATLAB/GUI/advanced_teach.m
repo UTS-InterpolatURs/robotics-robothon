@@ -22,7 +22,7 @@ function varargout = advanced_teach(varargin)
 
 % Edit the above text to modify the response to help advanced_teach
 
-% Last Modified by GUIDE v2.5 13-May-2022 09:43:23
+% Last Modified by GUIDE v2.5 13-May-2022 12:02:21
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -54,6 +54,12 @@ function advanced_teach_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for advanced_teach
 
 handles.robot = varargin{1};
+if nargin == 5
+    handles.realBot = varargin{2};
+    handles.usingRealBot = true;
+else
+    handles.usingRealBot = false;
+end
 handles.speedScale = 1;
 handles.buttonDown = 0;
 handles.eStop = 0;
@@ -114,7 +120,6 @@ function z_plus_button_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
-
 % --- If Enable == 'on', executes on mouse press in 5 pixel border.
 % --- Otherwise, executes on mouse press in 5 pixel border or over z_plus_button.
 function z_plus_button_ButtonDownFcn(hObject, eventdata, handles)
@@ -122,26 +127,28 @@ function z_plus_button_ButtonDownFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 while handles.buttonDown
-
+    %     if handles.usingRealBot == true
+    %         handles.robot.model.animate(handles.realBot.current_joint_states.Position);
+    %     end
+    guidata(hObject,handles);
     %tr = handles.robot.model.fkine(handles.robot.model.getpos());
     %     newtr = transl(0,0,0.01) * tr;
     %     xdot = (newtr - tr)/0.05;
     xdot = [0,0,(1*handles.speedScale),0,0,0];
-    q = handles.robot.model.getpos();
-    J = handles.robot.model.jacob0(q);
-    qdot = inv(J)*xdot';
-    newq = q + (0.01*qdot');
-    J2 = handles.robot.model.jacob0(newq);
-    if sqrt(det(J2*J2')) < 0.02
-        disp("Robot is close to singularity - Please use joint controls to move robot");
-        disp("manipuability: ");
-        disp(sqrt(det(J2*J2')));
-        break;
+    newq = GUIRMRC(xdot, handles.robot);
+    if handles.usingRealBot == true
+        test = isalmost(handles.robot.model.getpos(),handles.realBot.current_joint_states.Position, 0.001);
+        if all(test) == 0
+            disp('Start of Traj does not match current robot position, please press reset button to reset sim');
+            return
+        end
+        robotq = [handles.realBot.current_joint_states.Position; newq];
+        handles.realBot.sendJointTrajectory(robotq);
     end
-
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.1);
+    pause(0.2);
+
 
     handles = guidata(hObject);
 
@@ -181,21 +188,23 @@ while handles.buttonDown
     %     newtr = transl(0,0,-0.01) * tr;
     %     xdot = (newtr - tr)/0.05;
     xdot = [0,0,(-1*handles.speedScale),0,0,0];
-    q = handles.robot.model.getpos();
-    J = handles.robot.model.jacob0(q);
-    qdot = inv(J)*xdot';
+     newq = GUIRMRC(xdot, handles.robot);
 
-    newq = q + (0.01*qdot');
-    J2 = handles.robot.model.jacob0(newq);
-    if sqrt(det(J2*J2')) < 0.02
-        disp("Robot is close to singularity - Please use joint controls to move robot");
-        disp("manipuability: ");
-        disp(sqrt(det(J2*J2')));
-        break;
+
+
+    if handles.usingRealBot == true
+        test = isalmost(handles.robot.model.getpos(),handles.realBot.current_joint_states.Position, 0.1);
+        if all(test) == 0
+            disp('Start of Traj does not match current robot position, please press reset button to reset sim');
+            return
+        end
+        robotq = [handles.realBot.current_joint_states.Position; newq];
+        handles.realBot.sendJointTrajectory(robotq);
     end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.1);
+    pause(0.2);
+
 
     handles = guidata(hObject);
 end
@@ -244,21 +253,23 @@ while handles.buttonDown
     %     newtr = transl(0,0,0.01) * tr;
     %     xdot = (newtr - tr)/0.05;
     xdot = [(1*handles.speedScale),0,0,0,0,0];
-    q = handles.robot.model.getpos();
-    J = handles.robot.model.jacob0(q);
-    qdot = inv(J)*xdot';
-    newq = q + (0.01*qdot');
-    J2 = handles.robot.model.jacob0(newq);
-    if sqrt(det(J2*J2')) < 0.02
-        disp("Robot is close to singularity - Please use joint controls to move robot");
-        disp("manipuability: ");
-        disp(sqrt(det(J2*J2')));
-        break;
-    end
+     newq = GUIRMRC(xdot, handles.robot);
 
+
+
+    if handles.usingRealBot == true
+        test = isalmost(handles.robot.model.getpos(),handles.realBot.current_joint_states.Position, 0.1);
+        if all(test) == 0
+            disp('Start of Traj does not match current robot position, please press reset button to reset sim');
+            return
+        end
+        robotq = [handles.realBot.current_joint_states.Position; newq];
+        handles.realBot.sendJointTrajectory(robotq);
+    end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.1);
+    pause(0.2);
+
 
     handles = guidata(hObject);
 
@@ -280,21 +291,23 @@ while handles.buttonDown
     %     newtr = transl(0,0,0.01) * tr;
     %     xdot = (newtr - tr)/0.05;
     xdot = [(-1*handles.speedScale),0,0,0,0,0];
-    q = handles.robot.model.getpos();
-    J = handles.robot.model.jacob0(q);
-    qdot = inv(J)*xdot';
-    newq = q + (0.01*qdot');
-    J2 = handles.robot.model.jacob0(newq);
-    if sqrt(det(J2*J2')) < 0.02
-        disp("Robot is close to singularity - Please use joint controls to move robot");
-        disp("manipuability: ");
-        disp(sqrt(det(J2*J2')));
-        break;
-    end
+    newq = GUIRMRC(xdot, handles.robot);
 
+
+
+    if handles.usingRealBot == true
+        test = isalmost(handles.robot.model.getpos(),handles.realBot.current_joint_states.Position, 0.1);
+        if all(test) == 0
+            disp('Start of Traj does not match current robot position, please press reset button to reset sim');
+            return
+        end
+        robotq = [handles.realBot.current_joint_states.Position; newq];
+        handles.realBot.sendJointTrajectory(robotq);
+    end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.1);
+    pause(0.2);
+
 
     handles = guidata(hObject);
 
@@ -317,21 +330,23 @@ while handles.buttonDown
     %     newtr = transl(0,0,0.01) * tr;
     %     xdot = (newtr - tr)/0.05;
     xdot = [0,(-1*handles.speedScale),0,0,0,0];
-    q = handles.robot.model.getpos();
-    J = handles.robot.model.jacob0(q);
-    qdot = inv(J)*xdot';
-    newq = q + (0.01*qdot');
-    J2 = handles.robot.model.jacob0(newq);
-    if sqrt(det(J2*J2')) < 0.02
-        disp("Robot is close to singularity - Please use joint controls to move robot");
-        disp("manipuability: ");
-        disp(sqrt(det(J2*J2')));
-        break;
-    end
+    newq = GUIRMRC(xdot, handles.robot);
 
+
+
+    if handles.usingRealBot == true
+        test = isalmost(handles.robot.model.getpos(),handles.realBot.current_joint_states.Position, 0.1);
+        if all(test) == 0
+            disp('Start of Traj does not match current robot position, please press reset button to reset sim');
+            return
+        end
+        robotq = [handles.realBot.current_joint_states.Position; newq];
+        handles.realBot.sendJointTrajectory(robotq);
+    end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.1);
+    pause(0.2);
+
 
     handles = guidata(hObject);
 
@@ -354,21 +369,24 @@ while handles.buttonDown
     %     newtr = transl(0,0,0.01) * tr;
     %     xdot = (newtr - tr)/0.05;
     xdot = [0,(1*handles.speedScale),0,0,0,0];
-    q = handles.robot.model.getpos();
-    J = handles.robot.model.jacob0(q);
-    qdot = inv(J)*xdot';
-    newq = q + (0.01*qdot');
-    J2 = handles.robot.model.jacob0(newq);
-    if sqrt(det(J2*J2')) < 0.02
-        disp("Robot is close to singularity - Please use joint controls to move robot");
-        disp("manipuability: ");
-        disp(sqrt(det(J2*J2')));
-        break;
-    end
+     newq = GUIRMRC(xdot, handles.robot);
 
+
+
+    if handles.usingRealBot == true
+        test = isalmost(handles.robot.model.getpos(),handles.realBot.current_joint_states.Position, 0.1);
+        if all(test) == 0
+            disp('Start of Traj does not match current robot position, please press reset button to reset sim');
+            return
+        end
+        robotq = [handles.realBot.current_joint_states.Position; newq];
+        handles.realBot.sendJointTrajectory(robotq);
+    end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.1);
+    pause(0.2);
+
+
     handles = guidata(hObject);
 
 
@@ -748,4 +766,15 @@ if (get(hObject,'Value') == 1)
     handles.robot.eStopStatus = 1;
     guidata(hObject,handles);
 
+end
+
+
+% --- Executes on button press in reset_button.
+function reset_button_Callback(hObject, eventdata, handles)
+% hObject    handle to reset_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if handles.usingRealBot == true
+    handles.robot.model.animate(handles.realBot.current_joint_states.Position);
 end
