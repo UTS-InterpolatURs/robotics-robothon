@@ -23,10 +23,14 @@ robotCam = VCam('robot', myUR10e, 'focal', 0.08, 'pixel', 10e-5, ...
     'fps', 30, 'depth', mean(P(1,:)));
 
 % Created workbench model and plot it
-wbPose = transl(0,-1.2,-0.423) * rpy2tr(0,0,0);
+wbPose = transl(0,-1.0,-0.423) * rpy2tr(0,0,0);
 workbench = Environment('Envi/Workbench.ply', wbPose); 
 workbench.PlotModel();
 [wbVert,wbFace,wbFaceNorms] = workbench.GetModelVFNorm();
+
+tbPose = transl(0,-1.0,0.026) * rpy2tr(0,0,0);
+taskBoard = Taskboard(tbPose);
+taskBoard.PlotTaskboard();
 
 %% Move to ready pose
 hold off
