@@ -42,6 +42,13 @@ classdef Environment < handle
             drawnow();
         end
         
+        function MoveModel(self,goalPose)
+            self.SetPose(goalPose);
+            self.poseUpdate = [self.pose * [self.enVertices,ones(self.vertexCount,1)]']';
+            self.enMesh.Vertices = self.poseUpdate(:,1:3);
+            drawnow();
+        end
+        
         % Function for getting model vertices, face, face normals
         function [vertices,face,faceNormals] = GetModelVFNorm(self)
             vertices = self.vertices;
