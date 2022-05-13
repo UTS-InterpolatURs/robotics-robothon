@@ -24,15 +24,15 @@ classdef urCollisionDetection < handle
             [alpha_1 alpha_2 alpha_3 alpha_4 alpha_5 alpha_6] = robot.model.links.alpha;
             self.alpha_ur = [alpha_1 alpha_2 alpha_3 alpha_4 alpha_5 alpha_6];
             self.jointStatesCallback();
-            self.imageSubcriber = rossubscriber('/camera/aligned_depth_to_color/image_raw_throttle',@self.imageCallback);
-            %             self.imageSubcriber = rossubscriber('/camera/aligned_depth_to_color/image_raw');
-            %             pause(0.4);
-            %             self.imageCallback();
+%             self.imageSubcriber = rossubscriber('/camera/aligned_depth_to_color/image_raw_throttle',@self.imageCallback);
+                        self.imageSubcriber = rossubscriber('/camera/aligned_depth_to_color/image_raw');
+                        pause(0.4);
+                        self.imageCallback();
         end
         function imageCallback(self,~,msg)
             msg_array = ImageStorage(self.rows,self.cols,self.num_image);
-            %             depthImage = readImage(self.imageSubcriber.LatestMessage);
-            depthImage = readImage(msg);
+                        depthImage = readImage(self.imageSubcriber.LatestMessage);
+%             depthImage = readImage(msg);
             msg_array.addDepthImage(double(depthImage),self.num_image);
             pc = PointCloud();
             pc.setExtrinsic(918.7401,918.3084,647.22,345.83,720,1280);
@@ -88,7 +88,7 @@ classdef urCollisionDetection < handle
                     self.pClouds_mask(c,3) = tr_cor(3,4);
                 end
             end
-            self.plotPointCloud();
+%             self.plotPointCloud();
         end
         
         function plotPointCloud(self)
@@ -108,20 +108,38 @@ classdef urCollisionDetection < handle
             q2 = self.robot.model.ikcon(Tr,q0);
             
             % q2 = [0.0000 -0.5946 -5.1732 4.1970 4.7124 6.2832];
-            self.qmatrix = [q2];
+            self.qmatrix = [q0];
         end
         
-        function [pointsInside] = getCollisionStatus(self)
-            %             count = 0;
+        function [count] = getCollisionStatus(self)
+            count = 0;
             
             for q = 1 : length(self.qmatrix(:,1))
                 endEffector = self.robot.model.fkine(self.qmatrix(q,:));
-                centerPoint = [endEffector(1,4),endEffector(2,4),endEffector(3,4)];
-                radii = [1,0.5,0.5];
+                disp(endEffector);
+                centerPoint = [endEffector(1,4),endEffector(2,4),endEffector(3,4)-0.3];
+                
+                radii = [0.1,0.1,0.1];
+                [X,Y,Z] = ellipsoid( centerPoint(1), centerPoint(2), centerPoint(3), radii(1), radii(2), radii(3) );
+                hold on
+                ellipsoidAtOrigin_h = surf(X,Y,Z);
+                
                 cubePointsAndOnes = [inv(endEffector) * [self.pClouds_mask,ones(size(self.pClouds_mask,1),1)]']';
                 updatedCubePoints = cubePointsAndOnes(:,1:3);
-                algebraicDist = self.GetAlgebraicDist(updatedCubePoints, centerPoint, radii);
-                pointsInside = find(algebraicDist < 1);
+                self.robot.PlotAndColourRobot();
+                self.robot.model.animate(self.qmatrix(q,:));
+                hold on;
+%                 cubeAtOigin_h = plot3(updatedCubePoints(:,1),updatedCubePoints(:,2),updatedCubePoints(:,3),'r.');
+                cubeAtOigin_h = plot3(self.pClouds_mask(:,1),self.pClouds_mask(:,2),self.pClouds_mask(:,3),'r.');
+%                 algebraicDist = self.GetAlgebraicDist(updatedCubePoints, centerPoint, radii);
+                algebraicDist = self.GetAlgebraicDist(self.pClouds_mask, centerPoint, radii);
+                disp(algebraicDist(1));
+%                 pointsInside = find(algebraicDist < 0);
+                for i = 1: length(algebraicDist)
+                    if algebraicDist(i) < 1
+                        count = count + 1;
+                    end
+                end
                 %                 point1OnLine = [endEffector(1,4) endEffector(2,4) endEffector(3,4)];
                 %                 joinNumber = 5;
                 %                 jointState = self.robot.model.base;
