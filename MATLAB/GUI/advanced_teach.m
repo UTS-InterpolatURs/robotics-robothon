@@ -22,7 +22,7 @@ function varargout = advanced_teach(varargin)
 
 % Edit the above text to modify the response to help advanced_teach
 
-% Last Modified by GUIDE v2.5 13-May-2022 12:02:21
+% Last Modified by GUIDE v2.5 13-May-2022 13:46:33
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -137,7 +137,7 @@ while handles.buttonDown
     xdot = [0,0,(1*handles.speedScale),0,0,0];
     newq = GUIRMRC(xdot, handles.robot);
     if handles.usingRealBot == true
-        test = isalmost(handles.robot.model.getpos(),handles.realBot.current_joint_states.Position, 0.001);
+        test = isalmost(handles.robot.model.getpos(),handles.realBot.current_joint_states.Position, 0.01);
         if all(test) == 0
             disp('Start of Traj does not match current robot position, please press reset button to reset sim');
             return
@@ -147,7 +147,7 @@ while handles.buttonDown
     end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.2);
+    pause(0.01);
 
 
     handles = guidata(hObject);
@@ -188,7 +188,7 @@ while handles.buttonDown
     %     newtr = transl(0,0,-0.01) * tr;
     %     xdot = (newtr - tr)/0.05;
     xdot = [0,0,(-1*handles.speedScale),0,0,0];
-     newq = GUIRMRC(xdot, handles.robot);
+    newq = GUIRMRC(xdot, handles.robot);
 
 
 
@@ -203,7 +203,7 @@ while handles.buttonDown
     end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.2);
+    pause(0.01);
 
 
     handles = guidata(hObject);
@@ -253,7 +253,7 @@ while handles.buttonDown
     %     newtr = transl(0,0,0.01) * tr;
     %     xdot = (newtr - tr)/0.05;
     xdot = [(1*handles.speedScale),0,0,0,0,0];
-     newq = GUIRMRC(xdot, handles.robot);
+    newq = GUIRMRC(xdot, handles.robot);
 
 
 
@@ -268,7 +268,7 @@ while handles.buttonDown
     end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.2);
+    pause(0.01);
 
 
     handles = guidata(hObject);
@@ -306,7 +306,7 @@ while handles.buttonDown
     end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.2);
+    pause(0.01);
 
 
     handles = guidata(hObject);
@@ -345,7 +345,7 @@ while handles.buttonDown
     end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.2);
+    pause(0.01);
 
 
     handles = guidata(hObject);
@@ -369,7 +369,7 @@ while handles.buttonDown
     %     newtr = transl(0,0,0.01) * tr;
     %     xdot = (newtr - tr)/0.05;
     xdot = [0,(1*handles.speedScale),0,0,0,0];
-     newq = GUIRMRC(xdot, handles.robot);
+    newq = GUIRMRC(xdot, handles.robot);
 
 
 
@@ -384,7 +384,7 @@ while handles.buttonDown
     end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.2);
+    pause(0.01);
 
 
     handles = guidata(hObject);
@@ -778,3 +778,28 @@ function reset_button_Callback(hObject, eventdata, handles)
 if handles.usingRealBot == true
     handles.robot.model.animate(handles.realBot.current_joint_states.Position);
 end
+
+
+% --- Executes on button press in open_gripper_button.
+function open_gripper_button_Callback(hObject, eventdata, handles)
+% hObject    handle to open_gripper_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if(handles.usingRealBot)
+    handles.realBot.gripper.openGripper;
+end
+handles.robot.SetGripperState("gripperState", 0)
+
+
+% --- Executes on button press in close_gripper_callback.
+function close_gripper_callback_Callback(hObject, eventdata, handles)
+% hObject    handle to close_gripper_callback (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if(handles.usingRealBot)
+    handles.realBot.gripper.closeGripper(600);
+end
+handles.robot.SetGripperState("gripperState", 1)
+

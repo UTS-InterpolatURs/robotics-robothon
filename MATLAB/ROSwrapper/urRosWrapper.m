@@ -70,7 +70,7 @@ classdef urRosWrapper < handle
                 %nextJointState.Velocities = v(i,:);
                 %nextJointState.Accelerations = a(i,:);
                 %nextJointState.Effort = ones(1,6);
-                nextJointState.TimeFromStart = rosduration(i*0.1);
+                nextJointState.TimeFromStart = rosduration((i-1)*0.1);
                 msg.Goal.Trajectory.Points = [msg.Goal.Trajectory.Points; nextJointState];
             end
 
