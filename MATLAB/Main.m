@@ -29,6 +29,7 @@ workbench.PlotModel();
 [wbVert,wbFace,wbFaceNorms] = workbench.GetModelVFNorm();
 
 %% Move to ready pose
+hold off
 steps = 50;
 qInit = myUR10e.model.getpos();
 qHome = deg2rad([90 -60 90 -120 -90 90]);
