@@ -6,13 +6,13 @@ cla;
 % rosinit();
 
 while true
-if true
+
 %     A = rossubscriber('/head_camera/rgb/image_raw');
     A = rossubscriber('/camera/color/image_raw');
     
     pause(0.4);
     RGB = readImage(A.LatestMessage);
-end
+
 
 hold on 
 imshow(RGB);

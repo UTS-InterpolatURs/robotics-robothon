@@ -38,7 +38,7 @@ classdef PointCloud <handle
             v = repmat(1:self.h_,[self.w_,1])';
             Z = depthImage;
             for i = length(Z(:)) : -1 : 1
-                if Z(i) > 500
+                if (Z(i) > 500) || (Z(i) < 200) 
                     Z(i) = nan;
                 end
             end
