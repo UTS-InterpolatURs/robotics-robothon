@@ -22,16 +22,16 @@ function varargout = advanced_teach(varargin)
 
 % Edit the above text to modify the response to help advanced_teach
 
-% Last Modified by GUIDE v2.5 28-Apr-2022 20:29:38
+% Last Modified by GUIDE v2.5 13-May-2022 09:43:23
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @advanced_teach_OpeningFcn, ...
-                   'gui_OutputFcn',  @advanced_teach_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
+    'gui_Singleton',  gui_Singleton, ...
+    'gui_OpeningFcn', @advanced_teach_OpeningFcn, ...
+    'gui_OutputFcn',  @advanced_teach_OutputFcn, ...
+    'gui_LayoutFcn',  [] , ...
+    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
     gui_State.gui_Callback = str2func(varargin{1});
 end
@@ -56,6 +56,7 @@ function advanced_teach_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.robot = varargin{1};
 handles.speedScale = 1;
 handles.buttonDown = 0;
+handles.eStop = 0;
 set(handles.speed_slider, 'Min', 0);
 set(handles.speed_slider, 'Max', 1);
 set(handles.speed_slider, 'Value', 1);
@@ -68,7 +69,7 @@ guidata(hObject, handles);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = advanced_teach_OutputFcn(hObject, eventdata, handles) 
+function varargout = advanced_teach_OutputFcn(hObject, eventdata, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -97,7 +98,13 @@ function figure1_WindowButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-handles.buttonDown = 1;
+disp(handles.eStop);
+if(handles.eStop == 0)
+    handles.buttonDown = 1;
+else
+    handles.buttonDown = 0;
+end
+
 guidata(hObject,handles);
 
 
@@ -117,9 +124,9 @@ function z_plus_button_ButtonDownFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 while handles.buttonDown
 
-     %tr = handles.robot.model.fkine(handles.robot.model.getpos());
-%     newtr = transl(0,0,0.01) * tr;
-%     xdot = (newtr - tr)/0.05;
+    %tr = handles.robot.model.fkine(handles.robot.model.getpos());
+    %     newtr = transl(0,0,0.01) * tr;
+    %     xdot = (newtr - tr)/0.05;
     xdot = [0,0,(1*handles.speedScale),0,0,0];
     q = handles.robot.model.getpos();
     J = handles.robot.model.jacob0(q);
@@ -137,8 +144,8 @@ while handles.buttonDown
     drawnow();
     pause(0.1);
 
-  handles = guidata(hObject);
-    
+    handles = guidata(hObject);
+
 end
 
 
@@ -150,8 +157,8 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 delete(hObject);
-    
- 
+
+
 
 
 % --- Executes on button press in z_minus_button.
@@ -170,15 +177,15 @@ function z_minus_button_ButtonDownFcn(hObject, eventdata, handles)
 
 while handles.buttonDown
 
-   
-%     tr = handles.robot.model.fkine(handles.robot.model.getpos());
-%     newtr = transl(0,0,-0.01) * tr;
-%     xdot = (newtr - tr)/0.05;
+
+    %     tr = handles.robot.model.fkine(handles.robot.model.getpos());
+    %     newtr = transl(0,0,-0.01) * tr;
+    %     xdot = (newtr - tr)/0.05;
     xdot = [0,0,(-1*handles.speedScale),0,0,0];
     q = handles.robot.model.getpos();
     J = handles.robot.model.jacob0(q);
     qdot = inv(J)*xdot';
-    
+
     newq = q + (0.01*qdot');
     J2 = handles.robot.model.jacob0(newq);
     if sqrt(det(J2*J2')) < 0.01
@@ -234,9 +241,9 @@ function x_plus_button_ButtonDownFcn(hObject, eventdata, handles)
 
 while handles.buttonDown
 
-     %tr = handles.robot.model.fkine(handles.robot.model.getpos());
-%     newtr = transl(0,0,0.01) * tr;
-%     xdot = (newtr - tr)/0.05;
+    %tr = handles.robot.model.fkine(handles.robot.model.getpos());
+    %     newtr = transl(0,0,0.01) * tr;
+    %     xdot = (newtr - tr)/0.05;
     xdot = [(1*handles.speedScale),0,0,0,0,0];
     q = handles.robot.model.getpos();
     J = handles.robot.model.jacob0(q);
@@ -254,8 +261,8 @@ while handles.buttonDown
     drawnow();
     pause(0.1);
 
-  handles = guidata(hObject);
-    
+    handles = guidata(hObject);
+
 end
 
 
@@ -270,9 +277,9 @@ function x_minus_button_ButtonDownFcn(hObject, eventdata, handles)
 
 while handles.buttonDown
 
-     %tr = handles.robot.model.fkine(handles.robot.model.getpos());
-%     newtr = transl(0,0,0.01) * tr;
-%     xdot = (newtr - tr)/0.05;
+    %tr = handles.robot.model.fkine(handles.robot.model.getpos());
+    %     newtr = transl(0,0,0.01) * tr;
+    %     xdot = (newtr - tr)/0.05;
     xdot = [(-1*handles.speedScale),0,0,0,0,0];
     q = handles.robot.model.getpos();
     J = handles.robot.model.jacob0(q);
@@ -290,8 +297,8 @@ while handles.buttonDown
     drawnow();
     pause(0.1);
 
-  handles = guidata(hObject);
-    
+    handles = guidata(hObject);
+
 end
 
 
@@ -307,9 +314,9 @@ function y_minus_button_ButtonDownFcn(hObject, eventdata, handles)
 
 while handles.buttonDown
 
-     %tr = handles.robot.model.fkine(handles.robot.model.getpos());
-%     newtr = transl(0,0,0.01) * tr;
-%     xdot = (newtr - tr)/0.05;
+    %tr = handles.robot.model.fkine(handles.robot.model.getpos());
+    %     newtr = transl(0,0,0.01) * tr;
+    %     xdot = (newtr - tr)/0.05;
     xdot = [0,(-1*handles.speedScale),0,0,0,0];
     q = handles.robot.model.getpos();
     J = handles.robot.model.jacob0(q);
@@ -327,8 +334,8 @@ while handles.buttonDown
     drawnow();
     pause(0.1);
 
-  handles = guidata(hObject);
-    
+    handles = guidata(hObject);
+
 end
 
 
@@ -344,9 +351,9 @@ function y_plus_button_ButtonDownFcn(hObject, eventdata, handles)
 
 while handles.buttonDown
 
-     %tr = handles.robot.model.fkine(handles.robot.model.getpos());
-%     newtr = transl(0,0,0.01) * tr;
-%     xdot = (newtr - tr)/0.05;
+    %tr = handles.robot.model.fkine(handles.robot.model.getpos());
+    %     newtr = transl(0,0,0.01) * tr;
+    %     xdot = (newtr - tr)/0.05;
     xdot = [0,(1*handles.speedScale),0,0,0,0];
     q = handles.robot.model.getpos();
     J = handles.robot.model.jacob0(q);
@@ -365,8 +372,8 @@ while handles.buttonDown
     pause(0.1);
     handles = guidata(hObject);
 
-  
-    
+
+
 end
 
 
@@ -692,4 +699,51 @@ function speed_slider_CreateFcn(hObject, eventdata, handles)
 % Hint: slider controls usually have a light gray background.
 if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes on button press in start_button.
+function start_button_Callback(hObject, eventdata, handles)
+% hObject    handle to start_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+if (handles.eStop == 1)
+    handles.eStop = 0;
+    guidata(hObject,handles);
+
+end
+
+
+
+% --- Executes on button press in e_stop_button.
+function e_stop_button_Callback(hObject, eventdata, handles)
+% hObject    handle to e_stop_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on key press with focus on start_button and none of its controls.
+function start_button_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to start_button (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in e_stop.
+function e_stop_Callback(hObject, eventdata, handles)
+% hObject    handle to e_stop (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of e_stop
+
+if (get(hObject,'Value') == 1)
+    handles.eStop = get(hObject,'Value');
+    guidata(hObject,handles);
+
 end
