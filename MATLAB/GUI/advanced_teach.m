@@ -22,7 +22,7 @@ function varargout = advanced_teach(varargin)
 
 % Edit the above text to modify the response to help advanced_teach
 
-% Last Modified by GUIDE v2.5 13-May-2022 13:46:33
+% Last Modified by GUIDE v2.5 14-May-2022 13:54:49
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -802,4 +802,3 @@ if(handles.usingRealBot)
     handles.realBot.gripper.closeGripper(600);
 end
 handles.robot.SetGripperState("gripperState", 1)
-
