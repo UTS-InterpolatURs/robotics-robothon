@@ -76,13 +76,13 @@ classdef RobotController< handle
                 end
                 invJ = inv(J'*J + lambda *eye(6))*J';                                   % DLS Inverse
                 qdot(i,:) = (invJ*xdot)';                                                % Solve the RMRC equation (you may need to transpose the         vector)
-                %                 for j = 1:6                                                             % Loop through joints 1 to 6
-                %                     if qMatrix(i,j) + deltaT*qdot(i,j) < p560.qlim(j,1)                     % If next joint angle is lower than joint limit...
-                %                         qdot(i,j) = 0; % Stop the motor
-                %                     elseif qMatrix(i,j) + deltaT*qdot(i,j) > p560.qlim(j,2)                 % If next joint angle is greater than joint limit ...
-                %                         qdot(i,j) = 0; % Stop the motor
-                %                     end
-                %                 end
+                for j = 1:6                                                             % Loop through joints 1 to 6
+                    if qMatrix(i,j) + deltaT*qdot(i,j) < self.robot.model.qlim(j,1)                     % If next joint angle is lower than joint limit...
+                        qdot(i,j) = 0; % Stop the motor
+                    elseif qMatrix(i,j) + deltaT*qdot(i,j) > self.robot.model.qlim(j,2)                 % If next joint angle is greater than joint limit ...
+                        qdot(i,j) = 0; % Stop the motor
+                    end
+                end
                 qMatrix(i+1,:) = qMatrix(i,:) + deltaT*qdot(i,:);                         	% Update next joint state based on joint velocities
 
             end
