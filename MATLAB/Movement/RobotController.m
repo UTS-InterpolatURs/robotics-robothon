@@ -20,27 +20,45 @@ classdef RobotController< handle
                 self.realBot = realBot;
             end
         end
+        function qMatrix = GenerateJointTrajectory(self,goalPose,steps)
+            goalPoseAdjusted = self.robot.GetGoalPose(goalPose);
+            robotQ = self.robot.model.getpos();
+            goalQ = self.robot.model.ikcon(goalPoseAdjusted, robotQ);
+            %             baseToOriginTR = inv(self.robot.model.base);
+            %             robotToObject = baseToOriginTR * goalPoseAdjusted;
+            %             viaQ = robotq;
+            %
+            %             viaQ(1) = atan2(robotToObject(2,4),robotToObject(1,4)) - pi;
+            %
+            %             qMatrix = jtraj(robotq,viaQ,steps);
+
+            %             targetQ = self.robot.model.ikcon(goalPoseAdjusted, self.robot.model.getpos());
+            %             qMatrix = [qMatrix; jtraj(qMatrix(end,:), targetQ, steps)];
+            qMatrix = jtraj(robotQ, goalQ, steps);
+        end
 
         function qMatrix = GenerateLinearTrajectory(self,goalPose,steps)
             if(self.useRos)
                 self.robot.model.animate(self.realBot.current_joint_states.Position);
             end
+            goalPoseAdjusted = self.robot.GetGoalPose(goalPose);
+
             model = self.robot.model;
             currentPose = model.fkine(model.getpos());
             X = zeros(3,steps);
             qMatrix = zeros(steps,6);
             t = 10;             % Total time (s)
             deltaT = steps*t;      % Control frequency
-            W = diag([1 1 1 0.15 0.15 0.15]);    % Weighting matrix for the velocity vector
+            W = diag([1 1 1 0.1 0.1 0.1]);    % Weighting matrix for the velocity vector
             epsilon = 0.015;      % Threshold value for manipulability/Damped Least Squares
             theta = zeros(3,steps);         % Array for roll-pitch-yaw angles
 
 
             x1 = currentPose(1:3,4);
-            x2 = goalPose(1:3,4);
+            x2 = goalPoseAdjusted(1:3,4);
 
             a1 = tr2rpy(currentPose);
-            a2 = tr2rpy(goalPose);
+            a2 = tr2rpy(goalPoseAdjusted);
 
             s = lspb(0,1,steps);
 
@@ -90,13 +108,13 @@ classdef RobotController< handle
         end
 
         function qMatrix = moveCartesian(self, x ,steps)
-            currentPose = self.robot.model.fkine(self.robot.model.getpos());
+            currentPose = self.robot.GetEndEffPose();
             goalPose = transl(x) * currentPose;
 
-            qMatrix = self.LinearTrajectory(goalPose,steps);
+            qMatrix = self.GenerateLinearTrajectory(goalPose,steps);
         end
 
-        function ExecuteTrajectory(self, qMatrix)
+        function ExecuteTrajectory(self, qMatrix, object)
             restartFlag = false;
             if(self.useRos)
                 self.robot.model.animate(self.realBot.current_joint_states.Position);
@@ -121,6 +139,9 @@ classdef RobotController< handle
                 end
 
                 self.robot.model.animate(qMatrix(i,:))
+                if exist('object','var')
+                    object.MoveModel(self.robot.GetEndEffPose() * trotx(pi));
+                end
                 drawnow();
                 pause(0.1);
             end
