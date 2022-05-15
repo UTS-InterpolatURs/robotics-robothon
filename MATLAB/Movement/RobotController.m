@@ -37,7 +37,7 @@ classdef RobotController< handle
             qMatrix = jtraj(robotQ, goalQ, steps);
         end
 
-        function qMatrix = GenerateLinearTrajectory(self,goalPose,steps)
+        function qMatrix = GenerateLinearTrajectory(self,goalPose,steps, velocityMask)
             if(self.useRos)
                 self.robot.model.animate(self.realBot.current_joint_states.Position);
             end
@@ -50,6 +50,9 @@ classdef RobotController< handle
             t = 10;             % Total time (s)
             deltaT = steps*t;      % Control frequency
             W = diag([1 1 1 0.1 0.1 0.1]);    % Weighting matrix for the velocity vector
+            if exist('velocityMask','var')
+                W = diag([velocityMask]);
+            end
             epsilon = 0.015;      % Threshold value for manipulability/Damped Least Squares
             theta = zeros(3,steps);         % Array for roll-pitch-yaw angles
 
@@ -110,8 +113,9 @@ classdef RobotController< handle
         function qMatrix = moveCartesian(self, x ,steps)
             currentPose = self.robot.GetEndEffPose();
             goalPose = transl(x) * currentPose;
+            velocityMask = [1,1,1,0,0,0];
 
-            qMatrix = self.GenerateLinearTrajectory(goalPose,steps);
+            qMatrix = self.GenerateLinearTrajectory(goalPose,steps, velocityMask);
         end
 
         function ExecuteTrajectory(self, qMatrix, object)

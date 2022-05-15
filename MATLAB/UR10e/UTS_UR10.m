@@ -118,5 +118,9 @@ classdef UTS_UR10 < handle
         function goalPoseAdjusted = GetGoalPose(self, goalPose)
             goalPoseAdjusted = goalPose * transl(0,0,-self.toolOffset);
         end
+
+        function pose = GlobalToEndEffPose(self, globalPose)
+            pose = globalPose * trotx(pi);
+        end
     end
 end
