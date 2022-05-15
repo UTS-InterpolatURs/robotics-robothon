@@ -49,7 +49,40 @@ classdef Taskboard < handle
             self.battAA2.MoveModel(goalPose);
         end
         
+        function cableSlotPose = GetGoalCableSlot1(self)
+            cableSlot1Offset = transl(-0.005140321,-0.0220078,0.02124) * rpy2tr(0,0,pi);
+            cableSlotPose = self.mainboard.GetPose() * cableSlot1Offset;
+        end
         
+        function cableSlotPose = GetGoalCableSlot2(self)
+            cableSlot1Offset = transl(-0.046140301,-0.0220078,0.02124) * rpy2tr(0,0,pi);
+            cableSlotPose = self.mainboard.GetPose() * cableSlot1Offset;
+        end
+        
+        function keySwitchPose = GetGoalKeySwitch(self)
+            keySwitchOffset = transl(-0.0906143,-0.0217975,0.0102605) * rpy2tr(0,0,-pi);
+            keySwitchPose = self.mainboard.GetPose() * keySwitchOffset;
+        end
+        
+        function battAASlotPose = GetGoalAARedSlot(self)
+            AARedSlotOffset = transl(0.0408944,0.03220125,0.0187605) * rpy2tr(0,pi/2,0);
+            battAASlotPose = self.mainboard.GetPose() * AARedSlotOffset;
+        end
+        
+        function battAASlotPose = GetGoalAABlueSlot(self)
+            AABlueSlotOffset = transl(0.05602735,0.03220125,0.0187605) * rpy2tr(0,pi/2,0);
+            battAASlotPose = self.mainboard.GetPose() * AABlueSlotOffset;
+        end
+        
+        function buttonPose = GetGoalRedButton(self)
+            redButtonOffset = transl(0.04038215,0.05670295,-0.0022395) * rpy2tr(pi,0,0);
+            buttonPose = self.mainboard.GetPose() * redButtonOffset;
+        end
+        
+        function buttonPose = GetGoalBlueButton(self)
+            blueButtonOffset = transl(0.0543753,0.05670295,-0.0022395) * rpy2tr(pi,0,0);
+            buttonPose = self.mainboard.GetPose() * blueButtonOffset;
+        end
     end
 end
 
