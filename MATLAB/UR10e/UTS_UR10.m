@@ -3,11 +3,12 @@ classdef UTS_UR10 < handle
         %> Robot model
         model;
         eStopStatus;
-        
+
         %> workspace
         workspace = [-3 3 -3 3 -0.91 4];
+        toolOffset = 0.275354;
     end
-    
+
     properties (Access = private)
         openFaceData;
         openVertexData;
@@ -15,10 +16,10 @@ classdef UTS_UR10 < handle
         closeFaceData;
         closeVertexData;
         closePlyData;
-        
-        toolOffset = 0.275354;
+
+
     end
-    
+
     methods%% Class for UR10 robot simulation
         function self = UTS_UR10(basePose)
             if nargin < 1
@@ -28,10 +29,10 @@ classdef UTS_UR10 < handle
             self.model.base = basePose;
             self.PlotAndColourRobot();
             campos([-4.5 -2.5 3.0]);
-            
+
             self.eStopStatus = 0;
         end
-        
+
         %% GetUR10Robot
         % Given a name (optional), create and return a UR10 robot model
         function GetUR10Robot(self)
@@ -41,16 +42,16 @@ classdef UTS_UR10 < handle
             if ~isempty(handles)
                 error("Existed a robot with the same name");
             end
-            
+
             L1 = Link('d',0.128,'a',0,'alpha',pi/2,'qlim',deg2rad([-180 180]), 'offset', 0);
             L2 = Link('d',0,'a',-0.6127,'alpha',0,'qlim', deg2rad([-180 180]), 'offset',0); % was 'offset',pi/2
             L3 = Link('d',0,'a',-0.5716,'alpha',0,'qlim', deg2rad([-180 180]), 'offset', 0);
             L4 = Link('d',0.16389,'a',0,'alpha',pi/2,'qlim',deg2rad([-180 180]),'offset', 0); % was 'offset',pi/2
             L5 = Link('d',0.1157,'a',0,'alpha',-pi/2,'qlim',deg2rad([-180 180]), 'offset',0);
             L6 = Link('d',0.09037,'a',0,'alpha',0,'qlim',deg2rad([-360 360]), 'offset', 0);
-            
+
             self.model = SerialLink([L1 L2 L3 L4 L5 L6],'name',name);
-            
+
             [self.openFaceData, self.openVertexData, self.openPlyData] = plyread('UTS_UR10Link6_RG6open.ply', 'tri');
             [self.closeFaceData, self.closeVertexData, self.closePlyData] = plyread('UTS_UR10Link6_RG6close.ply', 'tri');
         end
@@ -66,14 +67,14 @@ classdef UTS_UR10 < handle
             end
             self.model.faces{self.model.n + 1} = self.openFaceData;
             self.model.points{self.model.n + 1} = self.openVertexData;
-            
+
             % Display robot
             self.model.plot3d(zeros(1,self.model.n),'noarrow','workspace',self.workspace);
             if isempty(findobj(get(gca,'Children'),'Type','Light'))
                 camlight
             end
             self.model.delay = 0;
-            
+
             % Try to correctly colour the arm (if colours are in ply file data)
             for linkIndex = 0:self.model.n
                 handles = findobj('Tag', self.model.name);
@@ -89,7 +90,7 @@ classdef UTS_UR10 < handle
                 end
             end
         end
-        
+
         function SetGripperState(self, args)
             arguments
                 self;
@@ -97,7 +98,7 @@ classdef UTS_UR10 < handle
             end
             gripperVertexData = LinearInterp(self.openVertexData, self.closeVertexData, args.gripperState);
             gripperFaceData = LinearInterp(self.openFaceData, self.closeFaceData(1:end-4,:), args.gripperState);
-            
+
             self.model.points{self.model.n + 1} = gripperVertexData;
             self.model.faces{self.model.n + 1} = gripperFaceData;
             handles = findobj('Tag', self.model.name);
@@ -108,10 +109,14 @@ classdef UTS_UR10 < handle
             self.model.animate(self.model.getpos());
             drawnow();
         end
-        
+
         function endEffPose = GetEndEffPose(self)
             endEffPose = self.model.fkine(self.model.getpos());
             endEffPose = endEffPose * transl(0,0,self.toolOffset);
+        end
+
+        function goalPoseAdjusted = GetGoalPose(self, goalPose)
+            goalPoseAdjusted = goalPose * transl(0,0,-self.toolOffset);
         end
     end
 end
