@@ -12,7 +12,9 @@ classdef urCollisionDetection < handle
         qmatrix
         robot
         A
-        B 
+        B
+        centrePoints
+        radiis
         
     end
     methods
@@ -24,6 +26,9 @@ classdef urCollisionDetection < handle
             self.a_ur = [a_1 a_2 a_3 a_4 a_5 a_6];
             [alpha_1 alpha_2 alpha_3 alpha_4 alpha_5 alpha_6] = robot.model.links.alpha;
             self.alpha_ur = [alpha_1 alpha_2 alpha_3 alpha_4 alpha_5 alpha_6];
+            self.centrePoints = zeros(self.robot.model.n+1,3);
+            self.radiis = zeros(self.robot.model.n+1,3);
+            self.radiis(1,:) = [0.15,0.15,0.15];
             self.jointStatesCallback();
 %             self.imageSubcriber = rossubscriber('/camera/aligned_depth_to_color/image_raw_throttle',@self.imageCallback);
                         self.imageSubcriber = rossubscriber('/camera/aligned_depth_to_color/image_raw');
@@ -98,6 +103,10 @@ classdef urCollisionDetection < handle
             pcshow(self.pClouds_mask(:,:));
         end
         
+        function setEllipsoid(self,centreP_1, centreP_2, centreP_3, radi_1,radi_2,radi_3)
+            self.radiis(1,:) = [0.15,0.15,0.15];
+            
+        end
         function jointStatesCallback(self,~,msg)
             q0 = [pi, -pi / 2, pi / 2, -pi / 2, -pi / 2, 0];
            
