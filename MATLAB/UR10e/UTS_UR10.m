@@ -7,6 +7,7 @@ classdef UTS_UR10 < handle
         %> workspace
         workspace = [-3 3 -3 3 -0.91 4];
         toolOffset = 0.275354;
+        neutralQ;
     end
 
     properties (Access = private)
@@ -31,6 +32,7 @@ classdef UTS_UR10 < handle
             campos([-4.5 -2.5 3.0]);
 
             self.eStopStatus = 0;
+            self.neutralQ = [0,-pi/2,pi/2,-pi/2,-pi/2,pi];
         end
 
         %% GetUR10Robot
@@ -89,6 +91,7 @@ classdef UTS_UR10 < handle
                     continue;
                 end
             end
+            self.model.animate([0,-pi/2,pi/2,-pi/2,-pi/2,pi]);
         end
 
         function SetGripperState(self, args)
