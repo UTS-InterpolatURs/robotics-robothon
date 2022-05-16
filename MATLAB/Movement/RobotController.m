@@ -49,7 +49,7 @@ classdef RobotController< handle
             qMatrix = zeros(steps,6);
             t = 10;             % Total time (s)
             deltaT = steps*t;      % Control frequency
-            W = diag([1 1 1 0.1 0.1 0.1]);    % Weighting matrix for the velocity vector
+            W = diag([1 1 1 0.15 0.15 0.15]);    % Weighting matrix for the velocity vector
             if exist('velocityMask','var')
                 W = diag([velocityMask]);
             end
