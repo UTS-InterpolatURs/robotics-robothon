@@ -1,0 +1,39 @@
+function PickAndPlaceEthCable(robot, rc, tb)
+%PICKANDPLACEETHCABLE Summary of this function goes here
+%   Detailed explanation goes here
+
+
+robot.model.animate([0,-pi/2,pi/2,-pi/2,-pi/2,0]);
+
+startPose = tb.cable.GetPose();
+
+goalPose = robot.GlobalToEndEffPose(tb.cable.GetPose() * transl(0,0,0.1));
+
+q = rc.GenerateJointTrajectory(goalPose, 20);
+rc.ExecuteTrajectory(q);
+
+goalPose = robot.GlobalToEndEffPose(tb.cable.GetPose());
+
+q = rc.GenerateJointTrajectory(goalPose, 20);
+rc.ExecuteTrajectory(q);
+
+rc.CloseGripper;
+
+goalPose = robot.GlobalToEndEffPose(transl(0,0,0.1) * tb.cable.GetPose());
+
+q = rc.GenerateJointTrajectory(goalPose, 20);
+rc.ExecuteTrajectory(q, tb.cable);
+
+goalPose = robot.GlobalToEndEffPose(transl(0,0.045,0.1) * startPose);
+
+q = rc.GenerateJointTrajectory(goalPose, 20);
+rc.ExecuteTrajectory(q, tb.cable);
+
+goalPose = robot.GlobalToEndEffPose(transl(0,0.045,0) * startPose);
+
+q = rc.GenerateJointTrajectory(goalPose, 20);
+rc.ExecuteTrajectory(q, tb.cable);
+
+rc.OpenGripper;
+end
+

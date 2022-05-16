@@ -1,35 +1,35 @@
-function varargout = advanced_teach(varargin)
-% ADVANCED_TEACH MATLAB code for advanced_teach.fig
-%      ADVANCED_TEACH, by itself, creates a new ADVANCED_TEACH or raises the existing
+function varargout = RobothonSimGui(varargin)
+% ROBOTHONSIMGUI MATLAB code for RobothonSimGui.fig
+%      ROBOTHONSIMGUI, by itself, creates a new ROBOTHONSIMGUI or raises the existing
 %      singleton*.
 %
-%      H = ADVANCED_TEACH returns the handle to a new ADVANCED_TEACH or the handle to
+%      H = ROBOTHONSIMGUI returns the handle to a new ROBOTHONSIMGUI or the handle to
 %      the existing singleton*.
 %
-%      ADVANCED_TEACH('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in ADVANCED_TEACH.M with the given input arguments.
+%      ROBOTHONSIMGUI('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in ROBOTHONSIMGUI.M with the given input arguments.
 %
-%      ADVANCED_TEACH('Property','Value',...) creates a new ADVANCED_TEACH or raises the
+%      ROBOTHONSIMGUI('Property','Value',...) creates a new ROBOTHONSIMGUI or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before advanced_teach_OpeningFcn gets called.  An
+%      applied to the GUI before RobothonSimGui_OpeningFcn gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to advanced_teach_OpeningFcn via varargin.
+%      stop.  All inputs are passed to RobothonSimGui_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help advanced_teach
+% Edit the above text to modify the response to help RobothonSimGui
 
-% Last Modified by GUIDE v2.5 16-May-2022 12:22:26
+% Last Modified by GUIDE v2.5 16-May-2022 12:53:31
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
     'gui_Singleton',  gui_Singleton, ...
-    'gui_OpeningFcn', @advanced_teach_OpeningFcn, ...
-    'gui_OutputFcn',  @advanced_teach_OutputFcn, ...
+    'gui_OpeningFcn', @RobothonSimGui_OpeningFcn, ...
+    'gui_OutputFcn',  @RobothonSimGui_OutputFcn, ...
     'gui_LayoutFcn',  [] , ...
     'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -43,19 +43,21 @@ else
 end
 % End initialization code - DO NOT EDIT
 
-% --- Executes just before advanced_teach is made visible.
-function advanced_teach_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before RobothonSimGui is made visible.
+function RobothonSimGui_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to advanced_teach (see VARARGIN)
+% varargin   command line arguments to RobothonSimGui (see VARARGIN)
 
-% Choose default command line output for advanced_teach
+% Choose default command line output for RobothonSimGui
 
 handles.robot = varargin{1};
-if nargin == 5
-    handles.realBot = varargin{2};
+handles.robotController = varargin{2};
+handles.taskBoard = varargin{3};
+if nargin == 7
+    handles.realBot = varargin{4};
     handles.usingRealBot = true;
 else
     handles.usingRealBot = false;
@@ -67,15 +69,17 @@ set(handles.speed_slider, 'Min', 0);
 set(handles.speed_slider, 'Max', 1);
 set(handles.speed_slider, 'Value', 1);
 
+
+
 % Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes advanced_teach wait for user response (see UIRESUME)
+% UIWAIT makes RobothonSimGui wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = advanced_teach_OutputFcn(hObject, eventdata, handles)
+function varargout = RobothonSimGui_OutputFcn(hObject, eventdata, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -804,10 +808,10 @@ end
 handles.robot.SetGripperState("gripperState", 1)
 
 
-% --- Executes on button press in cable_function_callback.
-function cable_function_callback_Callback(hObject, eventdata, handles)
-% hObject    handle to cable_function_callback (see GCBO)
+% --- Executes on button press in cable_move_button.
+function cable_move_button_Callback(hObject, eventdata, handles)
+% hObject    handle to cable_move_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-PickAndPlaceEthCable(handles.robot)
+PickAndPlaceEthCable(handles.robot, handles.robotController, handles.taskBoard);
