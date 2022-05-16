@@ -114,19 +114,22 @@ def FuncLx(x,y,Z):
 
 
 def VServoing(target, obs, Z, lambda_):
-    Lx =  np.zeros((len(target)*2,6))
-    index = len(target)
-    count = 0
-    for i in range (0,index):
-        Lx1 = FuncLx(obs[i][0],obs[i][1],Z[i])
-        Lx[i+count] = Lx1[0][:]
-        Lx[i+1+count] = Lx1[1][:]
-        count = count + 1
-    e2 = obs - target
-    e = e2.flatten()
-    transpose_Lx = Lx.T
-    Lx2 = np.dot(np.linalg.inv(np.dot(transpose_Lx,Lx)),transpose_Lx)
-    Vc = -lambda_*np.dot(Lx2,e)
+    try:
+        Lx =  np.zeros((len(target)*2,6))
+        index = len(target)
+        count = 0
+        for i in range (0,index):
+            Lx1 = FuncLx(obs[i][0],obs[i][1],Z[i])
+            Lx[i+count] = Lx1[0][:]
+            Lx[i+1+count] = Lx1[1][:]
+            count = count + 1
+        e2 = obs - target
+        e = e2.flatten()
+        transpose_Lx = Lx.T
+        Lx2 = np.dot(np.linalg.inv(np.dot(transpose_Lx,Lx)),transpose_Lx)
+        Vc = -lambda_*np.dot(Lx2,e)
+    except:
+        Vc = np.zeros(6)
     return Vc
 
 
@@ -253,10 +256,13 @@ def callback(image, depth):
     y_obs = np.array([(obs_corner_1[1]-v0)/fdy,(obs_corner_2[1]-v0)/fdy,(obs_corner_3[1]-v0)/fdy,(obs_corner_4[1]-v0)/fdy]) 
 
     lambda_ = 0.1
-    Z = np.array([depthImage[obs_corner_1[1]][obs_corner_1[0]],depthImage[obs_corner_2[1]][obs_corner_2[0]],depthImage[obs_corner_3[1]][obs_corner_3[0]],depthImage[obs_corner_4[1]][obs_corner_4[0]]]) #change here
-    Target = np.array([[x_[0],y_[0]],[x_[1],y_[1]],[x_[2],y_[2]],[x_[3],y_[3]]])
-    Obs = np.array([[x_obs[0],y_obs[0]],[x_obs[1],y_obs[1]],[x_obs[2],y_obs[2]],[x_obs[3],y_obs[3]]])
-    Vc = VServoing(Target,Obs,Z,lambda_)
+    try:
+        Z = np.array([depthImage[obs_corner_1[1]][obs_corner_1[0]],depthImage[obs_corner_2[1]][obs_corner_2[0]],depthImage[obs_corner_3[1]][obs_corner_3[0]],depthImage[obs_corner_4[1]][obs_corner_4[0]]]) #change here
+        Target = np.array([[x_[0],y_[0]],[x_[1],y_[1]],[x_[2],y_[2]],[x_[3],y_[3]]])
+        Obs = np.array([[x_obs[0],y_obs[0]],[x_obs[1],y_obs[1]],[x_obs[2],y_obs[2]],[x_obs[3],y_obs[3]]])
+        Vc = VServoing(Target,Obs,Z,lambda_)
+    except:
+        Vc = np.zeros(6)
     for i in range(0,len(Vc)):
         if abs(Vc[i])<0.000001:
             Vc[i] = float(0)  
