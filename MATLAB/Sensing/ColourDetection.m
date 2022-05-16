@@ -78,6 +78,17 @@ classdef ColourDetection < handle
                     self.SliderBW_ = ( (self.I_(:,:,1) >= self.channel1Min_) & (self.I_(:,:,1) <= self.channel1Max_) ) & ...
                         (self.I_(:,:,2) >= self.channel2Min_ ) & (self.I_(:,:,2) <= self.channel2Max_) & ...
                         (self.I_(:,:,3) >= self.channel3Min_ ) & (self.I_(:,:,3) <= self.channel3Max_);
+                case 5
+                    
+                    self.channel1Min_ = 0.086;
+                    self.channel1Max_ = 0.222;
+                    self.channel2Min_ = 0.628;
+                    self.channel2Max_ = 1.000;
+                    self.channel3Min_ = 0.000;
+                    self.channel3Max_ = 1.000;
+                    self.SliderBW_ = ( (self.I_(:,:,1) >= self.channel1Min_) & (self.I_(:,:,1) <= self.channel1Max_) ) & ...
+                        (self.I_(:,:,2) >= self.channel2Min_ ) & (self.I_(:,:,2) <= self.channel2Max_) & ...
+                        (self.I_(:,:,3) >= self.channel3Min_ ) & (self.I_(:,:,3) <= self.channel3Max_);
             end
         end
         
@@ -95,6 +106,10 @@ classdef ColourDetection < handle
             self.colour_ = 4;
             SetColour(self);
         end
+        function SetYellow(self)
+            self.colour_ = 5;
+            SetColour(self);
+        end
         
         function [X,Y] = DrawBoundaryAndRectangle(self)
             [B, L] = bwboundaries(self.SliderBW_,'noholes');
@@ -105,8 +120,12 @@ classdef ColourDetection < handle
             end
             hold on
             
-            [X,Y] = DrawRect(L);
+            [X,Y] = DrawRect(L,1);
             
+        end
+        function [X,Y] = getImageCoordinate(self)
+            [B, L] = bwboundaries(self.SliderBW_,'noholes');
+            [X,Y] = DrawRect(L,2);
         end
     end
 end

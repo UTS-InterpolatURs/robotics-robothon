@@ -35,10 +35,10 @@ classdef TesturCollisionDetection < handle
             self.radiis(4,:) = [0.5,0.10,0.10];
             self.radiis(5,:) = [0.10,0.10,0.10];
             self.radiis(6,:) = [0.10,0.10,0.10];
-            self.radiis(7,:) = [0.10,0.10,0.10];
+            self.radiis(7,:) = [0.10,0.10,0.15];
             self.centrePoints(1,:) = [0,0,0];
             self.centrePoints(2,:) = [0,0,0];
-            self.centrePoints(3,:) = [self.radiis(3,1)/2,0,self.radiis(3,3)];
+            self.centrePoints(3,:) = [self.radiis(3,1)/2,0,self.radiis(3,3)*2];
             self.centrePoints(4,:) = [self.radiis(3,1)/2,0,0];
             self.centrePoints(5,:) = [0,0,0];
             self.centrePoints(6,:) = [0,0,0];
@@ -51,7 +51,7 @@ classdef TesturCollisionDetection < handle
 %                         self.imageCallback();
         end
         
-        function setEllipsoid(self)
+        function drawEllipsoid(self)
             X = zeros(21,21,self.robot.model.n+1);
             Y = zeros(21,21,self.robot.model.n+1);
             Z = zeros(21,21,self.robot.model.n+1);
@@ -64,11 +64,14 @@ classdef TesturCollisionDetection < handle
                 self.robot.model.faces{i} = delaunay(self.robot.model.points{i});
                 warning on;
             end
+            self.robot.model.plot3d(self.robot.model.getpos());
             
         end
         
         
-        function getPointClouds(self)
+        function generatePointClouds(self)
+            self.imageSubcriber = rossubscriber('/camera/aligned_depth_to_color/image_raw');
+            pause(0.4);
             msg_array = ImageStorage(self.rows,self.cols,self.num_image);
             depthImage = readImage(self.imageSubcriber.LatestMessage);
             msg_array.addDepthImage(double(depthImage),self.num_image);
@@ -82,22 +85,23 @@ classdef TesturCollisionDetection < handle
             X_cor(:,1) = pClouds(:,1,1);
             Y_cor(:,1) = pClouds(:,2,1);
             Z_w(:,1) = pClouds(:,3,1);
-            self.pClouds_mask = [X_cor(:), Y_cor(:), Z_w(:)]/1000; 
+            self.pClouds_mask = [X_cor(:), Y_cor(:), Z_w(:)]/1000;
+            tr = self.robot.model.fkine(self.robot.model.getpos()); %% change to camera pose
+            pointsAndOnes = [tr * [self.pClouds_mask,ones(size(self.pClouds_mask,1),1)]']';
+            self.pClouds_mask = pointsAndOnes(:,1:3);
+            self.setObstaclePoints(self.pClouds_mask);
+        end
+        function [pcs] = getPointClouds(self)
+            pcs = self.pClouds_mask;
         end
         function plotPointCloud(self)
             hold off
             pcshow(self.pClouds_mask(:,:));
         end
-        function combineObstaclePoints(self)
-            tr = self.robot.model.fkine(self.qmatrix(1,:));
-            pointsAndOnes = [tr * [self.pClouds_mask,ones(size(self.pClouds_mask,1),1)]']';
-            cubePoints = pointsAndOnes(:,1:3);
-            self.setObstaclePoints(cubePoints);
-        end
+        
         function [col_array] = checkCollision(self,qmatrix)
             self.setJointStates(qmatrix);
             col_array = zeros(length(self.qmatrix(:,1)),1);
-%             self.combineObstaclePoints();
             points2Check = self.getObstaclePoints();
             for q = 1 : length(self.qmatrix(:,1))
                 col_flag = false;
@@ -112,7 +116,7 @@ classdef TesturCollisionDetection < handle
                     algebraicDist = self.GetAlgebraicDist(updatedPoints, self.centrePoints(i,:), self.radiis(i,:));
                     pointsInside = find(algebraicDist < 1);
 %                     display(['There are ', num2str(size(pointsInside,1)),' points inside the ',num2str(i),'th ellipsoid']);
-                    if pointsInside > 10
+                    if pointsInside > 0
                         col_flag = true;
                     end
                 end

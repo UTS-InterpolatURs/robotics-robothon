@@ -2,19 +2,25 @@ clc;
 clear;
 clf;
 addpath '../UR10e/'
-addpath '../'
+addpath '../Envi/'
 steps = 50;
-obj = TesturCollisionDetection(UTS_UR10);
-obj.setEllipsoid();
-obj.robot.PlotAndColourRobot();
-points = plotCube();
-q0 = [pi, -pi / 2, pi / 2, -pi / 2, -pi / 2, 0];
-q1 = [pi/2, -pi / 2, pi / 2, -pi / 2, -pi / 2, 0];
-obj.robot.model.animate(q0);
-qmatrix = jtraj(q0,q1,steps);
+humanPose = transl(1,0.5,-0.323) * rpy2tr(pi/2,0,pi/2);
+human = Environment('Workbench.ply',humanPose);
 
+obj = TesturCollisionDetection(UTS_UR10);
+% obj.drawEllipsoid();
+% obj.robot.PlotAndColourRobot();
+% points = plotCube();
+human.PlotModel();
+[verts, face, facenorm] = human.GetModelVFNorm();
+q0 = [pi/2, -pi / 2, pi / 2, -pi / 2, -pi / 2, 0];
+% q1 = [pi/2, -pi / 2, pi / 2, -pi / 2, -pi / 2, 0];
+q1 = deg2rad([90,-45,90,-135,-90,0]);
+obj.robot.model.animate(q0);
+q2 = deg2rad([180,-45,90,-135,-90,0]);
+qmatrix = jtraj(q1,q2,steps);
 obj.setJointStates(qmatrix);
-obj.setObstaclePoints(points);
+obj.setObstaclePoints(verts);
 
 qcheck = obj.checkCollision(qmatrix);
 
