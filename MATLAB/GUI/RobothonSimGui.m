@@ -22,7 +22,7 @@ function varargout = RobothonSimGui(varargin)
 
 % Edit the above text to modify the response to help RobothonSimGui
 
-% Last Modified by GUIDE v2.5 16-May-2022 12:53:31
+% Last Modified by GUIDE v2.5 16-May-2022 15:29:27
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -55,7 +55,7 @@ function RobothonSimGui_OpeningFcn(hObject, eventdata, handles, varargin)
 
 handles.robot = varargin{1};
 handles.robotController = varargin{2};
-handles.taskBoard = varargin{3};
+handles.taskboard = varargin{3};
 if nargin == 7
     handles.realBot = varargin{4};
     handles.usingRealBot = true;
@@ -68,6 +68,7 @@ handles.eStop = 0;
 set(handles.speed_slider, 'Min', 0);
 set(handles.speed_slider, 'Max', 1);
 set(handles.speed_slider, 'Value', 1);
+set(handles.zoom_button, 'Value', 0);
 
 
 
@@ -781,6 +782,11 @@ function reset_button_Callback(hObject, eventdata, handles)
 
 if handles.usingRealBot == true
     handles.robot.model.animate(handles.realBot.current_joint_states.Position);
+else
+
+%     handles.taskboard = Taskboard(transl(-0.65,0,0) * trotz(pi/2));
+%     handles.taskboard.PlotTaskboard;
+
 end
 
 
@@ -814,4 +820,34 @@ function cable_move_button_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-PickAndPlaceEthCable(handles.robot, handles.robotController, handles.taskBoard);
+PickAndPlaceEthCable(handles.robot, handles.robotController, handles.taskboard);
+
+
+% --- Executes on button press in zoom_button.
+function zoom_button_Callback(hObject, eventdata, handles)
+% hObject    handle to zoom_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of zoom_button
+
+if (get(hObject,'Value') == 1)
+    figure(1);
+    tbPose = handles.taskboard.mainboard.GetPose;
+    p = tbPose(1:3,4);
+    axis ([p(1) - 0.2, p(1) + 0.2, p(2) - 0.2, p(2) + 0.2, p(3) - 0.2, p(3) + 0.5])
+    disp("focus view");
+
+else
+    figure(1);
+    axis tight
+end
+
+
+% --- Executes on button press in key_move_button.
+function key_move_button_Callback(hObject, eventdata, handles)
+% hObject    handle to key_move_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+PickAndPlaceKey(handles.robot, handles.robotController, handles.taskboard);
