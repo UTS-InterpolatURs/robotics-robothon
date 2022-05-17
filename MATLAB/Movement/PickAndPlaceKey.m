@@ -14,7 +14,7 @@ end
 
 goalPose = robot.GlobalToEndEffPose(tb.key.GetPose());
 
-q = rc.GenerateLinearTrajectory(goalPose, 20, [1,1,1,0,0,0]);
+q = rc.GenerateLinearTrajectory(goalPose, 20, [1,1,1,1,1,1]);
 if(rc.ExecuteTrajectory(q) == false)
     
     return;
@@ -24,7 +24,7 @@ end
 rc.CloseGripper(1000);
 
 q = rc.moveCartesian([0,0,0.1], 20);
-if(rc.ExecuteTrajectory(q) == false)
+if(rc.ExecuteTrajectory(q, tb.key) == false)
     
     return;
 
