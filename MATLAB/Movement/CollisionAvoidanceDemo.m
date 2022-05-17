@@ -3,7 +3,7 @@ function CollisionAvoidanceDemo(robot, rc)
 %   Detailed explanation goes here
 
 
-robot.model.animate([-1.9955   -2.2444   -1.8776   -0.5904    1.5708    0.3607]);
+robot.model.animate([-2.2043   -2.0461   -1.0667   -1.5996    1.5708    0.1519]);
 
 
 traj = rc.moveCartesian([1,0,0], 50);

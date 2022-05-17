@@ -920,10 +920,11 @@ function spawn_object_button_Callback(hObject, eventdata, handles)
 % hObject    handle to spawn_object_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+figure(1)
+hand = ModelGen('Envi/Hand.ply',transl(0,-0.65,0.4) * trotz(pi/2));
+hand.PlotModel;
 
-
-
-[v,f,n] = handles.taskboard.mainboard.GetModelVFNorm;
+[v,f,n] = hand.GetModelVFNorm;
 
 
 % points = plotCube();

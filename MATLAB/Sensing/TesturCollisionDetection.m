@@ -35,7 +35,7 @@ classdef TesturCollisionDetection < handle
             self.radiis(4,:) = [0.5,0.10,0.10];
             self.radiis(5,:) = [0.10,0.10,0.10];
             self.radiis(6,:) = [0.10,0.10,0.10];
-            self.radiis(7,:) = [0.10,0.10,0.15];
+            self.radiis(7,:) = [0.10,0.10,0.30];
             self.centrePoints(1,:) = [0,0,0];
             self.centrePoints(2,:) = [0,0,0];
             self.centrePoints(3,:) = [self.radiis(3,1)/2,0,self.radiis(3,3)*2];
