@@ -15,7 +15,7 @@ classdef ModelGen < handle
     % Public functions for usage
     methods
         % Class constructor
-        function self = Environment(modelName,pose)
+        function self = ModelGen(modelName,pose)
             self.SetPose(pose);
             self.modelName = modelName;
         end
