@@ -539,7 +539,9 @@ while handles.buttonDown
 
     currentQ = handles.robot.model.getpos();
     currentQ(1) = currentQ(1) - (0.02 * handles.speedScale);
-
+    if(abs(currentQ(1)) - abs(handles.robot.model.qlim(1,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -557,7 +559,9 @@ while handles.buttonDown
 
     currentQ = handles.robot.model.getpos();
     currentQ(2) = currentQ(2) - (0.02 * handles.speedScale);
-
+    if(abs(current(Q2)) - abs(handles.robot.model.qlim(2,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -576,7 +580,9 @@ while handles.buttonDown
 
     currentQ = handles.robot.model.getpos();
     currentQ(3) = currentQ(3) - (0.02 * handles.speedScale);
-
+    if(abs(currentQ(3)) - abs(handles.robot.model.qlim(3,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -596,7 +602,9 @@ while handles.buttonDown
 
     currentQ = handles.robot.model.getpos();
     currentQ(4) = currentQ(4) - (0.02 * handles.speedScale);
-
+    if(abs(currentQ(4)) - abs(handles.robot.model.qlim(4,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -615,7 +623,9 @@ while handles.buttonDown
 
     currentQ = handles.robot.model.getpos();
     currentQ(5) = currentQ(5) - (0.02 * handles.speedScale);
-
+    if(abs(currentQ(5)) - abs(handles.robot.model.qlim(5,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -632,7 +642,9 @@ function joint6_minus_ButtonDownFcn(hObject, eventdata, handles)
 while handles.buttonDown
     currentQ = handles.robot.model.getpos();
     currentQ(6) = currentQ(6) - (0.02 * handles.speedScale);
-
+    if(abs(currentQ(6)) - abs(handles.robot.model.qlim(6,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -649,7 +661,9 @@ function joint1_plus_ButtonDownFcn(hObject, eventdata, handles)
 while handles.buttonDown
     currentQ = handles.robot.model.getpos();
     currentQ(1) = currentQ(1) + (0.02 * handles.speedScale);
-
+    if(abs(currentQ(1)) - abs(handles.robot.model.qlim(1,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -667,7 +681,9 @@ while handles.buttonDown
 
     currentQ = handles.robot.model.getpos();
     currentQ(2) = currentQ(2) + (0.02 * handles.speedScale);
-
+    if(abs(currentQ(2)) - abs(handles.robot.model.qlim(2,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -685,7 +701,9 @@ while handles.buttonDown
 
     currentQ = handles.robot.model.getpos();
     currentQ(3) = currentQ(3) + (0.02 * handles.speedScale);
-
+    if(abs(currentQ(3)) - abs(handles.robot.model.qlim(3,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -702,7 +720,9 @@ function joint4_plus_ButtonDownFcn(hObject, eventdata, handles)
 while handles.buttonDown
     currentQ = handles.robot.model.getpos();
     currentQ(4) = currentQ(4) + (0.02 * handles.speedScale);
-
+    if(abs(currentQ(4)) - abs(handles.robot.model.qlim(4,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -719,7 +739,9 @@ function joint5_plus_ButtonDownFcn(hObject, eventdata, handles)
 while handles.buttonDown
     currentQ = handles.robot.model.getpos();
     currentQ(5) = currentQ(5) + (0.02 * handles.speedScale);
-
+    if(abs(currentQ(5)) - abs(handles.robot.model.qlim(5,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -737,7 +759,9 @@ while handles.buttonDown
 
     currentQ = handles.robot.model.getpos();
     currentQ(6) = currentQ(6) + (0.02 * handles.speedScale);
-
+    if(abs(currentQ(6)) - abs(handles.robot.model.qlim(6,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
