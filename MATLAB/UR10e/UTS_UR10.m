@@ -50,12 +50,12 @@ classdef UTS_UR10 < handle
             L3 = Link('d',0,'a',-0.5716,'alpha',0,'qlim', deg2rad([-180 180]), 'offset', 0);
             L4 = Link('d',0.16389,'a',0,'alpha',pi/2,'qlim',deg2rad([-180 180]),'offset', 0); % was 'offset',pi/2
             L5 = Link('d',0.1157,'a',0,'alpha',-pi/2,'qlim',deg2rad([-180 180]), 'offset',0);
-            L6 = Link('d',0.09037,'a',0,'alpha',0,'qlim',deg2rad([-360 360]), 'offset', (pi+pi/4));
+            L6 = Link('d',0.09037,'a',0,'alpha',0,'qlim',deg2rad([-360 360]), 'offset', 0); %(pi+pi/4)
 
             self.model = SerialLink([L1 L2 L3 L4 L5 L6],'name',name);
 
-            [self.openFaceData, self.openVertexData, self.openPlyData] = plyread('UTS_UR10Link6_RG6open.ply', 'tri');
-            [self.closeFaceData, self.closeVertexData, self.closePlyData] = plyread('UTS_UR10Link6_RG6close.ply', 'tri');
+            [self.openFaceData, self.openVertexData, self.openPlyData] = plyread('UTS_UR10Link6_GripperOpen.ply', 'tri');
+            [self.closeFaceData, self.closeVertexData, self.closePlyData] = plyread('UTS_UR10Link6_GripperClose.ply', 'tri');
         end
 
         %% PlotAndColourRobot
@@ -91,7 +91,8 @@ classdef UTS_UR10 < handle
                     continue;
                 end
             end
-            self.model.animate([0,-pi/2,-pi/2,-pi/2,pi/2,pi]);
+            self.model.animate([0,0,0,0,0,0]);
+%             self.model.animate([0,-pi/2,-pi/2,-pi/2,pi/2,pi]);
         end
 
         function SetGripperState(self, args)
@@ -100,7 +101,7 @@ classdef UTS_UR10 < handle
                 args.gripperState;
             end
             gripperVertexData = LinearInterp(self.openVertexData, self.closeVertexData, args.gripperState);
-            gripperFaceData = LinearInterp(self.openFaceData, self.closeFaceData(1:end-4,:), args.gripperState);
+            gripperFaceData = LinearInterp(self.openFaceData, self.closeFaceData, args.gripperState);
 
             self.model.points{self.model.n + 1} = gripperVertexData;
             self.model.faces{self.model.n + 1} = gripperFaceData;
