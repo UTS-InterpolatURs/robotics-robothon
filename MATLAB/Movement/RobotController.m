@@ -20,7 +20,10 @@ classdef RobotController< handle
                 self.realBot = realBot;
             end
         end
-        function qMatrix = GenerateJointTrajectory(self,goalPose,steps)
+        function qMatrix = GenerateJointTrajectory(self,goalPose,steps,jointMask)
+            if ~exist("jointMask", "var")
+                jointMask = [1,1,1,1,1,1];
+            end
             goalPoseAdjusted = self.robot.GetGoalPose(goalPose);
             robotQ = self.robot.model.getpos();
             goalQ = self.robot.model.ikcon(goalPoseAdjusted, robotQ);

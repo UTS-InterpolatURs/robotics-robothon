@@ -13,7 +13,7 @@ goalPose = robot.GlobalToEndEffPose(tb.key.GetPose());
 q = rc.GenerateLinearTrajectory(goalPose, 20, [1,1,1,0,0,0]);
 rc.ExecuteTrajectory(q);
 
-rc.CloseGripper;
+rc.CloseGripper(1000);
 
 q = rc.moveCartesian([0,0,0.1], 20);
 rc.ExecuteTrajectory(q, tb.key);
@@ -30,12 +30,12 @@ rc.ExecuteTrajectory(q, tb.key);
 
 goalPose = goalPose * trotz(pi/3);
 
-q = rc.GenerateLinearTrajectory(goalPose, 20, [0,0,0,0,0,0.5]);
+q = rc.GenerateJointTrajectory(goalPose, 20, [0,0,0,0,0,0.5]);
 rc.ExecuteTrajectory(q, tb.key);
 
 goalPose = goalPose * trotz(-pi/3);
 
-q = rc.GenerateLinearTrajectory(goalPose, 20,[0,0,0,0,0,0.5]);
+q = rc.GenerateJointTrajectory(goalPose, 20,[0,0,0,0,0,0.5]);
 rc.ExecuteTrajectory(q, tb.key);
 
 rc.OpenGripper;
