@@ -6,43 +6,75 @@ function PickAndPlaceKey(robot, rc, tb)
 goalPose = robot.GlobalToEndEffPose(tb.key.GetPose() * transl(0,0,0.2));
 
 q = rc.GenerateLinearTrajectory(goalPose, 20, [1,1,1,0,0,0]);
-rc.ExecuteTrajectory(q);
+if(rc.ExecuteTrajectory(q) == false)
+    
+    return;
+
+end
 
 goalPose = robot.GlobalToEndEffPose(tb.key.GetPose());
 
 q = rc.GenerateLinearTrajectory(goalPose, 20, [1,1,1,0,0,0]);
-rc.ExecuteTrajectory(q);
+if(rc.ExecuteTrajectory(q) == false)
+    
+    return;
+
+end
 
 rc.CloseGripper(1000);
 
 q = rc.moveCartesian([0,0,0.1], 20);
-rc.ExecuteTrajectory(q, tb.key);
+if(rc.ExecuteTrajectory(q) == false)
+    
+    return;
+
+end
 
 goalPose = robot.GlobalToEndEffPose(tb.GetGoalKeySwitch * transl(0,0,0.1) * trotz(pi/2));
 
 q = rc.GenerateJointTrajectory(goalPose, 20);
-rc.ExecuteTrajectory(q, tb.key);
+if(rc.ExecuteTrajectory(q, tb.key) == false)
+    
+    return;
+
+end
 
 goalPose = robot.GlobalToEndEffPose(tb.GetGoalKeySwitch * trotz(pi/2));
 
 q = rc.GenerateJointTrajectory(goalPose, 20);
-rc.ExecuteTrajectory(q, tb.key);
+if(rc.ExecuteTrajectory(q, tb.key) == false)
+    
+    return;
+
+end
 
 goalPose = goalPose * trotz(pi/3);
 
 q = rc.GenerateJointTrajectory(goalPose, 20, [0,0,0,0,0,0.5]);
-rc.ExecuteTrajectory(q, tb.key);
+if(rc.ExecuteTrajectory(q, tb.key) == false)
+    
+    return;
+
+end
 
 goalPose = goalPose * trotz(-pi/3);
 
 q = rc.GenerateJointTrajectory(goalPose, 20,[0,0,0,0,0,0.5]);
-rc.ExecuteTrajectory(q, tb.key);
+if(rc.ExecuteTrajectory(q, tb.key) == false)
+    
+    return;
+
+end
 
 rc.OpenGripper;
 
 
 q = rc.moveCartesian([0,0,0.2], 20);
-rc.ExecuteTrajectory(q);
+if(rc.ExecuteTrajectory(q) == false)
+    
+    return;
+
+end
 
 
 

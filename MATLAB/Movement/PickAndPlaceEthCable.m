@@ -6,34 +6,60 @@ function PickAndPlaceEthCable(robot, rc, tb)
 goalPose = robot.GlobalToEndEffPose(tb.cable.GetPose() * transl(0,0,0.2));
 
 q = rc.GenerateLinearTrajectory(goalPose, 20);
-rc.ExecuteTrajectory(q);
+if(rc.ExecuteTrajectory(q) == false)
+
+    return;
+
+end
+
 
 goalPose = robot.GlobalToEndEffPose(tb.cable.GetPose());
 
 q = rc.GenerateJointTrajectory(goalPose, 20);
-rc.ExecuteTrajectory(q);
+
+if(rc.ExecuteTrajectory(q) == false)
+    
+    return;
+
+end
 
 rc.CloseGripper(1000);
 
 goalPose = robot.GlobalToEndEffPose(transl(0,0,0.1) * tb.cable.GetPose());
 
 q = rc.GenerateJointTrajectory(goalPose, 20);
-rc.ExecuteTrajectory(q, tb.cable);
+if(rc.ExecuteTrajectory(q, tb.cable) == false)
+    
+    return;
+
+end
 
 goalPose = robot.GlobalToEndEffPose(tb.GetGoalCableSlot2 * transl(0,0,0.1));
 
 q = rc.GenerateJointTrajectory(goalPose, 20);
-rc.ExecuteTrajectory(q, tb.cable);
+if(rc.ExecuteTrajectory(q, tb.cable) == false)
+    
+    return;
+
+end
 
 goalPose = robot.GlobalToEndEffPose(tb.GetGoalCableSlot2);
 
 q = rc.GenerateJointTrajectory(goalPose, 20);
-rc.ExecuteTrajectory(q, tb.cable);
+if(rc.ExecuteTrajectory(q, tb.cable) == false)
+    
+    return;
+
+end
 
 rc.OpenGripper;
 
 
 q = rc.moveCartesian([0,0,0.2], 20);
-rc.ExecuteTrajectory(q);
+if(rc.ExecuteTrajectory(q) == false)
+    
+    return;
+
+end
 end
 
