@@ -22,7 +22,7 @@ function varargout = RobothonSimGui(varargin)
 
 % Edit the above text to modify the response to help RobothonSimGui
 
-% Last Modified by GUIDE v2.5 16-May-2022 15:29:27
+% Last Modified by GUIDE v2.5 17-May-2022 15:27:45
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -786,8 +786,8 @@ if handles.usingRealBot == true
     handles.robot.model.animate(handles.realBot.current_joint_states.Position);
 else
 
-%     handles.taskboard = Taskboard(transl(-0.65,0,0) * trotz(pi/2));
-%     handles.taskboard.PlotTaskboard;
+handles.taskboard.ResetComponents();
+handles.robot.model.animate(handles.robot.neutralQ);
 
 end
 
@@ -853,3 +853,20 @@ function key_move_button_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 PickAndPlaceKey(handles.robot, handles.robotController, handles.taskboard);
+
+
+% --- Executes on button press in check_collision_button.
+function check_collision_button_Callback(hObject, eventdata, handles)
+% hObject    handle to check_collision_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of check_collision_button
+
+if (get(hObject,'Value') == 1)
+    handles.robotController.checkCollisionFlag = true;
+
+else
+    handles.robotController.checkCollisionFlag = false;
+
+end

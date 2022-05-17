@@ -39,6 +39,7 @@ classdef Environment < handle
                 , 'FaceVertexCData', vertexColours, 'EdgeColor', 'interp', 'EdgeLighting','flat');
             self.poseUpdate = [self.pose * [self.enVertices,ones(self.vertexCount,1)]']';
             self.enMesh.Vertices = self.poseUpdate(:,1:3);
+
             drawnow();
         end
         
@@ -51,7 +52,7 @@ classdef Environment < handle
         
         % Function for getting model vertices, face, face normals
         function [vertices,face,faceNormals] = GetModelVFNorm(self)
-            vertices = self.vertices;
+            vertices = self.enMesh.Vertices;
             face = self.face;
             
             faceNormals = zeros(size(face,1),3);
