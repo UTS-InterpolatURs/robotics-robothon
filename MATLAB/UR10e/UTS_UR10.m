@@ -97,8 +97,16 @@ classdef UTS_UR10 < handle
                 self;
                 args.gripperState;
             end
+%             if (args.gripperState == 0)
+%                 gripperVertexData = self.openVertexData;
+%                 gripperFaceData = self.openFaceData;
+%             elseif (args.gripperState == 1)
+%                 gripperVertexData = self.closeVertexData;
+%                 gripperFaceData = self.closeFaceData;
+%             end
+                        
             gripperVertexData = LinearInterp(self.openVertexData, self.closeVertexData, args.gripperState);
-            gripperFaceData = LinearInterp(self.openFaceData, self.closeFaceData, args.gripperState);
+            gripperFaceData = LinearInterp(self.openFaceData, self.closeFaceData(1:end-4,:), args.gripperState);
 
             self.model.points{self.model.n + 1} = gripperVertexData;
             self.model.faces{self.model.n + 1} = gripperFaceData;
