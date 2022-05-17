@@ -22,7 +22,7 @@ function varargout = RobothonSimGui(varargin)
 
 % Edit the above text to modify the response to help RobothonSimGui
 
-% Last Modified by GUIDE v2.5 17-May-2022 20:50:51
+% Last Modified by GUIDE v2.5 17-May-2022 21:13:08
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -962,3 +962,11 @@ handles.robotController.collisionComputer.ClearObstaclePoints();
 [v,f,n] = handles.hand.GetModelVFNorm;
 handles.robotController.collisionComputer.setObstaclePoints(v);
 
+
+% --- Executes on button press in delete_hand_button.
+function delete_hand_button_Callback(hObject, eventdata, handles)
+% hObject    handle to delete_hand_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.hand.DeleteModel;
+handles.robotController.collisionComputer.ClearObstaclePoints();

@@ -7,7 +7,7 @@ classdef ModelGen < handle
         enMesh;
         enVertices;
         modelName;
-        
+
         vertices;
         face;
         faceNormals;
@@ -42,19 +42,25 @@ classdef ModelGen < handle
 
             drawnow();
         end
-        
+
         function MoveModel(self,goalPose)
             self.SetPose(goalPose);
             self.poseUpdate = [self.pose * [self.enVertices,ones(self.vertexCount,1)]']';
             self.enMesh.Vertices = self.poseUpdate(:,1:3);
             drawnow();
         end
-        
+
+        function DeleteModel(self)
+            try delete(self.enMesh)
+            end
+            drawnow();
+        end
+
         % Function for getting model vertices, face, face normals
         function [vertices,face,faceNormals] = GetModelVFNorm(self)
             vertices = self.enMesh.Vertices;
             face = self.face;
-            
+
             faceNormals = zeros(size(face,1),3);
             for faceIndex = 1:size(face,1)
                 v1 = vertices(face(faceIndex,1)',:);
@@ -62,6 +68,8 @@ classdef ModelGen < handle
                 v3 = vertices(face(faceIndex,3)',:);
                 faceNormals(faceIndex,:) = unit(cross(v2-v1,v3-v1));
             end
+
+
         end
     end
 end

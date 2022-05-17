@@ -9,6 +9,9 @@ wbPose = transl(0,-0.8,-0.423) * rpy2tr(0,0,0);
 % wbPose = transl(-0.06,-0.8,-0.423) * rpy2tr(0,0,0); % <-- Lab Testing
 workbench = ModelGen('Envi/Workbench.ply', wbPose); 
 workbench.PlotModel();
+
+fence = ModelGen('Envi/Fences.ply', transl(0,0,0));
+fence.PlotModel;
 collisionComputer = TesturCollisionDetection(robot);
 
 % realBot = urRosWrapper(robot);
