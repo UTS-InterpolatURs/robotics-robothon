@@ -22,7 +22,7 @@ function varargout = RobothonSimGui(varargin)
 
 % Edit the above text to modify the response to help RobothonSimGui
 
-% Last Modified by GUIDE v2.5 17-May-2022 15:27:45
+% Last Modified by GUIDE v2.5 17-May-2022 17:55:46
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -913,3 +913,26 @@ else
     handles.robotController.checkCollisionFlag = false;
 
 end
+
+
+% --- Executes on button press in spawn_object_button.
+function spawn_object_button_Callback(hObject, eventdata, handles)
+% hObject    handle to spawn_object_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+[v,f,n] = handles.taskboard.mainboard.GetModelVFNorm;
+
+
+% points = plotCube();
+handles.robotController.collisionComputer.setObstaclePoints(v);
+
+
+% --- Executes on button press in collisaion_avoidance_button.
+function collisaion_avoidance_button_Callback(hObject, eventdata, handles)
+% hObject    handle to collisaion_avoidance_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+CollisionAvoidanceDemo(handles.robot, handles.robotController);

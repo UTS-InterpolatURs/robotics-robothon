@@ -161,7 +161,9 @@ classdef RobotController< handle
                 end
 
                 if(self.checkCollisionFlag == true)
-                    result = self.collisionComputer.checkCollision(qMatrix(i,:));
+                    result = false;
+                    try result = self.collisionComputer.checkCollision(qMatrix(i,:));
+                    end
 
                     if(result == true)
                         disp("COLLISION IMMINENT - COLLISION AVOIDANCE ACTIVATED!")
