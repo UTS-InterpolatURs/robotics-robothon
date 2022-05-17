@@ -6,7 +6,7 @@ function newq  = GUIRMRC(xdot, robot)
     qdot = inv(J)*xdot';
     newq = q + (0.01*qdot');
     J2 = robot.model.jacob0(newq);
-    if sqrt(det(J2*J2')) < 0.02
+    if sqrt(det(J2*J2')) < 0.05
         disp("Robot is close to singularity - Please use joint controls to move robot");
         disp("manipuability: ");
         disp(sqrt(det(J2*J2')));

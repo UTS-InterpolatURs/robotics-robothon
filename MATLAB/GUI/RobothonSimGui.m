@@ -22,7 +22,7 @@ function varargout = RobothonSimGui(varargin)
 
 % Edit the above text to modify the response to help RobothonSimGui
 
-% Last Modified by GUIDE v2.5 17-May-2022 17:55:46
+% Last Modified by GUIDE v2.5 17-May-2022 21:13:08
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -56,6 +56,7 @@ function RobothonSimGui_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.robot = varargin{1};
 handles.robotController = varargin{2};
 handles.taskboard = varargin{3};
+handles.hand = ModelGen('Envi/Hand.ply',transl(0,-1,0.4) * trotz(pi/2));
 if nargin == 7
     handles.realBot = varargin{4};
     handles.usingRealBot = true;
@@ -69,6 +70,7 @@ set(handles.speed_slider, 'Min', 0);
 set(handles.speed_slider, 'Max', 1);
 set(handles.speed_slider, 'Value', 1);
 set(handles.zoom_button, 'Value', 0);
+set(handles.e_stop, 'Value', 0);
 set(handles.check_collision_button, 'Value', 0);
 
 
@@ -538,7 +540,9 @@ while handles.buttonDown
 
     currentQ = handles.robot.model.getpos();
     currentQ(1) = currentQ(1) - (0.02 * handles.speedScale);
-
+    if(abs(currentQ(1)) - abs(handles.robot.model.qlim(1,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -556,7 +560,9 @@ while handles.buttonDown
 
     currentQ = handles.robot.model.getpos();
     currentQ(2) = currentQ(2) - (0.02 * handles.speedScale);
-
+    if(abs(current(Q2)) - abs(handles.robot.model.qlim(2,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -575,7 +581,9 @@ while handles.buttonDown
 
     currentQ = handles.robot.model.getpos();
     currentQ(3) = currentQ(3) - (0.02 * handles.speedScale);
-
+    if(abs(currentQ(3)) - abs(handles.robot.model.qlim(3,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -595,7 +603,9 @@ while handles.buttonDown
 
     currentQ = handles.robot.model.getpos();
     currentQ(4) = currentQ(4) - (0.02 * handles.speedScale);
-
+    if(abs(currentQ(4)) - abs(handles.robot.model.qlim(4,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -614,7 +624,9 @@ while handles.buttonDown
 
     currentQ = handles.robot.model.getpos();
     currentQ(5) = currentQ(5) - (0.02 * handles.speedScale);
-
+    if(abs(currentQ(5)) - abs(handles.robot.model.qlim(5,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -631,7 +643,9 @@ function joint6_minus_ButtonDownFcn(hObject, eventdata, handles)
 while handles.buttonDown
     currentQ = handles.robot.model.getpos();
     currentQ(6) = currentQ(6) - (0.02 * handles.speedScale);
-
+    if(abs(currentQ(6)) - abs(handles.robot.model.qlim(6,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -648,7 +662,9 @@ function joint1_plus_ButtonDownFcn(hObject, eventdata, handles)
 while handles.buttonDown
     currentQ = handles.robot.model.getpos();
     currentQ(1) = currentQ(1) + (0.02 * handles.speedScale);
-
+    if(abs(currentQ(1)) - abs(handles.robot.model.qlim(1,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -666,7 +682,9 @@ while handles.buttonDown
 
     currentQ = handles.robot.model.getpos();
     currentQ(2) = currentQ(2) + (0.02 * handles.speedScale);
-
+    if(abs(currentQ(2)) - abs(handles.robot.model.qlim(2,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -684,7 +702,9 @@ while handles.buttonDown
 
     currentQ = handles.robot.model.getpos();
     currentQ(3) = currentQ(3) + (0.02 * handles.speedScale);
-
+    if(abs(currentQ(3)) - abs(handles.robot.model.qlim(3,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -701,7 +721,9 @@ function joint4_plus_ButtonDownFcn(hObject, eventdata, handles)
 while handles.buttonDown
     currentQ = handles.robot.model.getpos();
     currentQ(4) = currentQ(4) + (0.02 * handles.speedScale);
-
+    if(abs(currentQ(4)) - abs(handles.robot.model.qlim(4,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -718,7 +740,9 @@ function joint5_plus_ButtonDownFcn(hObject, eventdata, handles)
 while handles.buttonDown
     currentQ = handles.robot.model.getpos();
     currentQ(5) = currentQ(5) + (0.02 * handles.speedScale);
-
+    if(abs(currentQ(5)) - abs(handles.robot.model.qlim(5,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -736,7 +760,9 @@ while handles.buttonDown
 
     currentQ = handles.robot.model.getpos();
     currentQ(6) = currentQ(6) + (0.02 * handles.speedScale);
-
+    if(abs(currentQ(6)) - abs(handles.robot.model.qlim(6,1)) >= 0)
+        return
+    end
     handles.robot.model.animate(currentQ);
     drawnow();
     handles = guidata(hObject);
@@ -774,12 +800,18 @@ function start_button_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
-if (handles.eStop == 1)
+if (handles.eStop == 1 && handles.e_stop.Value == 0)
     handles.eStop = 0;
     handles.robot.eStopStatus = 0;
     guidata(hObject,handles);
 
 end
+
+if(handles.buttonDown == 0)
+    disp("Please Release E-Stop");
+        return;
+end
+
 
 
 
@@ -920,13 +952,11 @@ function spawn_object_button_Callback(hObject, eventdata, handles)
 % hObject    handle to spawn_object_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+figure(1)
 
+handles.hand.PlotModel;
+[v,f,n] = handles.hand.GetModelVFNorm;
 
-
-[v,f,n] = handles.taskboard.mainboard.GetModelVFNorm;
-
-
-% points = plotCube();
 handles.robotController.collisionComputer.setObstaclePoints(v);
 
 
@@ -936,3 +966,38 @@ function collisaion_avoidance_button_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 CollisionAvoidanceDemo(handles.robot, handles.robotController);
+
+
+% --- Executes on button press in hand_forward_button.
+function hand_forward_button_Callback(hObject, eventdata, handles)
+% hObject    handle to hand_forward_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+currentPose = handles.hand.GetPose;
+handles.hand.MoveModel(currentPose * transl(0.2,0,0));
+
+handles.robotController.collisionComputer.ClearObstaclePoints();
+[v,f,n] = handles.hand.GetModelVFNorm;
+handles.robotController.collisionComputer.setObstaclePoints(v);
+
+% --- Executes on button press in hand_backward_button.
+function hand_backward_button_Callback(hObject, eventdata, handles)
+% hObject    handle to hand_backward_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+currentPose = handles.hand.GetPose;
+handles.hand.MoveModel(currentPose * transl(-0.2,0,0));
+
+handles.robotController.collisionComputer.ClearObstaclePoints();
+[v,f,n] = handles.hand.GetModelVFNorm;
+handles.robotController.collisionComputer.setObstaclePoints(v);
+
+
+% --- Executes on button press in delete_hand_button.
+function delete_hand_button_Callback(hObject, eventdata, handles)
+% hObject    handle to delete_hand_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.hand.DeleteModel;
+handles.robotController.collisionComputer.ClearObstaclePoints();
