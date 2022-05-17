@@ -1,37 +1,37 @@
-function varargout = advanced_teach(varargin)
-% ADVANCED_TEACH MATLAB code for advanced_teach.fig
-%      ADVANCED_TEACH, by itself, creates a new ADVANCED_TEACH or raises the existing
+function varargout = RobothonSimGui(varargin)
+% ROBOTHONSIMGUI MATLAB code for RobothonSimGui.fig
+%      ROBOTHONSIMGUI, by itself, creates a new ROBOTHONSIMGUI or raises the existing
 %      singleton*.
 %
-%      H = ADVANCED_TEACH returns the handle to a new ADVANCED_TEACH or the handle to
+%      H = ROBOTHONSIMGUI returns the handle to a new ROBOTHONSIMGUI or the handle to
 %      the existing singleton*.
 %
-%      ADVANCED_TEACH('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in ADVANCED_TEACH.M with the given input arguments.
+%      ROBOTHONSIMGUI('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in ROBOTHONSIMGUI.M with the given input arguments.
 %
-%      ADVANCED_TEACH('Property','Value',...) creates a new ADVANCED_TEACH or raises the
+%      ROBOTHONSIMGUI('Property','Value',...) creates a new ROBOTHONSIMGUI or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before advanced_teach_OpeningFcn gets called.  An
+%      applied to the GUI before RobothonSimGui_OpeningFcn gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to advanced_teach_OpeningFcn via varargin.
+%      stop.  All inputs are passed to RobothonSimGui_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help advanced_teach
+% Edit the above text to modify the response to help RobothonSimGui
 
-% Last Modified by GUIDE v2.5 28-Apr-2022 20:29:38
+% Last Modified by GUIDE v2.5 16-May-2022 15:29:27
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @advanced_teach_OpeningFcn, ...
-                   'gui_OutputFcn',  @advanced_teach_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
+    'gui_Singleton',  gui_Singleton, ...
+    'gui_OpeningFcn', @RobothonSimGui_OpeningFcn, ...
+    'gui_OutputFcn',  @RobothonSimGui_OutputFcn, ...
+    'gui_LayoutFcn',  [] , ...
+    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
     gui_State.gui_Callback = str2func(varargin{1});
 end
@@ -43,32 +43,44 @@ else
 end
 % End initialization code - DO NOT EDIT
 
-% --- Executes just before advanced_teach is made visible.
-function advanced_teach_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before RobothonSimGui is made visible.
+function RobothonSimGui_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to advanced_teach (see VARARGIN)
+% varargin   command line arguments to RobothonSimGui (see VARARGIN)
 
-% Choose default command line output for advanced_teach
+% Choose default command line output for RobothonSimGui
 
 handles.robot = varargin{1};
+handles.robotController = varargin{2};
+handles.taskboard = varargin{3};
+if nargin == 7
+    handles.realBot = varargin{4};
+    handles.usingRealBot = true;
+else
+    handles.usingRealBot = false;
+end
 handles.speedScale = 1;
 handles.buttonDown = 0;
+handles.eStop = 0;
 set(handles.speed_slider, 'Min', 0);
 set(handles.speed_slider, 'Max', 1);
 set(handles.speed_slider, 'Value', 1);
+set(handles.zoom_button, 'Value', 0);
+
+
 
 % Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes advanced_teach wait for user response (see UIRESUME)
+% UIWAIT makes RobothonSimGui wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = advanced_teach_OutputFcn(hObject, eventdata, handles) 
+function varargout = RobothonSimGui_OutputFcn(hObject, eventdata, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -97,7 +109,12 @@ function figure1_WindowButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-handles.buttonDown = 1;
+if(handles.eStop == 0)
+    handles.buttonDown = 1;
+else
+    handles.buttonDown = 0;
+end
+
 guidata(hObject,handles);
 
 
@@ -108,7 +125,6 @@ function z_plus_button_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
-
 % --- If Enable == 'on', executes on mouse press in 5 pixel border.
 % --- Otherwise, executes on mouse press in 5 pixel border or over z_plus_button.
 function z_plus_button_ButtonDownFcn(hObject, eventdata, handles)
@@ -116,29 +132,31 @@ function z_plus_button_ButtonDownFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 while handles.buttonDown
-handles = guidata(hObject);
-     %tr = handles.robot.model.fkine(handles.robot.model.getpos());
-%     newtr = transl(0,0,0.01) * tr;
-%     xdot = (newtr - tr)/0.05;
+    %     if handles.usingRealBot == true
+    %         handles.robot.model.animate(handles.realBot.current_joint_states.Position);
+    %     end
+    guidata(hObject,handles);
+    %tr = handles.robot.model.fkine(handles.robot.model.getpos());
+    %     newtr = transl(0,0,0.01) * tr;
+    %     xdot = (newtr - tr)/0.05;
     xdot = [0,0,(1*handles.speedScale),0,0,0];
-    q = handles.robot.model.getpos();
-    J = handles.robot.model.jacob0(q);
-    qdot = inv(J)*xdot';
-    newq = q + (0.01*qdot');
-    J2 = handles.robot.model.jacob0(newq);
-    if sqrt(det(J2*J2')) < 0.01
-        disp("Robot is close to singularity - Please use joint controls to move robot");
-        disp("manipuability: ");
-        disp(sqrt(det(J2*J2')));
-        break;
+    newq = GUIRMRC(xdot, handles.robot);
+    if handles.usingRealBot == true
+        test = isalmost(handles.robot.model.getpos(),handles.realBot.current_joint_states.Position, 0.01);
+        if all(test) == 0
+            disp('Start of Traj does not match current robot position, please press reset button to reset sim');
+            return
+        end
+        robotq = [handles.realBot.current_joint_states.Position; newq];
+        handles.realBot.sendJointTrajectory(robotq);
     end
-
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.1);
+    %pause(0.01);
 
-  
-    
+
+    handles = guidata(hObject);
+
 end
 
 
@@ -150,8 +168,8 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 delete(hObject);
-    
- 
+
+
 
 
 % --- Executes on button press in z_minus_button.
@@ -169,29 +187,31 @@ function z_minus_button_ButtonDownFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 while handles.buttonDown
-handles = guidata(hObject);
-   
-%     tr = handles.robot.model.fkine(handles.robot.model.getpos());
-%     newtr = transl(0,0,-0.01) * tr;
-%     xdot = (newtr - tr)/0.05;
+
+
+    %     tr = handles.robot.model.fkine(handles.robot.model.getpos());
+    %     newtr = transl(0,0,-0.01) * tr;
+    %     xdot = (newtr - tr)/0.05;
     xdot = [0,0,(-1*handles.speedScale),0,0,0];
-    q = handles.robot.model.getpos();
-    J = handles.robot.model.jacob0(q);
-    qdot = inv(J)*xdot';
-    
-    newq = q + (0.01*qdot');
-    J2 = handles.robot.model.jacob0(newq);
-    if sqrt(det(J2*J2')) < 0.01
-        disp("Robot is close to singularity - Please use joint controls to move robot");
-        disp("manipuability: ");
-        disp(sqrt(det(J2*J2')));
-        break;
+    newq = GUIRMRC(xdot, handles.robot);
+
+
+
+    if handles.usingRealBot == true
+        test = isalmost(handles.robot.model.getpos(),handles.realBot.current_joint_states.Position, 0.1);
+        if all(test) == 0
+            disp('Start of Traj does not match current robot position, please press reset button to reset sim');
+            return
+        end
+        robotq = [handles.realBot.current_joint_states.Position; newq];
+        handles.realBot.sendJointTrajectory(robotq);
     end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.1);
-disp('down');
-    
+    pause(0.01);
+
+
+    handles = guidata(hObject);
 end
 
 
@@ -233,29 +253,31 @@ function x_plus_button_ButtonDownFcn(hObject, eventdata, handles)
 
 
 while handles.buttonDown
-handles = guidata(hObject);
-     %tr = handles.robot.model.fkine(handles.robot.model.getpos());
-%     newtr = transl(0,0,0.01) * tr;
-%     xdot = (newtr - tr)/0.05;
-    xdot = [(1*handles.speedScale),0,0,0,0,0];
-    q = handles.robot.model.getpos();
-    J = handles.robot.model.jacob0(q);
-    qdot = inv(J)*xdot';
-    newq = q + (0.01*qdot');
-    J2 = handles.robot.model.jacob0(newq);
-    if sqrt(det(J2*J2')) < 0.01
-        disp("Robot is close to singularity - Please use joint controls to move robot");
-        disp("manipuability: ");
-        disp(sqrt(det(J2*J2')));
-        break;
-    end
 
+    %tr = handles.robot.model.fkine(handles.robot.model.getpos());
+    %     newtr = transl(0,0,0.01) * tr;
+    %     xdot = (newtr - tr)/0.05;
+    xdot = [(1*handles.speedScale),0,0,0,0,0];
+    newq = GUIRMRC(xdot, handles.robot);
+
+
+
+    if handles.usingRealBot == true
+        test = isalmost(handles.robot.model.getpos(),handles.realBot.current_joint_states.Position, 0.1);
+        if all(test) == 0
+            disp('Start of Traj does not match current robot position, please press reset button to reset sim');
+            return
+        end
+        robotq = [handles.realBot.current_joint_states.Position; newq];
+        handles.realBot.sendJointTrajectory(robotq);
+    end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.1);
+    pause(0.01);
 
-  
-    
+
+    handles = guidata(hObject);
+
 end
 
 
@@ -269,29 +291,31 @@ function x_minus_button_ButtonDownFcn(hObject, eventdata, handles)
 
 
 while handles.buttonDown
-handles = guidata(hObject);
-     %tr = handles.robot.model.fkine(handles.robot.model.getpos());
-%     newtr = transl(0,0,0.01) * tr;
-%     xdot = (newtr - tr)/0.05;
-    xdot = [(-1*handles.speedScale),0,0,0,0,0];
-    q = handles.robot.model.getpos();
-    J = handles.robot.model.jacob0(q);
-    qdot = inv(J)*xdot';
-    newq = q + (0.01*qdot');
-    J2 = handles.robot.model.jacob0(newq);
-    if sqrt(det(J2*J2')) < 0.01
-        disp("Robot is close to singularity - Please use joint controls to move robot");
-        disp("manipuability: ");
-        disp(sqrt(det(J2*J2')));
-        break;
-    end
 
+    %tr = handles.robot.model.fkine(handles.robot.model.getpos());
+    %     newtr = transl(0,0,0.01) * tr;
+    %     xdot = (newtr - tr)/0.05;
+    xdot = [(-1*handles.speedScale),0,0,0,0,0];
+    newq = GUIRMRC(xdot, handles.robot);
+
+
+
+    if handles.usingRealBot == true
+        test = isalmost(handles.robot.model.getpos(),handles.realBot.current_joint_states.Position, 0.1);
+        if all(test) == 0
+            disp('Start of Traj does not match current robot position, please press reset button to reset sim');
+            return
+        end
+        robotq = [handles.realBot.current_joint_states.Position; newq];
+        handles.realBot.sendJointTrajectory(robotq);
+    end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.1);
+    pause(0.01);
 
-  
-    
+
+    handles = guidata(hObject);
+
 end
 
 
@@ -306,29 +330,31 @@ function y_minus_button_ButtonDownFcn(hObject, eventdata, handles)
 
 
 while handles.buttonDown
-handles = guidata(hObject);
-     %tr = handles.robot.model.fkine(handles.robot.model.getpos());
-%     newtr = transl(0,0,0.01) * tr;
-%     xdot = (newtr - tr)/0.05;
-    xdot = [0,(-1*handles.speedScale),0,0,0,0];
-    q = handles.robot.model.getpos();
-    J = handles.robot.model.jacob0(q);
-    qdot = inv(J)*xdot';
-    newq = q + (0.01*qdot');
-    J2 = handles.robot.model.jacob0(newq);
-    if sqrt(det(J2*J2')) < 0.01
-        disp("Robot is close to singularity - Please use joint controls to move robot");
-        disp("manipuability: ");
-        disp(sqrt(det(J2*J2')));
-        break;
-    end
 
+    %tr = handles.robot.model.fkine(handles.robot.model.getpos());
+    %     newtr = transl(0,0,0.01) * tr;
+    %     xdot = (newtr - tr)/0.05;
+    xdot = [0,(-1*handles.speedScale),0,0,0,0];
+    newq = GUIRMRC(xdot, handles.robot);
+
+
+
+    if handles.usingRealBot == true
+        test = isalmost(handles.robot.model.getpos(),handles.realBot.current_joint_states.Position, 0.1);
+        if all(test) == 0
+            disp('Start of Traj does not match current robot position, please press reset button to reset sim');
+            return
+        end
+        robotq = [handles.realBot.current_joint_states.Position; newq];
+        handles.realBot.sendJointTrajectory(robotq);
+    end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.1);
+    pause(0.01);
 
-  
-    
+
+    handles = guidata(hObject);
+
 end
 
 
@@ -343,29 +369,33 @@ function y_plus_button_ButtonDownFcn(hObject, eventdata, handles)
 
 
 while handles.buttonDown
-handles = guidata(hObject);
-     %tr = handles.robot.model.fkine(handles.robot.model.getpos());
-%     newtr = transl(0,0,0.01) * tr;
-%     xdot = (newtr - tr)/0.05;
-    xdot = [0,(1*handles.speedScale),0,0,0,0];
-    q = handles.robot.model.getpos();
-    J = handles.robot.model.jacob0(q);
-    qdot = inv(J)*xdot';
-    newq = q + (0.01*qdot');
-    J2 = handles.robot.model.jacob0(newq);
-    if sqrt(det(J2*J2')) < 0.01
-        disp("Robot is close to singularity - Please use joint controls to move robot");
-        disp("manipuability: ");
-        disp(sqrt(det(J2*J2')));
-        break;
-    end
 
+    %tr = handles.robot.model.fkine(handles.robot.model.getpos());
+    %     newtr = transl(0,0,0.01) * tr;
+    %     xdot = (newtr - tr)/0.05;
+    xdot = [0,(1*handles.speedScale),0,0,0,0];
+    newq = GUIRMRC(xdot, handles.robot);
+
+
+
+    if handles.usingRealBot == true
+        test = isalmost(handles.robot.model.getpos(),handles.realBot.current_joint_states.Position, 0.1);
+        if all(test) == 0
+            disp('Start of Traj does not match current robot position, please press reset button to reset sim');
+            return
+        end
+        robotq = [handles.realBot.current_joint_states.Position; newq];
+        handles.realBot.sendJointTrajectory(robotq);
+    end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.1);
+    pause(0.01);
 
-  
-    
+
+    handles = guidata(hObject);
+
+
+
 end
 
 
@@ -462,12 +492,13 @@ function joint1_minus_ButtonDownFcn(hObject, eventdata, handles)
 
 
 while handles.buttonDown
-handles = guidata(hObject);
+
     currentQ = handles.robot.model.getpos();
     currentQ(1) = currentQ(1) - (0.02 * handles.speedScale);
 
     handles.robot.model.animate(currentQ);
     drawnow();
+    handles = guidata(hObject);
 end
 
 
@@ -479,12 +510,13 @@ function joint2_minus_ButtonDownFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 while handles.buttonDown
-handles = guidata(hObject);
+
     currentQ = handles.robot.model.getpos();
     currentQ(2) = currentQ(2) - (0.02 * handles.speedScale);
 
     handles.robot.model.animate(currentQ);
     drawnow();
+    handles = guidata(hObject);
 end
 
 
@@ -497,12 +529,13 @@ function joint3_minus_ButtonDownFcn(hObject, eventdata, handles)
 
 
 while handles.buttonDown
-handles = guidata(hObject);
+
     currentQ = handles.robot.model.getpos();
     currentQ(3) = currentQ(3) - (0.02 * handles.speedScale);
 
     handles.robot.model.animate(currentQ);
     drawnow();
+    handles = guidata(hObject);
 end
 
 
@@ -516,12 +549,13 @@ function joint4_minus_ButtonDownFcn(hObject, eventdata, handles)
 
 
 while handles.buttonDown
-handles = guidata(hObject);
+
     currentQ = handles.robot.model.getpos();
     currentQ(4) = currentQ(4) - (0.02 * handles.speedScale);
 
     handles.robot.model.animate(currentQ);
     drawnow();
+    handles = guidata(hObject);
 end
 
 
@@ -534,12 +568,13 @@ function joint5_minus_ButtonDownFcn(hObject, eventdata, handles)
 
 
 while handles.buttonDown
-handles = guidata(hObject);
+
     currentQ = handles.robot.model.getpos();
     currentQ(5) = currentQ(5) - (0.02 * handles.speedScale);
 
     handles.robot.model.animate(currentQ);
     drawnow();
+    handles = guidata(hObject);
 end
 
 
@@ -551,12 +586,12 @@ function joint6_minus_ButtonDownFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 while handles.buttonDown
-handles = guidata(hObject);
     currentQ = handles.robot.model.getpos();
     currentQ(6) = currentQ(6) - (0.02 * handles.speedScale);
 
     handles.robot.model.animate(currentQ);
     drawnow();
+    handles = guidata(hObject);
 end
 
 
@@ -568,12 +603,12 @@ function joint1_plus_ButtonDownFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 while handles.buttonDown
-handles = guidata(hObject);
     currentQ = handles.robot.model.getpos();
     currentQ(1) = currentQ(1) + (0.02 * handles.speedScale);
 
     handles.robot.model.animate(currentQ);
     drawnow();
+    handles = guidata(hObject);
 end
 
 
@@ -585,12 +620,13 @@ function joint2_plus_ButtonDownFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 while handles.buttonDown
-handles = guidata(hObject);
+
     currentQ = handles.robot.model.getpos();
     currentQ(2) = currentQ(2) + (0.02 * handles.speedScale);
 
     handles.robot.model.animate(currentQ);
     drawnow();
+    handles = guidata(hObject);
 end
 
 
@@ -607,7 +643,8 @@ while handles.buttonDown
     currentQ(3) = currentQ(3) + (0.02 * handles.speedScale);
 
     handles.robot.model.animate(currentQ);
-    drawnow();handles = guidata(hObject);
+    drawnow();
+    handles = guidata(hObject);
 end
 
 
@@ -685,3 +722,132 @@ function speed_slider_CreateFcn(hObject, eventdata, handles)
 if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
+
+
+% --- Executes on button press in start_button.
+function start_button_Callback(hObject, eventdata, handles)
+% hObject    handle to start_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+if (handles.eStop == 1)
+    handles.eStop = 0;
+    handles.robot.eStopStatus = 0;
+    guidata(hObject,handles);
+
+end
+
+
+
+% --- Executes on button press in e_stop_button.
+function e_stop_button_Callback(hObject, eventdata, handles)
+% hObject    handle to e_stop_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on key press with focus on start_button and none of its controls.
+function start_button_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to start_button (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in e_stop.
+function e_stop_Callback(hObject, eventdata, handles)
+% hObject    handle to e_stop (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of e_stop
+
+if (get(hObject,'Value') == 1)
+    disp("EMERGENCY STOP PRESSED");
+    handles.eStop = get(hObject,'Value');
+    handles.robot.eStopStatus = 1;
+    guidata(hObject,handles);
+
+end
+
+
+% --- Executes on button press in reset_button.
+function reset_button_Callback(hObject, eventdata, handles)
+% hObject    handle to reset_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if handles.usingRealBot == true
+    handles.robot.model.animate(handles.realBot.current_joint_states.Position);
+else
+
+%     handles.taskboard = Taskboard(transl(-0.65,0,0) * trotz(pi/2));
+%     handles.taskboard.PlotTaskboard;
+
+end
+
+
+% --- Executes on button press in open_gripper_button.
+function open_gripper_button_Callback(hObject, eventdata, handles)
+% hObject    handle to open_gripper_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if(handles.usingRealBot)
+    handles.realBot.gripper.openGripper;
+end
+handles.robot.SetGripperState("gripperState", 0)
+
+
+% --- Executes on button press in close_gripper_callback.
+function close_gripper_callback_Callback(hObject, eventdata, handles)
+% hObject    handle to close_gripper_callback (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if(handles.usingRealBot)
+    handles.realBot.gripper.closeGripper(600);
+end
+handles.robot.SetGripperState("gripperState", 1)
+
+
+% --- Executes on button press in cable_move_button.
+function cable_move_button_Callback(hObject, eventdata, handles)
+% hObject    handle to cable_move_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+PickAndPlaceEthCable(handles.robot, handles.robotController, handles.taskboard);
+
+
+% --- Executes on button press in zoom_button.
+function zoom_button_Callback(hObject, eventdata, handles)
+% hObject    handle to zoom_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of zoom_button
+
+if (get(hObject,'Value') == 1)
+    figure(1);
+    tbPose = handles.taskboard.mainboard.GetPose;
+    p = tbPose(1:3,4);
+    axis ([p(1) - 0.2, p(1) + 0.2, p(2) - 0.2, p(2) + 0.2, p(3) - 0.2, p(3) + 0.5])
+    disp("focus view");
+
+else
+    figure(1);
+    axis tight
+end
+
+
+% --- Executes on button press in key_move_button.
+function key_move_button_Callback(hObject, eventdata, handles)
+% hObject    handle to key_move_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+PickAndPlaceKey(handles.robot, handles.robotController, handles.taskboard);
