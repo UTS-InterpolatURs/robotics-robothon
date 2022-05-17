@@ -770,6 +770,8 @@ if (get(hObject,'Value') == 1)
     handles.eStop = get(hObject,'Value');
     handles.robot.eStopStatus = 1;
     guidata(hObject,handles);
+else
+    disp("EMERGENCY STOP RELEASED - Press Start to continue program");
 
 end
 

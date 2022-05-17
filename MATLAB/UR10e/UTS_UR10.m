@@ -32,7 +32,7 @@ classdef UTS_UR10 < handle
             campos([-4.5 -2.5 3.0]);
 
             self.eStopStatus = 0;
-            self.neutralQ = [0,-pi/2,pi/2,-pi/2,-pi/2,pi];
+            self.neutralQ = [0,-pi/2,-pi/2,-pi/2,pi/2,pi];
         end
 
         %% GetUR10Robot
@@ -91,7 +91,7 @@ classdef UTS_UR10 < handle
                     continue;
                 end
             end
-            self.model.animate([0,-pi/2,pi/2,-pi/2,-pi/2,pi]);
+            self.model.animate([0,-pi/2,-pi/2,-pi/2,pi/2,pi]);
         end
 
         function SetGripperState(self, args)
@@ -116,6 +116,7 @@ classdef UTS_UR10 < handle
         function endEffPose = GetEndEffPose(self)
             endEffPose = self.model.fkine(self.model.getpos());
             endEffPose = endEffPose * transl(0,0,self.toolOffset);
+
         end
 
         function goalPoseAdjusted = GetGoalPose(self, goalPose)

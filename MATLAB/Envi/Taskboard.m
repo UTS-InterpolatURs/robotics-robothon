@@ -11,7 +11,7 @@ classdef Taskboard < handle
     
     properties (Access = private)
         keyOffset = transl(-0.08861,0.0452,-0.0037) * rpy2tr(0,0,0);
-        cableOffset = transl(-0.005044,-0.022093,0.02124) * rpy2tr(0,0,pi);
+        cableOffset = transl(-0.005044,-0.022093,0.02124) * rpy2tr(0,0,0);
         battCapOffset = transl(-0.03674,0.0397,0.007386) * rpy2tr(0,0,0);
         battCoinOffset = transl(0.06404,-0.03233,0.001) * rpy2tr(0,0,0);
         battAA1Offset = transl(-0.04495,0.047206,0.0012084) * rpy2tr(0,0,0);
@@ -50,12 +50,12 @@ classdef Taskboard < handle
         end
         
         function cableSlotPose = GetGoalCableSlot1(self)
-            cableSlot1Offset = transl(-0.005140321,-0.0220078,0.02124) * rpy2tr(0,0,pi);
+            cableSlot1Offset = transl(-0.005140321,-0.0220078,0.02124) * rpy2tr(0,0,0);
             cableSlotPose = self.mainboard.GetPose() * cableSlot1Offset;
         end
         
         function cableSlotPose = GetGoalCableSlot2(self)
-            cableSlot1Offset = transl(-0.046140301,-0.0220078,0.02124) * rpy2tr(0,0,pi);
+            cableSlot1Offset = transl(-0.046140301,-0.0220078,0.02124) * rpy2tr(0,0,0);
             cableSlotPose = self.mainboard.GetPose() * cableSlot1Offset;
         end
         

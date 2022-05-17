@@ -20,7 +20,10 @@ classdef RobotController< handle
                 self.realBot = realBot;
             end
         end
-        function qMatrix = GenerateJointTrajectory(self,goalPose,steps)
+        function qMatrix = GenerateJointTrajectory(self,goalPose,steps,jointMask)
+            if ~exist("jointMask", "var")
+                jointMask = [1,1,1,1,1,1];
+            end
             goalPoseAdjusted = self.robot.GetGoalPose(goalPose);
             robotQ = self.robot.model.getpos();
             goalQ = self.robot.model.ikcon(goalPoseAdjusted, robotQ);
@@ -118,7 +121,7 @@ classdef RobotController< handle
             qMatrix = self.GenerateLinearTrajectory(goalPose,steps, velocityMask);
         end
 
-        function ExecuteTrajectory(self, qMatrix, object)
+        function success = ExecuteTrajectory(self, qMatrix, object)
             restartFlag = false;
             if(self.useRos)
                 self.robot.model.animate(self.realBot.current_joint_states.Position);
@@ -134,9 +137,19 @@ classdef RobotController< handle
                     end
 
                 end
-                while(self.robot.eStopStatus == 1)
+                tic
+                while(toc < 30)
+                    if(self.robot.eStopStatus == 0)
+                        break;
+                    end
                     pause(0.1);
                 end
+                if (toc >= 30)
+                    disp("estop timeout triggered, please restart program");
+                    success = false;
+                    return;
+                end
+
 
                 if restartFlag == true
                     self.realBot.play();
@@ -149,6 +162,9 @@ classdef RobotController< handle
                 drawnow();
                 pause(0.1);
             end
+
+            success = true;
+
 
         end
 
