@@ -14,7 +14,7 @@ end
 
 goalPose = robot.GlobalToEndEffPose(tb.key.GetPose());
 
-q = rc.GenerateLinearTrajectory(goalPose, 20, [1,1,1,1,1,1]);
+q = rc.GenerateJointTrajectory(goalPose, 20, [1,1,1,1,1,1]);
 if(rc.ExecuteTrajectory(q) == false)
     
     return;
@@ -30,7 +30,16 @@ if(rc.ExecuteTrajectory(q, tb.key) == false)
 
 end
 
-goalPose = robot.GlobalToEndEffPose(tb.GetGoalKeySwitch * transl(0,0,0.1) * trotz(pi/2));
+goalPose = robot.GlobalToEndEffPose(tb.GetGoalKeySwitch * transl(0,0,0.1));
+
+q = rc.GenerateLinearTrajectory(goalPose, 20, [1,1,1,0,0,0]);
+if(rc.ExecuteTrajectory(q, tb.key) == false)
+    
+    return;
+
+end
+
+goalPose = goalPose * trotz(pi/2);
 
 q = rc.GenerateJointTrajectory(goalPose, 20);
 if(rc.ExecuteTrajectory(q, tb.key) == false)
@@ -41,7 +50,7 @@ end
 
 goalPose = robot.GlobalToEndEffPose(tb.GetGoalKeySwitch * trotz(pi/2));
 
-q = rc.GenerateJointTrajectory(goalPose, 20);
+q = rc.GenerateLinearTrajectory(goalPose, 20, [1,1,1,0,0,0]);
 if(rc.ExecuteTrajectory(q, tb.key) == false)
     
     return;
@@ -50,7 +59,7 @@ end
 
 goalPose = goalPose * trotz(pi/3);
 
-q = rc.GenerateJointTrajectory(goalPose, 20, [0,0,0,0,0,0.5]);
+q = rc.GenerateJointTrajectory(goalPose, 20);
 if(rc.ExecuteTrajectory(q, tb.key) == false)
     
     return;
@@ -59,7 +68,7 @@ end
 
 goalPose = goalPose * trotz(-pi/3);
 
-q = rc.GenerateJointTrajectory(goalPose, 20,[0,0,0,0,0,0.5]);
+q = rc.GenerateJointTrajectory(goalPose, 20);
 if(rc.ExecuteTrajectory(q, tb.key) == false)
     
     return;
