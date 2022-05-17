@@ -5,7 +5,7 @@ function PickAndPlaceEthCable(robot, rc, tb)
 
 goalPose = robot.GlobalToEndEffPose(tb.cable.GetPose() * transl(0,0,0.2));
 
-q = rc.GenerateLinearTrajectory(goalPose, 20);
+q = rc.GenerateJointTrajectory(goalPose, 20);
 if(rc.ExecuteTrajectory(q) == false)
 
     return;

@@ -6,13 +6,17 @@ classdef RobotController< handle
         robot
         useRos
         realBot
+        collisionComputer
+        checkCollisionFlag
     end
 
     methods
-        function self = RobotController(robot, realBot)
+        function self = RobotController(robot, collisionComputer, realBot)
             %TRAJECTORYGENERATOR Construct an instance of this class
             %   Detailed explanation goes here
             self.robot = robot;
+            self.collisionComputer = collisionComputer;
+            self.checkCollisionFlag = false;
             if ~exist('realBot','var') || isempty(realBot)
                 self.useRos=false;
             else
@@ -52,7 +56,7 @@ classdef RobotController< handle
             qMatrix = zeros(steps,6);
             t = 10;             % Total time (s)
             deltaT = steps*t;      % Control frequency
-            W = diag([1 1 1 0.15 0.15 0.15]);    % Weighting matrix for the velocity vector
+            W = diag([1 1 1 0.1 0.1 0.1]);    % Weighting matrix for the velocity vector
             if exist('velocityMask','var')
                 W = diag([velocityMask]);
             end
@@ -88,7 +92,6 @@ classdef RobotController< handle
                 S = Rdot*Ra';                                                           % Skew symmetric!
                 linear_velocity = (1/deltaT)*deltaX;
                 angular_velocity = [S(3,2);S(1,3);S(2,1)];                              % Check the structure of Skew Symmetric matrix!!
-                deltaTheta = tr2rpy(Rd*Ra');                                            % Convert rotation matrix to RPY angles
                 xdot = W*[linear_velocity;angular_velocity];                          	% Calculate end-effector velocity to reach next waypoint.
                 J = model.jacob0(qMatrix(i,:));                 % Get Jacobian at current joint state
                 m(i) = sqrt(det(J*J'));
@@ -182,6 +185,16 @@ classdef RobotController< handle
                 self.realBot.gripper.closeGripper(effort);
             end
             self.robot.SetGripperState("gripperState", 1)
+        end
+
+        function MoveToNeutral(self)
+             if(self.useRos)
+                self.robot.model.animate(self.realBot.current_joint_states.Position);
+             end
+             currentQ = self.robot.model.getpos();
+
+            traj = jtraj(currentQ, self.robot.neutralQ, 100);
+            self.ExecuteTrajectory(traj);
         end
     end
 end

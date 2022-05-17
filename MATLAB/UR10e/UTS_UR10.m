@@ -32,7 +32,7 @@ classdef UTS_UR10 < handle
             campos([-4.5 -2.5 3.0]);
 
             self.eStopStatus = 0;
-            self.neutralQ = [0,-pi/2,-pi/2,-pi/2,pi/2,pi];
+            self.neutralQ = [-pi/2,-pi/2,-pi/2,-pi/2,pi/2,pi/4];
         end
 
         %% GetUR10Robot
@@ -91,8 +91,7 @@ classdef UTS_UR10 < handle
                     continue;
                 end
             end
-            self.model.animate([0,0,0,0,0,0]);
-%             self.model.animate([0,-pi/2,-pi/2,-pi/2,pi/2,pi]);
+            self.model.animate([-pi/2,-pi/2,-pi/2,-pi/2,pi/2,pi/4]);
         end
 
         function SetGripperState(self, args)

@@ -10,8 +10,8 @@ human = Environment('Workbench.ply',humanPose);
 obj = TesturCollisionDetection(UTS_UR10);
 % obj.drawEllipsoid();
 % obj.robot.PlotAndColourRobot();
-% points = plotCube();
-human.PlotModel();
+ points = plotCube();
+%human.PlotModel();
 [verts, face, facenorm] = human.GetModelVFNorm();
 q0 = [pi/2, -pi / 2, pi / 2, -pi / 2, -pi / 2, 0];
 % q1 = [pi/2, -pi / 2, pi / 2, -pi / 2, -pi / 2, 0];
@@ -20,7 +20,7 @@ obj.robot.model.animate(q0);
 q2 = deg2rad([180,-45,90,-135,-90,0]);
 qmatrix = jtraj(q1,q2,steps);
 obj.setJointStates(qmatrix);
-obj.setObstaclePoints(verts);
+obj.setObstaclePoints(points);
 
 qcheck = obj.checkCollision(qmatrix);
 
@@ -47,7 +47,7 @@ cubePoints = [ cubePoints ...
 hold on
 % Plot the cube's point cloud
 % cubeAtOigin_h = plot3(cubePoints(:,1),cubePoints(:,2),cubePoints(:,3),'r.');
-cubePoints = cubePoints + repmat([0,-3,0],size(cubePoints,1),1);
+cubePoints = cubePoints + repmat([0,-1,0],size(cubePoints,1),1);
 cube_h = plot3(cubePoints(:,1),cubePoints(:,2),cubePoints(:,3),'b.');
 end
 % obj = urCollisionDetection(UTS_UR10);
