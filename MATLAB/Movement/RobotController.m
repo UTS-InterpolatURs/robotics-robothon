@@ -8,6 +8,7 @@ classdef RobotController< handle
         realBot
         collisionComputer
         checkCollisionFlag
+        delay
     end
 
     methods
@@ -17,6 +18,7 @@ classdef RobotController< handle
             self.robot = robot;
             self.collisionComputer = collisionComputer;
             self.checkCollisionFlag = false;
+            self.delay = 0.1;
             if ~exist('realBot','var') || isempty(realBot)
                 self.useRos=false;
             else
@@ -161,6 +163,7 @@ classdef RobotController< handle
                 end
 
                 if(self.checkCollisionFlag == true)
+                    %check light curtain for collision
                     result = false;
                     try result = self.collisionComputer.checkCollision(qMatrix(i,:));
                     end
@@ -203,7 +206,7 @@ classdef RobotController< handle
                     object.MoveModel(self.robot.GetEndEffPose() * trotx(pi));
                 end
                 drawnow();
-                pause(0.1);
+                pause(self.delay);
             end
 
             success = true;

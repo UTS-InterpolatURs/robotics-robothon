@@ -156,5 +156,10 @@ classdef TesturCollisionDetection < handle
                 + ((points(:,2)-centerPoint(2))/radii(2)).^2 ...
                 + ((points(:,3)-centerPoint(3))/radii(3)).^2;
         end
+
+
+        function ClearObstaclePoints(self)
+            self.obstaclePoints = [50,50,50];
+        end
     end
 end

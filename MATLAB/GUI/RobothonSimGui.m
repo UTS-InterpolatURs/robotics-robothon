@@ -22,7 +22,7 @@ function varargout = RobothonSimGui(varargin)
 
 % Edit the above text to modify the response to help RobothonSimGui
 
-% Last Modified by GUIDE v2.5 17-May-2022 17:55:46
+% Last Modified by GUIDE v2.5 17-May-2022 20:50:51
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -56,6 +56,7 @@ function RobothonSimGui_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.robot = varargin{1};
 handles.robotController = varargin{2};
 handles.taskboard = varargin{3};
+handles.hand = ModelGen('Envi/Hand.ply',transl(0,-1,0.4) * trotz(pi/2));
 if nargin == 7
     handles.realBot = varargin{4};
     handles.usingRealBot = true;
@@ -921,13 +922,10 @@ function spawn_object_button_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 figure(1)
-hand = ModelGen('Envi/Hand.ply',transl(0,-0.65,0.4) * trotz(pi/2));
-hand.PlotModel;
 
-[v,f,n] = hand.GetModelVFNorm;
+handles.hand.PlotModel;
+[v,f,n] = handles.hand.GetModelVFNorm;
 
-
-% points = plotCube();
 handles.robotController.collisionComputer.setObstaclePoints(v);
 
 
@@ -937,3 +935,30 @@ function collisaion_avoidance_button_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 CollisionAvoidanceDemo(handles.robot, handles.robotController);
+
+
+% --- Executes on button press in hand_forward_button.
+function hand_forward_button_Callback(hObject, eventdata, handles)
+% hObject    handle to hand_forward_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+currentPose = handles.hand.GetPose;
+handles.hand.MoveModel(currentPose * transl(0.2,0,0));
+
+handles.robotController.collisionComputer.ClearObstaclePoints();
+[v,f,n] = handles.hand.GetModelVFNorm;
+handles.robotController.collisionComputer.setObstaclePoints(v);
+
+% --- Executes on button press in hand_backward_button.
+function hand_backward_button_Callback(hObject, eventdata, handles)
+% hObject    handle to hand_backward_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+currentPose = handles.hand.GetPose;
+handles.hand.MoveModel(currentPose * transl(-0.2,0,0));
+
+handles.robotController.collisionComputer.ClearObstaclePoints();
+[v,f,n] = handles.hand.GetModelVFNorm;
+handles.robotController.collisionComputer.setObstaclePoints(v);
+
