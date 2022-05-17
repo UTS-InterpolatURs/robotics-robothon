@@ -182,6 +182,16 @@ classdef RobotController< handle
             end
             self.robot.SetGripperState("gripperState", 1)
         end
+
+        function MoveToNeutral(self)
+             if(self.useRos)
+                self.robot.model.animate(self.realBot.current_joint_states.Position);
+             end
+             currentQ = self.robot.model.getpos();
+
+            traj = jtraj(currentQ, self.robot.neutralQ, 100);
+            self.ExecuteTrajectory(traj);
+        end
     end
 end
 

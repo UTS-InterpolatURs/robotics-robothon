@@ -3,6 +3,8 @@ function PickAndPlaceKey(robot, rc, tb)
 %   Detailed explanation goes here
 %move to location above key
 
+
+
 goalPose = robot.GlobalToEndEffPose(tb.key.GetPose() * transl(0,0,0.2));
 
 q = rc.GenerateLinearTrajectory(goalPose, 20, [1,1,1,0,0,0]);
@@ -59,7 +61,7 @@ end
 
 goalPose = goalPose * trotz(pi/3);
 
-q = rc.GenerateJointTrajectory(goalPose, 20);
+q = rc.GenerateJointTrajectory(goalPose, 50);
 if(rc.ExecuteTrajectory(q, tb.key) == false)
     
     return;
@@ -68,7 +70,7 @@ end
 
 goalPose = goalPose * trotz(-pi/3);
 
-q = rc.GenerateJointTrajectory(goalPose, 20);
+q = rc.GenerateJointTrajectory(goalPose, 50);
 if(rc.ExecuteTrajectory(q, tb.key) == false)
     
     return;
