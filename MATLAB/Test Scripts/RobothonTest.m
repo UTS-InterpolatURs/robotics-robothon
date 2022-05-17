@@ -11,11 +11,6 @@ rc = RobotController(robot, collisionComputer);
 tb = Taskboard(transl(0,0-0.65,0));
 tb.PlotTaskboard;
 
-[v,f,n] = tb.mainboard.GetModelVFNorm;
-
-
-% points = plotCube();
-collisionComputer.setObstaclePoints(v);
 
 
 

@@ -125,6 +125,8 @@ classdef RobotController< handle
         end
 
         function success = ExecuteTrajectory(self, qMatrix, object)
+            trajPatchIndex = 0;
+            avoidanceFlag = 0;
             restartFlag = false;
             if(self.useRos)
                 self.robot.model.animate(self.realBot.current_joint_states.Position);
@@ -158,6 +160,44 @@ classdef RobotController< handle
                     self.realBot.play();
                 end
 
+                if(self.checkCollisionFlag == true)
+                    result = false;
+                    try result = self.collisionComputer.checkCollision(qMatrix(i,:));
+                    end
+
+                    if(result == true)
+                        disp("COLLISION IMMINENT - COLLISION AVOIDANCE ACTIVATED!")
+                        traj = self.robot.model.getpos;
+                        for j = 1:5
+                            traj = [traj; qMatrix(i-j,:)];
+                        end
+                        self.ExecuteTrajectory(traj);
+
+                        traj = self.moveCartesian([0,0,0.3], 20);
+                        self.ExecuteTrajectory(traj);
+
+                        checkMatrix = qMatrix(i:end,:);
+                        resultMatrix = self.collisionComputer.checkCollision(checkMatrix);
+
+                        for k = 1:(size(resultMatrix, 1))
+                            index = (i-1) + k;
+                            if(resultMatrix(k) == true)                           
+                                newGoal = self.robot.model.fkine(qMatrix(index,:)) * transl(0,0,-0.3);
+                                qMatrix(index,:) = self.robot.model.ikcon(newGoal,qMatrix(index, :));
+                                avoidanceFlag = 1;
+                                trajPatchIndex = index;
+                            end
+                        end
+
+                    end
+
+                end
+
+                if(avoidanceFlag == true && i == trajPatchIndex + 1)
+                    traj = jtraj(qMatrix(i-1,:),qMatrix(i,:), 20);
+                    self.ExecuteTrajectory(traj);
+                end
+
                 self.robot.model.animate(qMatrix(i,:))
                 if exist('object','var')
                     object.MoveModel(self.robot.GetEndEffPose() * trotx(pi));
@@ -188,10 +228,10 @@ classdef RobotController< handle
         end
 
         function MoveToNeutral(self)
-             if(self.useRos)
+            if(self.useRos)
                 self.robot.model.animate(self.realBot.current_joint_states.Position);
-             end
-             currentQ = self.robot.model.getpos();
+            end
+            currentQ = self.robot.model.getpos();
 
             traj = jtraj(currentQ, self.robot.neutralQ, 100);
             self.ExecuteTrajectory(traj);

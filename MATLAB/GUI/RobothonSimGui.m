@@ -22,7 +22,7 @@ function varargout = RobothonSimGui(varargin)
 
 % Edit the above text to modify the response to help RobothonSimGui
 
-% Last Modified by GUIDE v2.5 17-May-2022 15:27:45
+% Last Modified by GUIDE v2.5 17-May-2022 17:55:46
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -69,6 +69,7 @@ set(handles.speed_slider, 'Min', 0);
 set(handles.speed_slider, 'Max', 1);
 set(handles.speed_slider, 'Value', 1);
 set(handles.zoom_button, 'Value', 0);
+set(handles.check_collision_button, 'Value', 0);
 
 
 
@@ -150,9 +151,16 @@ while handles.buttonDown
         robotq = [handles.realBot.current_joint_states.Position; newq];
         handles.realBot.sendJointTrajectory(robotq);
     end
+    if(handles.robotController.checkCollisionFlag == true)
+        result =handles.robotController.collisionComputer.checkCollision(newq);
+        if (result == true)
+            disp("COLLISION IMMINENT!");
+            return;
+        end
+    end
     handles.robot.model.animate(newq);
     drawnow();
-    %pause(0.01);
+
 
 
     handles = guidata(hObject);
@@ -206,9 +214,18 @@ while handles.buttonDown
         robotq = [handles.realBot.current_joint_states.Position; newq];
         handles.realBot.sendJointTrajectory(robotq);
     end
+    
+    if(handles.robotController.checkCollisionFlag == true)
+        result =handles.robotController.collisionComputer.checkCollision(newq);
+        if (result == true)
+            disp("COLLISION IMMINENT!");
+            return;
+        end
+    end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.01);
+
+
 
 
     handles = guidata(hObject);
@@ -271,9 +288,16 @@ while handles.buttonDown
         robotq = [handles.realBot.current_joint_states.Position; newq];
         handles.realBot.sendJointTrajectory(robotq);
     end
+    if(handles.robotController.checkCollisionFlag == true)
+        result =handles.robotController.collisionComputer.checkCollision(newq);
+        if (result == true)
+            disp("COLLISION IMMINENT!");
+            return;
+        end
+    end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.01);
+
 
 
     handles = guidata(hObject);
@@ -309,9 +333,16 @@ while handles.buttonDown
         robotq = [handles.realBot.current_joint_states.Position; newq];
         handles.realBot.sendJointTrajectory(robotq);
     end
+    if(handles.robotController.checkCollisionFlag == true)
+        result =handles.robotController.collisionComputer.checkCollision(newq);
+        if (result == true)
+            disp("COLLISION IMMINENT!");
+            return;
+        end
+    end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.01);
+
 
 
     handles = guidata(hObject);
@@ -348,9 +379,16 @@ while handles.buttonDown
         robotq = [handles.realBot.current_joint_states.Position; newq];
         handles.realBot.sendJointTrajectory(robotq);
     end
+    if(handles.robotController.checkCollisionFlag == true)
+        result =handles.robotController.collisionComputer.checkCollision(newq);
+        if (result == true)
+            disp("COLLISION IMMINENT!");
+            return;
+        end
+    end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.01);
+
 
 
     handles = guidata(hObject);
@@ -387,10 +425,15 @@ while handles.buttonDown
         robotq = [handles.realBot.current_joint_states.Position; newq];
         handles.realBot.sendJointTrajectory(robotq);
     end
+    if(handles.robotController.checkCollisionFlag == true)
+        result =handles.robotController.collisionComputer.checkCollision(newq);
+        if (result == true)
+            disp("COLLISION IMMINENT!");
+            return;
+        end
+    end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.01);
-
 
     handles = guidata(hObject);
 
@@ -870,3 +913,26 @@ else
     handles.robotController.checkCollisionFlag = false;
 
 end
+
+
+% --- Executes on button press in spawn_object_button.
+function spawn_object_button_Callback(hObject, eventdata, handles)
+% hObject    handle to spawn_object_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+[v,f,n] = handles.taskboard.mainboard.GetModelVFNorm;
+
+
+% points = plotCube();
+handles.robotController.collisionComputer.setObstaclePoints(v);
+
+
+% --- Executes on button press in collisaion_avoidance_button.
+function collisaion_avoidance_button_Callback(hObject, eventdata, handles)
+% hObject    handle to collisaion_avoidance_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+CollisionAvoidanceDemo(handles.robot, handles.robotController);
