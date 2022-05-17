@@ -69,6 +69,7 @@ set(handles.speed_slider, 'Min', 0);
 set(handles.speed_slider, 'Max', 1);
 set(handles.speed_slider, 'Value', 1);
 set(handles.zoom_button, 'Value', 0);
+set(handles.check_collision_button, 'Value', 0);
 
 
 
@@ -150,9 +151,16 @@ while handles.buttonDown
         robotq = [handles.realBot.current_joint_states.Position; newq];
         handles.realBot.sendJointTrajectory(robotq);
     end
+    if(handles.robotController.checkCollisionFlag == true)
+        result =handles.robotController.collisionComputer.checkCollision(newq);
+        if (result == true)
+            disp("COLLISION IMMINENT!");
+            return;
+        end
+    end
     handles.robot.model.animate(newq);
     drawnow();
-    %pause(0.01);
+
 
 
     handles = guidata(hObject);
@@ -206,9 +214,18 @@ while handles.buttonDown
         robotq = [handles.realBot.current_joint_states.Position; newq];
         handles.realBot.sendJointTrajectory(robotq);
     end
+    
+    if(handles.robotController.checkCollisionFlag == true)
+        result =handles.robotController.collisionComputer.checkCollision(newq);
+        if (result == true)
+            disp("COLLISION IMMINENT!");
+            return;
+        end
+    end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.01);
+
+
 
 
     handles = guidata(hObject);
@@ -271,9 +288,16 @@ while handles.buttonDown
         robotq = [handles.realBot.current_joint_states.Position; newq];
         handles.realBot.sendJointTrajectory(robotq);
     end
+    if(handles.robotController.checkCollisionFlag == true)
+        result =handles.robotController.collisionComputer.checkCollision(newq);
+        if (result == true)
+            disp("COLLISION IMMINENT!");
+            return;
+        end
+    end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.01);
+
 
 
     handles = guidata(hObject);
@@ -309,9 +333,16 @@ while handles.buttonDown
         robotq = [handles.realBot.current_joint_states.Position; newq];
         handles.realBot.sendJointTrajectory(robotq);
     end
+    if(handles.robotController.checkCollisionFlag == true)
+        result =handles.robotController.collisionComputer.checkCollision(newq);
+        if (result == true)
+            disp("COLLISION IMMINENT!");
+            return;
+        end
+    end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.01);
+
 
 
     handles = guidata(hObject);
@@ -348,9 +379,16 @@ while handles.buttonDown
         robotq = [handles.realBot.current_joint_states.Position; newq];
         handles.realBot.sendJointTrajectory(robotq);
     end
+    if(handles.robotController.checkCollisionFlag == true)
+        result =handles.robotController.collisionComputer.checkCollision(newq);
+        if (result == true)
+            disp("COLLISION IMMINENT!");
+            return;
+        end
+    end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.01);
+
 
 
     handles = guidata(hObject);
@@ -387,10 +425,15 @@ while handles.buttonDown
         robotq = [handles.realBot.current_joint_states.Position; newq];
         handles.realBot.sendJointTrajectory(robotq);
     end
+    if(handles.robotController.checkCollisionFlag == true)
+        result =handles.robotController.collisionComputer.checkCollision(newq);
+        if (result == true)
+            disp("COLLISION IMMINENT!");
+            return;
+        end
+    end
     handles.robot.model.animate(newq);
     drawnow();
-    pause(0.01);
-
 
     handles = guidata(hObject);
 
