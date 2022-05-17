@@ -44,6 +44,7 @@ classdef TesturCollisionDetection < handle
             self.centrePoints(6,:) = [0,0,0];
             self.centrePoints(7,:) = [0,0,0];
             
+            
 %             self.jointStatesCallback();
 %             self.imageSubcriber = rossubscriber('/camera/aligned_depth_to_color/image_raw_throttle',@self.imageCallback);
 %                         self.imageSubcriber = rossubscriber('/camera/aligned_depth_to_color/image_raw');
@@ -67,7 +68,32 @@ classdef TesturCollisionDetection < handle
             self.robot.model.plot3d(self.robot.model.getpos());
             
         end
+        function [points] = getLightcurtain(self)
+            [Y,Z] = meshgrid(-1:0.1:1,-1:0.1:1);
+            sizeMat = size(Y);
+            X = repmat(1,sizeMat(1),sizeMat(2));
+            points = [X,Y,Z]
+        end
         
+        function [check] = lightCurtainDetected(self)
+            check = 0;
+            points2Check = self.getObstaclePoints();
+            col_flag = false;
+            updatedPoints = self.getLightcurtain();
+            centrePoints_ = [0,1,0];
+            radi = [0.0,1,1];
+            algebraicDist = self.GetAlgebraicDist(points2Check, centrePoints_, radi);
+            pointsInside = find(algebraicDist < 1);
+            %                     display(['There are ', num2str(size(pointsInside,1)),' points inside the ',num2str(i),'th ellipsoid']);
+            if pointsInside > 0
+                col_flag = true;
+            end
+            
+            if col_flag == true
+                check = 1;
+            end
+            
+        end
         
         function generatePointClouds(self)
             self.imageSubcriber = rossubscriber('/camera/aligned_depth_to_color/image_raw');
@@ -97,6 +123,11 @@ classdef TesturCollisionDetection < handle
         function plotPointCloud(self)
             hold off
             pcshow(self.pClouds_mask(:,:));
+        end
+        function plotPointCloudwithRobot(self)
+            hold on
+            pointCloudwithRobot_h = plot3(self.pClouds_mask(:,1),self.pClouds_mask(:,2),self.pClouds_mask(:,3),'r.');
+            
         end
         
         function [col_array] = checkCollision(self,qmatrix)
