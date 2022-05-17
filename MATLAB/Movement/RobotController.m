@@ -164,6 +164,12 @@ classdef RobotController< handle
 
                 if(self.checkCollisionFlag == true)
                     %check light curtain for collision
+                    if(self.collisionComputer.lightCurtainDetected)
+                        self.delay = 0.3;
+                        disp("Object detected in work zone - reducing speed")
+                    else
+                        self.delay = 0.1;
+                    end
                     result = false;
                     try result = self.collisionComputer.checkCollision(qMatrix(i,:));
                     end

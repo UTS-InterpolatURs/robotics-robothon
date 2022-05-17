@@ -70,6 +70,7 @@ set(handles.speed_slider, 'Min', 0);
 set(handles.speed_slider, 'Max', 1);
 set(handles.speed_slider, 'Value', 1);
 set(handles.zoom_button, 'Value', 0);
+set(handles.e_stop, 'Value', 0);
 set(handles.check_collision_button, 'Value', 0);
 
 
@@ -799,12 +800,18 @@ function start_button_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
-if (handles.eStop == 1)
+if (handles.eStop == 1 && handles.e_stop.Value == 0)
     handles.eStop = 0;
     handles.robot.eStopStatus = 0;
     guidata(hObject,handles);
 
 end
+
+if(handles.buttonDown == 0)
+    disp("Please Release E-Stop");
+        return;
+end
+
 
 
 
