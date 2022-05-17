@@ -17,8 +17,6 @@ classdef UTS_UR10 < handle
         closeFaceData;
         closeVertexData;
         closePlyData;
-
-
     end
 
     methods%% Class for UR10 robot simulation
