@@ -24,7 +24,7 @@ robotCam = VCam('robot', myUR10e, 'focal', 0.08, 'pixel', 10e-5, ...
 
 % Created workbench model and plot it
 wbPose = transl(0,-1.0,-0.423) * rpy2tr(0,0,0);
-workbench = Environment('Envi/Workbench.ply', wbPose); 
+workbench = ModelGen('Envi/Workbench.ply', wbPose); 
 workbench.PlotModel();
 [wbVert,wbFace,wbFaceNorms] = workbench.GetModelVFNorm();
 

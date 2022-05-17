@@ -1,4 +1,4 @@
-classdef Environment < handle
+classdef ModelGen < handle
     % Private variables for Environment class
     properties (Access = private)
         pose;

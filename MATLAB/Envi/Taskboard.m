@@ -29,18 +29,18 @@ classdef Taskboard < handle
     
     methods
         function self = Taskboard(spawnPose)
-            self.mainboard = Environment("Taskboard.ply", spawnPose);
-            self.key = Environment("TaskboardKey.ply", spawnPose * self.keyOffset);
+            self.mainboard = ModelGen("Taskboard.ply", spawnPose);
+            self.key = ModelGen("TaskboardKey.ply", spawnPose * self.keyOffset);
             self.keyPoseInit = self.key.GetPose();
-            self.cable = Environment("EthernetCable.ply", spawnPose * self.cableOffset);
+            self.cable = ModelGen("EthernetCable.ply", spawnPose * self.cableOffset);
             self.cablePoseInit = self.cable.GetPose();
-            self.battCap = Environment("AABatteryCap.ply", spawnPose * self.battCapOffset);
+            self.battCap = ModelGen("AABatteryCap.ply", spawnPose * self.battCapOffset);
             self.battCapPoseInit = self.battCap.GetPose();
-            self.battCoin = Environment("CoinBattery.ply", spawnPose * self.battCoinOffset);
+            self.battCoin = ModelGen("CoinBattery.ply", spawnPose * self.battCoinOffset);
             self.battCoinPoseInit = self.battCoin.GetPose();
-            self.battAA1 = Environment("AABattery.ply", spawnPose * self.battAA1Offset);
+            self.battAA1 = ModelGen("AABattery.ply", spawnPose * self.battAA1Offset);
             self.battAA1PoseInit = self.battAA1.GetPose();
-            self.battAA2 = Environment("AABattery.ply", spawnPose * self.battAA2Offset);
+            self.battAA2 = ModelGen("AABattery.ply", spawnPose * self.battAA2Offset);
             self.battAA2PoseInit = self.battAA2.GetPose();
         end
         
