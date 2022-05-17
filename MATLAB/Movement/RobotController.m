@@ -6,13 +6,17 @@ classdef RobotController< handle
         robot
         useRos
         realBot
+        collisionComputer
+        checkCollisionFlag
     end
 
     methods
-        function self = RobotController(robot, realBot)
+        function self = RobotController(robot, collisionComputer, realBot)
             %TRAJECTORYGENERATOR Construct an instance of this class
             %   Detailed explanation goes here
             self.robot = robot;
+            self.collisionComputer = collisionComputer;
+            self.checkCollisionFlag = false;
             if ~exist('realBot','var') || isempty(realBot)
                 self.useRos=false;
             else
