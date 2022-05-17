@@ -10,23 +10,31 @@ human = Environment('Workbench.ply',humanPose);
 obj = TesturCollisionDetection(UTS_UR10);
 % obj.drawEllipsoid();
 % obj.robot.PlotAndColourRobot();
+
  points = plotCube();
 %human.PlotModel();
 [verts, face, facenorm] = human.GetModelVFNorm();
 q0 = [pi/2, -pi / 2, pi / 2, -pi / 2, -pi / 2, 0];
 % q1 = [pi/2, -pi / 2, pi / 2, -pi / 2, -pi / 2, 0];
 q1 = deg2rad([90,-45,90,-135,-90,0]);
+
 obj.robot.model.animate(q0);
-q2 = deg2rad([180,-45,90,-135,-90,0]);
-qmatrix = jtraj(q1,q2,steps);
+% q2 = deg2rad([180,-45,90,-135,-90,0]);
+qmatrix = jtraj(q0,q1,steps);
 obj.setJointStates(qmatrix);
 obj.setObstaclePoints(points);
 
 qcheck = obj.checkCollision(qmatrix);
 
 for i = 1:steps
+    if qcheck(i) == 1
+        break;
+    end
+    
     obj.robot.model.animate(qmatrix(i,:));                                    % Moving the robot near the brick
     drawnow();
+    
+    
 end
 
 
