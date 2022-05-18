@@ -5,14 +5,19 @@ hold on;
 
 robot = UTS_UR10;
 PlotFloor();
-wbPose = transl(0,-0.8,-0.423) * rpy2tr(0,0,0);    
+wbPose = transl(0,-0.8,-0.423) * rpy2tr(0,0,0);
 % wbPose = transl(-0.06,-0.8,-0.423) * rpy2tr(0,0,0); % <-- Lab Testing
-workbench = ModelGen('Envi/Workbench.ply', wbPose); 
+workbench = ModelGen('Envi/Workbench.ply', wbPose);
 workbench.PlotModel();
 
-fence = ModelGen('Envi/Fences.ply', transl(0,0,0));
+fence = ModelGen('Envi/Fences.ply', transl(0,0,0.6));
 fence.PlotModel;
+
+extinguisher = ModelGen('Envi/extinguisher.ply', transl(-1.2,-1,-0.6));
+extinguisher.PlotModel;
 collisionComputer = TesturCollisionDetection(robot);
+
+danger_sign = surface_plot('Envi/warning_sign.jpg', [-3,-3;-2,-2],[-3.13,-3.13;-3.13,-3.13],[1,2;1,2]);
 
 % realBot = urRosWrapper(robot);
 rc = RobotController(robot, collisionComputer);
@@ -22,6 +27,14 @@ tb.PlotTaskboard;
 
 
 RobothonSimGui(robot, rc, tb);
+
+
+
+function surface = surface_plot(item, xx, yy, zz)
+%function to plot an image in the environment (ie signs)
+
+surface = surf(xx,yy,zz,'CData',imread(item),'FaceColor','texturemap');
+end
 
 
 
