@@ -22,7 +22,7 @@ function varargout = RobothonSimGui(varargin)
 
 % Edit the above text to modify the response to help RobothonSimGui
 
-% Last Modified by GUIDE v2.5 17-May-2022 21:13:08
+% Last Modified by GUIDE v2.5 18-May-2022 10:11:26
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -70,6 +70,7 @@ set(handles.speed_slider, 'Min', 0);
 set(handles.speed_slider, 'Max', 1);
 set(handles.speed_slider, 'Value', 1);
 set(handles.zoom_button, 'Value', 0);
+set(handles.tight_view_button, 'Value', 0);
 set(handles.e_stop, 'Value', 0);
 set(handles.check_collision_button, 'Value', 0);
 
@@ -560,7 +561,7 @@ while handles.buttonDown
 
     currentQ = handles.robot.model.getpos();
     currentQ(2) = currentQ(2) - (0.02 * handles.speedScale);
-    if(abs(current(Q2)) - abs(handles.robot.model.qlim(2,1)) >= 0)
+    if(abs(currentQ(2)) - abs(handles.robot.model.qlim(2,1)) >= 0)
         return
     end
     handles.robot.model.animate(currentQ);
@@ -804,10 +805,11 @@ if (handles.eStop == 1 && handles.e_stop.Value == 0)
     handles.eStop = 0;
     handles.robot.eStopStatus = 0;
     guidata(hObject,handles);
+    disp("Program Resumed");
 
 end
 
-if(handles.buttonDown == 0)
+if(handles.buttonDown == 0 && handles.e_stop.Value == 1)
     disp("Please Release E-Stop");
         return;
 end
@@ -1001,3 +1003,23 @@ function delete_hand_button_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 handles.hand.DeleteModel;
 handles.robotController.collisionComputer.ClearObstaclePoints();
+
+
+% --- Executes on button press in tight_view_button.
+function tight_view_button_Callback(hObject, eventdata, handles)
+% hObject    handle to tight_view_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of tight_view_buttonz
+
+if (get(hObject,'Value') == 1)
+    figure(1);
+
+    axis([-1,1,-1.5,0.6,-0.2,1.5])
+    disp("tight view");
+
+else
+    figure(1);
+    axis tight
+end
