@@ -56,7 +56,7 @@ classdef urRosWrapper < handle
             %display(self.wrench.Force)
         end
 
-        function sendJointTrajectory(self,traj)
+        function sendJointTrajectory(self,traj,controlFrequency)
             pause(0.2);
             test = isalmost(traj(1,:),self.current_joint_states.Position, 0.001);
             if all(test) == 0
@@ -70,7 +70,7 @@ classdef urRosWrapper < handle
                 %nextJointState.Velocities = v(i,:);
                 %nextJointState.Accelerations = a(i,:);
                 %nextJointState.Effort = ones(1,6);
-                nextJointState.TimeFromStart = rosduration((i-1)*0.1);
+                nextJointState.TimeFromStart = rosduration((i-1)*controlFrequency);
                 msg.Goal.Trajectory.Points = [msg.Goal.Trajectory.Points; nextJointState];
             end
 

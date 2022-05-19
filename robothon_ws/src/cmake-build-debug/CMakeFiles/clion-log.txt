@@ -1,4 +1,4 @@
-/snap/clion/189/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/snap/clion/189/bin/ninja/linux/ninja -G Ninja -S /home/rohan/git/robotics-robothon/robothon_ws/src -B /home/rohan/git/robotics-robothon/robothon_ws/src/cmake-build-debug
+/snap/clion/190/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" -S /home/rohan/git/robotics-robothon/robothon_ws/src -B /home/rohan/git/robotics-robothon/robothon_ws/src/cmake-build-debug
 -- The C compiler identification is GNU 7.5.0
 -- The CXX compiler identification is GNU 7.5.0
 -- Detecting C compiler ABI info

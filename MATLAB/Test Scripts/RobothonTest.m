@@ -10,23 +10,24 @@ wbPose = transl(0,-0.8,-0.423) * rpy2tr(0,0,0);
 workbench = ModelGen('Envi/Workbench.ply', wbPose);
 workbench.PlotModel();
 
-fence = ModelGen('Envi/Fences.ply', transl(0,0,0.6));
-fence.PlotModel;
+% fence = ModelGen('Envi/Fences.ply', transl(0,0,0.6));
+% fence.PlotModel;
+% 
+% extinguisher = ModelGen('Envi/extinguisher.ply', transl(-1.2,-1,-0.6));
+% extinguisher.PlotModel;
 
-extinguisher = ModelGen('Envi/extinguisher.ply', transl(-1.2,-1,-0.6));
-extinguisher.PlotModel;
+% 
+% danger_sign = surface_plot('Envi/warning_sign.jpg', [-3,-3;-2,-2],[-3.13,-3.13;-3.13,-3.13],[1,2;1,2]);
+
+realBot = urRosWrapper(robot);
 collisionComputer = TesturCollisionDetection(robot);
-
-danger_sign = surface_plot('Envi/warning_sign.jpg', [-3,-3;-2,-2],[-3.13,-3.13;-3.13,-3.13],[1,2;1,2]);
-
-% realBot = urRosWrapper(robot);
-rc = RobotController(robot, collisionComputer);
+rc = RobotControllerTwo(robot, collisionComputer, realBot);
 
 tb = Taskboard(transl(0,-0.65,0.025));
 tb.PlotTaskboard;
 
 
-RobothonSimGui(robot, rc, tb);
+RobothonSimGui(robot, rc, tb, realBot);
 
 
 

@@ -861,6 +861,7 @@ function reset_button_Callback(hObject, eventdata, handles)
 
 if handles.usingRealBot == true
     handles.robot.model.animate(handles.realBot.current_joint_states.Position);
+    handles.taskboard.ResetComponents();
 else
 
 handles.taskboard.ResetComponents();
@@ -888,7 +889,7 @@ function close_gripper_callback_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 if(handles.usingRealBot)
-    handles.realBot.gripper.closeGripper(600);
+    handles.realBot.gripper.closeGripper(1100);
 end
 handles.robot.SetGripperState("gripperState", 1)
 
