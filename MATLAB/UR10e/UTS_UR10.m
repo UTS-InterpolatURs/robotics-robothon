@@ -132,5 +132,9 @@ classdef UTS_UR10 < handle
         function pose = GlobalToEndEffPose(self, globalPose)
             pose = globalPose * trotx(pi);
         end
+        
+        function pose = GetCamPose(self)
+            
+        end
     end
 end
