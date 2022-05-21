@@ -8,7 +8,9 @@ classdef UTS_UR10 < handle
         workspace = [-3 3 -3 3 -0.91 4];
         toolOffset = 0.275354;
         neutralQ;
-        RealSenseTF;
+        neutralPose;
+        realSenseTf;
+        gripperTf
     end
 
     properties (Access = private)
@@ -29,11 +31,13 @@ classdef UTS_UR10 < handle
             self.model.base = basePose;
             campos([-4.5 -2.5 3.0]);
 
-            self.RealSenseTF = transl(-0.10831,0,0.04361) * rpy2tr(0,deg2rad(19),0);
-            self.model.tool = self.RealSenseTF;
+            self.realSenseTf = transl(0.10831,0,0.04361) * rpy2tr(0,deg2rad(-20),pi/2);
+            self.gripperTf = transl(0,0,0.12256);
+            self.model.tool = self.gripperTf;
             self.PlotAndColourRobot();
             self.eStopStatus = 0;
             self.neutralQ = [-pi/2,-pi/2,-pi/2,-pi/2,pi/2,pi/4];
+            self.neutralPose = transl(-0.1639, -0.6873, 0.5278) * trotx(pi);
         end
 
         %% GetUR10Robot
