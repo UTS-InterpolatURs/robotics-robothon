@@ -44,7 +44,7 @@ classdef VCam < handle
             % Get end effector pose
             endEffPose = self.robot.model.fkine(self.robot.model.getpos());
             % Set camera pose
-            self.camPose = endEffPose * transl(-0.06,0,0);
+            self.camPose = endEffPose * transl(-0.10831,0,0.04361) * rpy2tr(0,deg2rad(19),0);
             % Intrinsic
             self.camera = CentralCamera('focal',self.focal,'pixel',self.pixel,'resolution',self.resolution,'centre',self.centre,'name',self.name);
             % Extrinsic
@@ -52,14 +52,14 @@ classdef VCam < handle
         end
         
         function PlotVirtualCam(self)           
-            self.camera.plot_camera('Tcam',self.camPose,'label','scale',0.05);
+            self.camera.plot_camera('Tcam',self.camPose,'label','scale',0.04);
         end
         
         function UpdateCamPose(self)
             % Get end effector pose
             endEffPose = self.robot.model.fkine(self.robot.model.getpos());
             % Set camera pose
-            self.camPose = endEffPose * transl(-0.06,0,0);
+            self.camPose = endEffPose * transl(-0.10831,0,0.04361) * rpy2tr(0,deg2rad(19),0);
             % Update 
             self.camera.T = self.camPose;
 %             drawnow();
