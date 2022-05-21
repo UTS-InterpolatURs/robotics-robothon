@@ -150,18 +150,18 @@ classdef RobotControllerTwo< handle
                     end
 
                 end
-%                 tic
-%                 while(toc < 30)
-%                     if(self.robot.eStopStatus == 0)
-%                         break;
-%                     end
-%                     pause(0.1);
-%                 end
-%                 if (toc >= 30)
-%                     disp("estop timeout triggered, please restart program");
-%                     success = false;
-%                     return;
-%                 end
+                %                 tic
+                %                 while(toc < 30)
+                %                     if(self.robot.eStopStatus == 0)
+                %                         break;
+                %                     end
+                %                     pause(0.1);
+                %                 end
+                %                 if (toc >= 30)
+                %                     disp("estop timeout triggered, please restart program");
+                %                     success = false;
+                %                     return;
+                %                 end
 
 
                 if restartFlag == true
@@ -210,10 +210,10 @@ classdef RobotControllerTwo< handle
                 if exist('object','var')
                     object.MoveModel(self.robot.GetEndEffPose() * trotx(pi));
                 end
-                    drawnow();
-                    pause(self.controlFrequency);
+                drawnow();
+                pause(self.controlFrequency);
 
-       
+
             end
 
             success = true;
@@ -245,6 +245,39 @@ classdef RobotControllerTwo< handle
 
             traj = jtraj(currentQ, self.robot.neutralQ, 100);
             self.ExecuteTrajectory(traj);
+        end
+
+        function SetToolCamera(self)
+            if(self.useRos)
+                self.robot.model.animate(self.realBot.current_joint_states.Position);
+            end
+            currentQ = self.robot.model.getpos();
+            currentPose = self.robot.model.fkine(currentQ);
+            newPose = currentPose * trotz(pi/2);
+
+            self.robot.model.tool = self.robot.realSenseTf;
+
+            newQ = self.robot.model.ikcon(newPose, currentQ);
+            traj = jtraj(currentQ, newQ, 30);
+            self.ExecuteTrajectory(traj);
+
+
+        end
+
+        function SetToolGripper(self)
+            if(self.useRos)
+                self.robot.model.animate(self.realBot.current_joint_states.Position);
+            end
+            currentQ = self.robot.model.getpos();
+            currentPose = self.robot.model.fkine(currentQ);
+            newPose = currentPose * trotz(-pi/2);
+            self.robot.model.tool = self.robot.gripperTf;
+    
+            newQ = self.robot.model.ikcon(newPose, currentQ);
+            traj = jtraj(currentQ, newQ, 30);
+            self.ExecuteTrajectory(traj);
+
+
         end
     end
 end
