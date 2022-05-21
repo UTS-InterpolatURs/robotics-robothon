@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+
+
 from sensor_msgs.msg import Image
 import rospy
 from cv_bridge import CvBridge
@@ -10,6 +12,9 @@ import message_filters
 from std_msgs.msg import Float32MultiArray
 import math
 
+index = 30
+Vc_array = np.zeros([index,6])
+vcCount = 0
 
 class DetectandDraw:
 
@@ -132,10 +137,34 @@ def VServoing(target, obs, Z, lambda_):
         Vc = np.zeros(6)
     return Vc
 
+def filterData(data_array):
+    vx = 0
+    vy = 0
+    vz = 0
+    wx = 0
+    wy = 0
+    wz = 0
+    for i in range(0,len(data_array[:][1])):
+        vx = vx + data_array[i][0]
+    for i in range(0,len(data_array[:][1])):
+        vy = vy + data_array[i][1]
+    for i in range(0,len(data_array[:][1])):
+        vz = vz + data_array[i][2]
+    for i in range(0,len(data_array[:][1])):
+        wx = wx + data_array[i][3]
+    for i in range(0,len(data_array[:][1])):
+        wy = wy + data_array[i][4]
+    for i in range(0,len(data_array[:][1])):
+        wz = wz + data_array[i][5]
+    myArray = [vx,vy,vz,wx,wy,wz]
+    newArray = [i/len(data_array[:][1]) for i in myArray]
+    return newArray
 
 
 def callback(image, depth):
-    
+    global vcCount
+    global Vc_array
+    global index
     bridgeRGB = CvBridge()
     RGB = bridgeRGB.imgmsg_to_cv2(image, "bgr8")
     gray = cv.cvtColor(RGB,cv.COLOR_BGR2GRAY)
@@ -181,7 +210,7 @@ def callback(image, depth):
         y = 0
         w = 0
         h = 0
-    
+    # print(x_centre,y_centre)
     # cv.imshow("bounding_box", edges)
     # cv.waitKey(2)
     # print(x,y,w,h)
@@ -230,9 +259,8 @@ def callback(image, depth):
     # h = 480
     # w = 640
 
-
-
     
+        
     bridgeDepth = CvBridge()
     depthImage = bridgeDepth.imgmsg_to_cv2(depth, "32FC1" )
     target_corner_1 = np.array([874,225])
@@ -256,23 +284,58 @@ def callback(image, depth):
     y_obs = np.array([(obs_corner_1[1]-v0)/fdy,(obs_corner_2[1]-v0)/fdy,(obs_corner_3[1]-v0)/fdy,(obs_corner_4[1]-v0)/fdy]) 
 
     lambda_ = 0.1
+<<<<<<< HEAD
+    
+
+    
+    try:
+        Z = np.array([depthImage[obs_corner_1[1]][obs_corner_1[0]],depthImage[obs_corner_2[1]][obs_corner_2[0]],depthImage[obs_corner_3[1]][obs_corner_3[0]],depthImage[obs_corner_4[1]][obs_corner_4[0]]]) #change here
+        myZ = Z
+        newZ = [i/10 for i in myZ]
+        Target = np.array([[x_[0],y_[0]],[x_[1],y_[1]],[x_[2],y_[2]],[x_[3],y_[3]]])
+        Obs = np.array([[x_obs[0],y_obs[0]],[x_obs[1],y_obs[1]],[x_obs[2],y_obs[2]],[x_obs[3],y_obs[3]]])
+        Vc = VServoing(Target,Obs,newZ,lambda_)
+=======
     try:
         Z = np.array([depthImage[obs_corner_1[1]][obs_corner_1[0]],depthImage[obs_corner_2[1]][obs_corner_2[0]],depthImage[obs_corner_3[1]][obs_corner_3[0]],depthImage[obs_corner_4[1]][obs_corner_4[0]]]) #change here
         Target = np.array([[x_[0],y_[0]],[x_[1],y_[1]],[x_[2],y_[2]],[x_[3],y_[3]]])
         Obs = np.array([[x_obs[0],y_obs[0]],[x_obs[1],y_obs[1]],[x_obs[2],y_obs[2]],[x_obs[3],y_obs[3]]])
         Vc = VServoing(Target,Obs,Z,lambda_)
+>>>>>>> main
     except:
         Vc = np.zeros(6)
     for i in range(0,len(Vc)):
         if abs(Vc[i])<0.000001:
-            Vc[i] = float(0)  
+            Vc[i] = float(0)
     
+    # for i in range(0,len(Vc_array[:][1])):
+    # newVc = filterData(Vc_array)
+    xy = [float(x_centre),float(y_centre)]
+    vcCount = vcCount + 1
+    Vc_array[:][i] = Vc
+    if vcCount == index:
+        vcCount = 0
+        newVc = filterData(Vc_array)
+        talker(newVc,xy)
+
     
+    # try:
+    #     Z = np.array([depthImage[obs_corner_1[1]][obs_corner_1[0]],depthImage[obs_corner_2[1]][obs_corner_2[0]],depthImage[obs_corner_3[1]][obs_corner_3[0]],depthImage[obs_corner_4[1]][obs_corner_4[0]]]) #change here
+    #     Target = np.array([[x_[0],y_[0]],[x_[1],y_[1]],[x_[2],y_[2]],[x_[3],y_[3]]])
+    #     Obs = np.array([[x_obs[0],y_obs[0]],[x_obs[1],y_obs[1]],[x_obs[2],y_obs[2]],[x_obs[3],y_obs[3]]])
+    #     Vc = VServoing(Target,Obs,Z,lambda_)
+        
+            
+    # except:
+    #     Vc = np.zeros(6)
+    # for i in range(0,len(Vc)):
+    #     if abs(Vc[i])<0.000001:
+    #         Vc[i] = float(0)
 
     # print(Vc)
-    xy = [float(x_centre),float(y_centre)]
+    # xy = [float(x_centre),float(y_centre)]
     
-    talker(Vc,xy)
+    # talker(Vc,xy)
     
     # pub = rospy.Publisher('/colourChatter', PointStamped, queue_size=10)
     # point = PointStamped()
@@ -287,6 +350,9 @@ def callback(image, depth):
     # rate.sleep()
             
 def talker(Vc,xy):
+    global vcCount
+    global Vc_array
+    global index
     pub = rospy.Publisher('ColourDetectionChatter', Float32MultiArray, queue_size=10)
     rate = rospy.Rate(10) # 10hz
     array_ = ([Vc[0],Vc[1],Vc[2],Vc[3],Vc[4],Vc[5],xy[0],xy[1]])
@@ -294,6 +360,7 @@ def talker(Vc,xy):
     pub_data = Float32MultiArray(data = array_)
     rospy.loginfo(pub_data)
     pub.publish(pub_data)  
+    Vc_array = np.zeros([index,6])
     rate.sleep()   
     
     

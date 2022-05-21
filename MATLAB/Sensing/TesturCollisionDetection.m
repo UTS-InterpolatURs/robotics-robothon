@@ -16,7 +16,7 @@ classdef TesturCollisionDetection < handle
         centrePoints
         radiis
         obstaclePoints
-        
+
     end
     methods
         function self = TesturCollisionDetection(robot)
@@ -35,7 +35,7 @@ classdef TesturCollisionDetection < handle
             self.radiis(4,:) = [0.5,0.10,0.10];
             self.radiis(5,:) = [0.10,0.10,0.10];
             self.radiis(6,:) = [0.10,0.10,0.10];
-            self.radiis(7,:) = [0.10,0.10,0.15];
+            self.radiis(7,:) = [0.10,0.10,0.30];
             self.centrePoints(1,:) = [0,0,0];
             self.centrePoints(2,:) = [0,0,0];
             self.centrePoints(3,:) = [self.radiis(3,1)/2,0,self.radiis(3,3)*2];
@@ -43,14 +43,15 @@ classdef TesturCollisionDetection < handle
             self.centrePoints(5,:) = [0,0,0];
             self.centrePoints(6,:) = [0,0,0];
             self.centrePoints(7,:) = [0,0,0];
-            
-%             self.jointStatesCallback();
-%             self.imageSubcriber = rossubscriber('/camera/aligned_depth_to_color/image_raw_throttle',@self.imageCallback);
-%                         self.imageSubcriber = rossubscriber('/camera/aligned_depth_to_color/image_raw');
-%                         pause(0.4);
-%                         self.imageCallback();
+
+
+            %             self.jointStatesCallback();
+            %             self.imageSubcriber = rossubscriber('/camera/aligned_depth_to_color/image_raw_throttle',@self.imageCallback);
+            %                         self.imageSubcriber = rossubscriber('/camera/aligned_depth_to_color/image_raw');
+            %                         pause(0.4);
+            %                         self.imageCallback();
         end
-        
+
         function drawEllipsoid(self)
             X = zeros(21,21,self.robot.model.n+1);
             Y = zeros(21,21,self.robot.model.n+1);
@@ -65,10 +66,38 @@ classdef TesturCollisionDetection < handle
                 warning on;
             end
             self.robot.model.plot3d(self.robot.model.getpos());
-            
+
         end
-        
-        
+        function [points] = getLightcurtain(self)
+            [Y,Z] = meshgrid(-1:0.1:1,-1:0.1:1);
+            sizeMat = size(Y);
+            X = repmat(1,sizeMat(1),sizeMat(2));
+            points = [X,Y,Z]
+        end
+
+        function [check] = lightCurtainDetected(self)
+            check = 0;
+            points2Check = self.getObstaclePoints();
+            col_flag = false;
+            %             updatedPoints = self.getLightcurtain();
+            centrePoints_ = [0,-1.2,0];
+            radi = [1,0.01,1];
+%             [X,Y,Z] = ellipsoid( centrePoints_ (1), centrePoints_ (2), centrePoints_ (3), radi(1), radi(2), radi(3) );
+%             hold on;
+%             ellipsoidAtOrigin_h = surf(X,Y,Z);
+            algebraicDist = self.GetAlgebraicDist(points2Check, centrePoints_, radi);
+            pointsInside = find(algebraicDist < 1);
+            %                     display(['There are ', num2str(size(pointsInside,1)),' points inside the ',num2str(i),'th ellipsoid']);
+            if pointsInside > 0
+                col_flag = true;
+            end
+
+            if col_flag == true
+                check = 1;
+            end
+
+        end
+
         function generatePointClouds(self)
             self.imageSubcriber = rossubscriber('/camera/aligned_depth_to_color/image_raw');
             pause(0.4);
@@ -98,7 +127,12 @@ classdef TesturCollisionDetection < handle
             hold off
             pcshow(self.pClouds_mask(:,:));
         end
-        
+        function plotPointCloudwithRobot(self)
+            hold on
+            pointCloudwithRobot_h = plot3(self.pClouds_mask(:,1),self.pClouds_mask(:,2),self.pClouds_mask(:,3),'r.');
+
+        end
+
         function [col_array] = checkCollision(self,qmatrix)
             self.setJointStates(qmatrix);
             col_array = zeros(length(self.qmatrix(:,1)),1);
@@ -108,14 +142,14 @@ classdef TesturCollisionDetection < handle
                 tr = zeros(4,4,self.robot.model.n+1);
                 tr(:,:,1) = self.robot.model.base;
                 for i = 1:self.robot.model.n
-                    tr(:,:,i+1) = tr(:,:,i) * trotz(self.qmatrix(q,i)) * transl(self.a_ur(i), 0, self.d_ur(i)) * trotx(self.alpha_ur(i));                   
+                    tr(:,:,i+1) = tr(:,:,i) * trotz(self.qmatrix(q,i)) * transl(self.a_ur(i), 0, self.d_ur(i)) * trotx(self.alpha_ur(i));
                 end
-                for i = 1: size(tr,3)     
+                for i = 1: size(tr,3)
                     pointsAndOnes = [inv(tr(:,:,i)) * [points2Check,ones(size(points2Check,1),1)]']';
                     updatedPoints = pointsAndOnes(:,1:3);
                     algebraicDist = self.GetAlgebraicDist(updatedPoints, self.centrePoints(i,:), self.radiis(i,:));
                     pointsInside = find(algebraicDist < 1);
-%                     display(['There are ', num2str(size(pointsInside,1)),' points inside the ',num2str(i),'th ellipsoid']);
+                    %                     display(['There are ', num2str(size(pointsInside,1)),' points inside the ',num2str(i),'th ellipsoid']);
                     if pointsInside > 0
                         col_flag = true;
                     end
@@ -125,36 +159,41 @@ classdef TesturCollisionDetection < handle
                 end
             end
         end
- 
+
         function [updatedPoints] = getObstaclePoints(self)
             updatedPoints = self.obstaclePoints;
         end
-        
+
         function setObstaclePoints(self,points)
             self.obstaclePoints = [self.obstaclePoints;points];
         end
-          
+
         function setJointStates(self,qmatrix_)
-%             q0 = [pi, -pi / 2, pi / 2, -pi / 2, -pi / 2, 0];
-%            
-%             q1 = deg2rad([180 -45 90 -135 -90 0]);
-%             Tr = [0.9985 -0.0094 -0.0531 0.5938;
-%                 -0.0096 -0.9999 -0.0034 -0.0014
-%                 -0.0530 0.0039 -0.9986 0.3474
-%                 0 0 0 1.0000];
-%             
-%             q2 = self.robot.model.ikcon(Tr,q0);
-            
+            %             q0 = [pi, -pi / 2, pi / 2, -pi / 2, -pi / 2, 0];
+            %
+            %             q1 = deg2rad([180 -45 90 -135 -90 0]);
+            %             Tr = [0.9985 -0.0094 -0.0531 0.5938;
+            %                 -0.0096 -0.9999 -0.0034 -0.0014
+            %                 -0.0530 0.0039 -0.9986 0.3474
+            %                 0 0 0 1.0000];
+            %
+            %             q2 = self.robot.model.ikcon(Tr,q0);
+
             % q2 = [0.0000 -0.5946 -5.1732 4.1970 4.7124 6.2832];
             self.qmatrix = qmatrix_;
         end
-        
+
 
         function algebraicDist = GetAlgebraicDist(self,points, centerPoint, radii)
-            
+
             algebraicDist = ((points(:,1)-centerPoint(1))/radii(1)).^2 ...
                 + ((points(:,2)-centerPoint(2))/radii(2)).^2 ...
                 + ((points(:,3)-centerPoint(3))/radii(3)).^2;
+        end
+
+
+        function ClearObstaclePoints(self)
+            self.obstaclePoints = [50,50,50];
         end
     end
 end

@@ -1,4 +1,4 @@
-classdef RobotController< handle
+classdef RobotControllerTwo< handle
     %TRAJECTORYGENERATOR Summary of this class goes here
     %   Detailed explanation goes here
 
@@ -8,21 +8,17 @@ classdef RobotController< handle
         realBot
         collisionComputer
         checkCollisionFlag
-        delay
         controlFrequency
-        animateSim
     end
 
     methods
-        function self = RobotController(robot, collisionComputer, realBot)
+        function self = RobotControllerTwo(robot, collisionComputer, realBot)
             %TRAJECTORYGENERATOR Construct an instance of this class
             %   Detailed explanation goes here
             self.robot = robot;
             self.collisionComputer = collisionComputer;
             self.checkCollisionFlag = false;
-            self.delay = 0.1;
             self.controlFrequency = 0.05;
-            self.animateSim = false;
             if ~exist('realBot','var') || isempty(realBot)
                 self.useRos=false;
             else
@@ -31,12 +27,15 @@ classdef RobotController< handle
             end
         end
         function qMatrix = GenerateJointTrajectory(self,goalPose,steps,jointMask)
-            if ~exist("jointMask", "var")
-                jointMask = [1,1,1,1,1,1];
-            end
             goalPoseAdjusted = self.robot.GetGoalPose(goalPose);
             robotQ = self.robot.model.getpos();
-            goalQ = self.robot.model.ikcon(goalPoseAdjusted, robotQ);
+            if exist("jointMask", "var")
+                goalQ = self.robot.model.ikine(goalPoseAdjusted, robotQ, jointMask);
+            else
+                goalQ = self.robot.model.ikcon(goalPoseAdjusted, robotQ);
+
+            end
+
             %             baseToOriginTR = inv(self.robot.model.base);
             %             robotToObject = baseToOriginTR * goalPoseAdjusted;
             %             viaQ = robotq;
@@ -58,19 +57,18 @@ classdef RobotController< handle
 
             model = self.robot.model;
             currentPose = model.fkine(model.getpos());
+            deltaT = self.controlFrequency;      % Control frequency
+            steps = duration/deltaT;             % Total time (s)
 
-
-            % Total time (s)
-            deltaT = self.controlFrequency ;     % Control frequency
-            steps = duration/deltaT;
-            X = zeros(3,steps);
             qMatrix = zeros(steps,6);
-            qdot = zeros(steps,6);
-            W = diag([1 1 1 0.1 0.1 0.1]);    % Weighting matrix for the velocity vector
+
+            X = zeros(3,steps);
+
+            W = diag([1 1 1 0.15 0.15 0.15]);    % Weighting matrix for the velocity vector
             if exist('velocityMask','var')
-                W = diag([velocityMask]);
+                W = diag(velocityMask);
             end
-            epsilon = 0.015;      % Threshold value for manipulability/Damped Least Squares
+            epsilon = 0.01;      % Threshold value for manipulability/Damped Least Squares
             theta = zeros(3,steps);         % Array for roll-pitch-yaw angles
 
 
@@ -126,21 +124,21 @@ classdef RobotController< handle
 
         end
 
-        function qMatrix = moveCartesian(self, x ,steps)
+        function qMatrix = moveCartesian(self, x ,duration)
             currentPose = self.robot.GetEndEffPose();
             goalPose = transl(x) * currentPose;
             velocityMask = [1,1,1,0,0,0];
 
-            qMatrix = self.GenerateLinearTrajectory(goalPose,steps, velocityMask);
+            qMatrix = self.GenerateLinearTrajectory(goalPose,duration, velocityMask);
         end
 
-        function success = ExecuteTrajectory(self, qMatrix, duration, object)
+        function success = ExecuteTrajectory(self, qMatrix, object)
             trajPatchIndex = 0;
             avoidanceFlag = 0;
             restartFlag = false;
             if(self.useRos)
                 self.robot.model.animate(self.realBot.current_joint_states.Position);
-                self.realBot.sendJointTrajectory(qMatrix);
+                self.realBot.sendJointTrajectory(qMatrix, self.controlFrequency);
             end
 
 
@@ -152,18 +150,18 @@ classdef RobotController< handle
                     end
 
                 end
-                tic
-                while(toc < 30)
-                    if(self.robot.eStopStatus == 0)
-                        break;
-                    end
-                    pause(0.1);
-                end
-                if (toc >= 30)
-                    disp("estop timeout triggered, please restart program");
-                    success = false;
-                    return;
-                end
+%                 tic
+%                 while(toc < 30)
+%                     if(self.robot.eStopStatus == 0)
+%                         break;
+%                     end
+%                     pause(0.1);
+%                 end
+%                 if (toc >= 30)
+%                     disp("estop timeout triggered, please restart program");
+%                     success = false;
+%                     return;
+%                 end
 
 
                 if restartFlag == true
@@ -171,13 +169,6 @@ classdef RobotController< handle
                 end
 
                 if(self.checkCollisionFlag == true)
-                    %check light curtain for collision
-                    if(self.collisionComputer.lightCurtainDetected)
-                        self.delay = 0.3;
-                        disp("Object detected in work zone - reducing speed")
-                    else
-                        self.delay = 0.1;
-                    end
                     result = false;
                     try result = self.collisionComputer.checkCollision(qMatrix(i,:));
                     end
@@ -219,16 +210,10 @@ classdef RobotController< handle
                 if exist('object','var')
                     object.MoveModel(self.robot.GetEndEffPose() * trotx(pi));
                 end
-
-                tic
-                while(toc <= duration)
-                if(self.animateSim)
                     drawnow();
                     pause(self.controlFrequency);
-                end
-                end
-                
-                
+
+       
             end
 
             success = true;
