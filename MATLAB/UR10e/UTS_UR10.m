@@ -8,6 +8,7 @@ classdef UTS_UR10 < handle
         workspace = [-3 3 -3 3 -0.91 4];
         toolOffset = 0.275354;
         neutralQ;
+        neutralPose;
         realSenseTf;
         gripperTf
     end
@@ -36,6 +37,7 @@ classdef UTS_UR10 < handle
             self.PlotAndColourRobot();
             self.eStopStatus = 0;
             self.neutralQ = [-pi/2,-pi/2,-pi/2,-pi/2,pi/2,pi/4];
+            self.neutralPose = transl(-0.1639, -0.6873, 0.5278) * trotx(pi);
         end
 
         %% GetUR10Robot

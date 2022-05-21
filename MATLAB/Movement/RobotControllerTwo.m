@@ -242,9 +242,13 @@ classdef RobotControllerTwo< handle
                 self.robot.model.animate(self.realBot.current_joint_states.Position);
             end
             currentQ = self.robot.model.getpos();
-
+            
             traj = jtraj(currentQ, self.robot.neutralQ, 100);
             self.ExecuteTrajectory(traj);
+%             traj = self.GenerateJointTrajectory(self.robot.neutralPose, 100);
+%             self.ExecuteTrajectory(traj);
+
+
         end
 
         function SetToolCamera(self)
