@@ -10,8 +10,17 @@ classdef Taskboard < handle
     end
     
     properties (Access = private)
+        keyPoseInit;
+        cablePoseInit;
+        battCapPoseInit;
+        battCoinPoseInit;
+        battAA1PoseInit;
+        battAA2PoseInit;
+    end
+    
+    properties (Access = private)
         keyOffset = transl(-0.08861,0.0452,-0.0037) * rpy2tr(0,0,0);
-        cableOffset = transl(-0.005044,-0.022093,0.02124) * rpy2tr(0,0,pi);
+        cableOffset = transl(-0.005044,-0.022093,0.02124) * rpy2tr(0,0,0);
         battCapOffset = transl(-0.03674,0.0397,0.007386) * rpy2tr(0,0,0);
         battCoinOffset = transl(0.06404,-0.03233,0.001) * rpy2tr(0,0,0);
         battAA1Offset = transl(-0.04495,0.047206,0.0012084) * rpy2tr(0,0,0);
@@ -20,13 +29,19 @@ classdef Taskboard < handle
     
     methods
         function self = Taskboard(spawnPose)
-            self.mainboard = Environment("Taskboard.ply", spawnPose);
-            self.key = Environment("TaskboardKey.ply", spawnPose * self.keyOffset);
-            self.cable = Environment("EthernetCable.ply", spawnPose * self.cableOffset);
-            self.battCap = Environment("AABatteryCap.ply", spawnPose * self.battCapOffset);
-            self.battCoin = Environment("CoinBattery.ply", spawnPose * self.battCoinOffset);
-            self.battAA1 = Environment("AABattery.ply", spawnPose * self.battAA1Offset);
-            self.battAA2 = Environment("AABattery.ply", spawnPose * self.battAA2Offset);
+            self.mainboard = ModelGen("Taskboard.ply", spawnPose);
+            self.key = ModelGen("TaskboardKey.ply", spawnPose * self.keyOffset);
+            self.keyPoseInit = self.key.GetPose();
+            self.cable = ModelGen("EthernetCable.ply", spawnPose * self.cableOffset);
+            self.cablePoseInit = self.cable.GetPose();
+            self.battCap = ModelGen("AABatteryCap.ply", spawnPose * self.battCapOffset);
+            self.battCapPoseInit = self.battCap.GetPose();
+            self.battCoin = ModelGen("CoinBattery.ply", spawnPose * self.battCoinOffset);
+            self.battCoinPoseInit = self.battCoin.GetPose();
+            self.battAA1 = ModelGen("AABattery.ply", spawnPose * self.battAA1Offset);
+            self.battAA1PoseInit = self.battAA1.GetPose();
+            self.battAA2 = ModelGen("AABattery.ply", spawnPose * self.battAA2Offset);
+            self.battAA2PoseInit = self.battAA2.GetPose();
         end
         
         function PlotTaskboard(self)
@@ -38,24 +53,23 @@ classdef Taskboard < handle
             self.battAA1.PlotModel();
             self.battAA2.PlotModel();
         end
-        
-        function MoveTaskboard(self, goalPose)
-            self.mainboard.MoveModel(goalPose);
-            self.key.MoveModel(goalPose);
-            self.cable.MoveModel(goalPose);
-            self.battCap.MoveModel(goalPose);
-            self.battCoin.MoveModel(goalPose);
-            self.battAA1.MoveModel(goalPose);
-            self.battAA2.MoveModel(goalPose);
+             
+        function ResetComponents(self)
+            self.key.MoveModel(self.keyPoseInit);
+            self.cable.MoveModel(self.cablePoseInit);
+            self.battCap.MoveModel(self.battCapPoseInit);
+            self.battCoin.MoveModel(self.battCoinPoseInit);
+            self.battAA1.MoveModel(self.battAA1PoseInit);
+            self.battAA2.MoveModel(self.battAA2PoseInit);
         end
         
         function cableSlotPose = GetGoalCableSlot1(self)
-            cableSlot1Offset = transl(-0.005140321,-0.0220078,0.02124) * rpy2tr(0,0,pi);
+            cableSlot1Offset = transl(-0.005140321,-0.0220078,0.02124) * rpy2tr(0,0,0);
             cableSlotPose = self.mainboard.GetPose() * cableSlot1Offset;
         end
         
         function cableSlotPose = GetGoalCableSlot2(self)
-            cableSlot1Offset = transl(-0.046140301,-0.0220078,0.02124) * rpy2tr(0,0,pi);
+            cableSlot1Offset = transl(-0.046140301,-0.0220078,0.02124) * rpy2tr(0,0,0);
             cableSlotPose = self.mainboard.GetPose() * cableSlot1Offset;
         end
         

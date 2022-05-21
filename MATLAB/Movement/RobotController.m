@@ -6,13 +6,17 @@ classdef RobotController< handle
         robot
         useRos
         realBot
+        collisionComputer
+        checkCollisionFlag
     end
 
     methods
-        function self = RobotController(robot, realBot)
+        function self = RobotController(robot, collisionComputer, realBot)
             %TRAJECTORYGENERATOR Construct an instance of this class
             %   Detailed explanation goes here
             self.robot = robot;
+            self.collisionComputer = collisionComputer;
+            self.checkCollisionFlag = false;
             if ~exist('realBot','var') || isempty(realBot)
                 self.useRos=false;
             else
@@ -20,7 +24,10 @@ classdef RobotController< handle
                 self.realBot = realBot;
             end
         end
-        function qMatrix = GenerateJointTrajectory(self,goalPose,steps)
+        function qMatrix = GenerateJointTrajectory(self,goalPose,steps,jointMask)
+            if ~exist("jointMask", "var")
+                jointMask = [1,1,1,1,1,1];
+            end
             goalPoseAdjusted = self.robot.GetGoalPose(goalPose);
             robotQ = self.robot.model.getpos();
             goalQ = self.robot.model.ikcon(goalPoseAdjusted, robotQ);
@@ -49,7 +56,7 @@ classdef RobotController< handle
             qMatrix = zeros(steps,6);
             t = 10;             % Total time (s)
             deltaT = steps*t;      % Control frequency
-            W = diag([1 1 1 0.15 0.15 0.15]);    % Weighting matrix for the velocity vector
+            W = diag([1 1 1 0.1 0.1 0.1]);    % Weighting matrix for the velocity vector
             if exist('velocityMask','var')
                 W = diag([velocityMask]);
             end
@@ -85,7 +92,6 @@ classdef RobotController< handle
                 S = Rdot*Ra';                                                           % Skew symmetric!
                 linear_velocity = (1/deltaT)*deltaX;
                 angular_velocity = [S(3,2);S(1,3);S(2,1)];                              % Check the structure of Skew Symmetric matrix!!
-                deltaTheta = tr2rpy(Rd*Ra');                                            % Convert rotation matrix to RPY angles
                 xdot = W*[linear_velocity;angular_velocity];                          	% Calculate end-effector velocity to reach next waypoint.
                 J = model.jacob0(qMatrix(i,:));                 % Get Jacobian at current joint state
                 m(i) = sqrt(det(J*J'));
@@ -118,7 +124,9 @@ classdef RobotController< handle
             qMatrix = self.GenerateLinearTrajectory(goalPose,steps, velocityMask);
         end
 
-        function ExecuteTrajectory(self, qMatrix, object)
+        function success = ExecuteTrajectory(self, qMatrix, object)
+            trajPatchIndex = 0;
+            avoidanceFlag = 0;
             restartFlag = false;
             if(self.useRos)
                 self.robot.model.animate(self.realBot.current_joint_states.Position);
@@ -134,12 +142,60 @@ classdef RobotController< handle
                     end
 
                 end
-                while(self.robot.eStopStatus == 1)
+                tic
+                while(toc < 30)
+                    if(self.robot.eStopStatus == 0)
+                        break;
+                    end
                     pause(0.1);
                 end
+                if (toc >= 30)
+                    disp("estop timeout triggered, please restart program");
+                    success = false;
+                    return;
+                end
+
 
                 if restartFlag == true
                     self.realBot.play();
+                end
+
+                if(self.checkCollisionFlag == true)
+                    result = false;
+                    try result = self.collisionComputer.checkCollision(qMatrix(i,:));
+                    end
+
+                    if(result == true)
+                        disp("COLLISION IMMINENT - COLLISION AVOIDANCE ACTIVATED!")
+                        traj = self.robot.model.getpos;
+                        for j = 1:5
+                            traj = [traj; qMatrix(i-j,:)];
+                        end
+                        self.ExecuteTrajectory(traj);
+
+                        traj = self.moveCartesian([0,0,0.3], 20);
+                        self.ExecuteTrajectory(traj);
+
+                        checkMatrix = qMatrix(i:end,:);
+                        resultMatrix = self.collisionComputer.checkCollision(checkMatrix);
+
+                        for k = 1:(size(resultMatrix, 1))
+                            index = (i-1) + k;
+                            if(resultMatrix(k) == true)                           
+                                newGoal = self.robot.model.fkine(qMatrix(index,:)) * transl(0,0,-0.3);
+                                qMatrix(index,:) = self.robot.model.ikcon(newGoal,qMatrix(index, :));
+                                avoidanceFlag = 1;
+                                trajPatchIndex = index;
+                            end
+                        end
+
+                    end
+
+                end
+
+                if(avoidanceFlag == true && i == trajPatchIndex + 1)
+                    traj = jtraj(qMatrix(i-1,:),qMatrix(i,:), 20);
+                    self.ExecuteTrajectory(traj);
                 end
 
                 self.robot.model.animate(qMatrix(i,:))
@@ -149,6 +205,9 @@ classdef RobotController< handle
                 drawnow();
                 pause(0.1);
             end
+
+            success = true;
+
 
         end
 
@@ -166,6 +225,16 @@ classdef RobotController< handle
                 self.realBot.gripper.closeGripper(effort);
             end
             self.robot.SetGripperState("gripperState", 1)
+        end
+
+        function MoveToNeutral(self)
+            if(self.useRos)
+                self.robot.model.animate(self.realBot.current_joint_states.Position);
+            end
+            currentQ = self.robot.model.getpos();
+
+            traj = jtraj(currentQ, self.robot.neutralQ, 100);
+            self.ExecuteTrajectory(traj);
         end
     end
 end
