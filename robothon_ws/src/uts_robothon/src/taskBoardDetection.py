@@ -535,7 +535,7 @@ def callback(image, depth,box_centre):
         else:
             stop_count = 0
 
-        if stop_count == 3:
+        if stop_count == 2:
             stop_flag = True
             print("stop flag raised")
         if stop_flag == False:
