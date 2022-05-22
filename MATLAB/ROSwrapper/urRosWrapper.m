@@ -31,7 +31,7 @@ classdef urRosWrapper < handle
 
         function jointStatesCallback(self,~,msg)
 
-            % display (msg.Data)
+%              display (msg.Position)
             self.current_joint_states = msg;
             currentJointState_321456 = (msg.Position)'; % Note the default order of the joints is 3,2,1,4,5,6
 
@@ -101,6 +101,7 @@ classdef urRosWrapper < handle
             req.Speed_Slider_Fraction = slider;
             call(sliderClient,req,"Timeout",1);
         end
+
 
     end
 end

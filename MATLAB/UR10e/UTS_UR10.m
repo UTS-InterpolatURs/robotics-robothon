@@ -11,6 +11,8 @@ classdef UTS_UR10 < handle
         neutralPose;
         realSenseTf;
         gripperTf
+        robotBusy
+        acceptCommand
     end
 
     properties (Access = private)
@@ -38,6 +40,8 @@ classdef UTS_UR10 < handle
             self.eStopStatus = 0;
             self.neutralQ = [-pi/2,-pi/2,-pi/2,-pi/2,pi/2,pi/4];
             self.neutralPose = transl(-0.1639, -0.6873, 0.5278) * trotx(pi);
+            self.robotBusy = false;
+            self.acceptCommand = false;
         end
 
         %% GetUR10Robot

@@ -22,7 +22,7 @@ function varargout = RobothonSimGui(varargin)
 
 % Edit the above text to modify the response to help RobothonSimGui
 
-% Last Modified by GUIDE v2.5 18-May-2022 10:11:26
+% Last Modified by GUIDE v2.5 22-May-2022 14:46:39
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -70,6 +70,7 @@ set(handles.speed_slider, 'Min', 0);
 set(handles.speed_slider, 'Max', 1);
 set(handles.speed_slider, 'Value', 1);
 set(handles.zoom_button, 'Value', 0);
+set(handles.accept_command_toggle, 'Value', 0);
 set(handles.tight_view_button, 'Value', 0);
 set(handles.e_stop, 'Value', 0);
 set(handles.check_collision_button, 'Value', 0);
@@ -889,7 +890,7 @@ function close_gripper_callback_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 if(handles.usingRealBot)
-    handles.realBot.gripper.closeGripper(1100);
+    handles.realBot.gripper.closeGripper(1000);
 end
 handles.robot.SetGripperState("gripperState", 1)
 
@@ -900,7 +901,7 @@ function cable_move_button_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-PickAndPlaceEthCable(handles.robot, handles.robotController, handles.taskboard);
+PickAndPlaceEthCableTwo(handles.robot, handles.robotController, handles.taskboard);
 
 
 % --- Executes on button press in zoom_button.
@@ -1023,4 +1024,45 @@ if (get(hObject,'Value') == 1)
 else
     figure(1);
     axis tight
+end
+
+
+% --- Executes on button press in neutral_pose_button.
+function neutral_pose_button_Callback(hObject, eventdata, handles)
+% hObject    handle to neutral_pose_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+handles.robotController.MoveToNeutral();
+
+
+% --- Executes on button press in camera_tool_button.
+function camera_tool_button_Callback(hObject, eventdata, handles)
+% hObject    handle to camera_tool_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.robotController.SetToolCamera;
+
+% --- Executes on button press in gripper_tool_button.
+function gripper_tool_button_Callback(hObject, eventdata, handles)
+% hObject    handle to gripper_tool_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.robotController.SetToolGripper;
+
+
+% --- Executes on button press in accept_command_toggle.
+function accept_command_toggle_Callback(hObject, eventdata, handles)
+% hObject    handle to accept_command_toggle (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of accept_command_toggle
+
+if (get(hObject,'Value') == 0)
+handles.robot.acceptCommand = false;
+
+else
+handles.robot.acceptCommand = true;
+disp("robot is accepting commands");
 end

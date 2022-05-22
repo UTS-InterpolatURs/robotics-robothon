@@ -9,6 +9,7 @@ classdef RobotControllerTwo< handle
         collisionComputer
         checkCollisionFlag
         controlFrequency
+        desiredJointStateSubscriber
     end
 
     methods
@@ -24,15 +25,18 @@ classdef RobotControllerTwo< handle
             else
                 self.useRos = true;
                 self.realBot = realBot;
+                self.desiredJointStateSubscriber = rossubscriber('/desired_joint_state', @self.desiredJointStatesCallback, 'sensor_msgs/JointState',"DataFormat","struct");
+
             end
         end
-        function qMatrix = GenerateJointTrajectory(self,goalPose,steps,jointMask)
-            goalPoseAdjusted = self.robot.GetGoalPose(goalPose);
+        function qMatrix = GenerateJointTrajectory(self,goalPose,duration,jointMask)
+            timescale = 0:self.controlFrequency:duration;
+            %             goalPoseAdjusted = self.robot.GetGoalPose(goalPose);
             robotQ = self.robot.model.getpos();
             if exist("jointMask", "var")
-                goalQ = self.robot.model.ikine(goalPoseAdjusted, robotQ, jointMask);
+                goalQ = self.robot.model.ikine(goalPose, robotQ, jointMask);
             else
-                goalQ = self.robot.model.ikcon(goalPoseAdjusted, robotQ);
+                goalQ = self.robot.model.ikcon(goalPose, robotQ);
 
             end
 
@@ -46,7 +50,7 @@ classdef RobotControllerTwo< handle
 
             %             targetQ = self.robot.model.ikcon(goalPoseAdjusted, self.robot.model.getpos());
             %             qMatrix = [qMatrix; jtraj(qMatrix(end,:), targetQ, steps)];
-            qMatrix = jtraj(robotQ, goalQ, steps);
+            qMatrix = jtraj(robotQ, goalQ, timescale);
         end
 
         function qMatrix = GenerateLinearTrajectory(self,goalPose,duration, velocityMask)
@@ -124,21 +128,25 @@ classdef RobotControllerTwo< handle
 
         end
 
-        function qMatrix = moveCartesian(self, x ,duration)
+        function moveCartesian(self, x ,duration)
             currentPose = self.robot.GetEndEffPose();
             goalPose = transl(x) * currentPose;
             velocityMask = [1,1,1,0,0,0];
 
             qMatrix = self.GenerateLinearTrajectory(goalPose,duration, velocityMask);
+
+            self.ExecuteTrajectory(qMatrix);
         end
 
         function success = ExecuteTrajectory(self, qMatrix, object)
+            self.robot.robotBusy = true;
             trajPatchIndex = 0;
             avoidanceFlag = 0;
             restartFlag = false;
             if(self.useRos)
                 self.robot.model.animate(self.realBot.current_joint_states.Position);
                 self.realBot.sendJointTrajectory(qMatrix, self.controlFrequency);
+                drawnow();
             end
 
 
@@ -218,7 +226,7 @@ classdef RobotControllerTwo< handle
 
             success = true;
 
-
+            self.robot.robotBusy = false;
         end
 
 
@@ -242,16 +250,24 @@ classdef RobotControllerTwo< handle
                 self.robot.model.animate(self.realBot.current_joint_states.Position);
             end
             currentQ = self.robot.model.getpos();
-            
-            traj = jtraj(currentQ, self.robot.neutralQ, 100);
+
+            if(self.robot.model.tool == self.robot.realSenseTf)
+                traj = jtraj(currentQ, [-1.5710, -1.3736, -2.0368, -0.9529, 1.5709, 0.7852], 100);
+            else
+                traj = jtraj(currentQ, self.robot.neutralQ, 100);
+            end
             self.ExecuteTrajectory(traj);
-%             traj = self.GenerateJointTrajectory(self.robot.neutralPose, 100);
-%             self.ExecuteTrajectory(traj);
+            %             traj = self.GenerateJointTrajectory(self.robot.neutralPose, 100);
+            %             self.ExecuteTrajectory(traj);
 
 
         end
 
         function SetToolCamera(self)
+            if(self.robot.model.tool == self.robot.realSenseTf)
+                disp("Tool is already set to camera");
+                return
+            end
             if(self.useRos)
                 self.robot.model.animate(self.realBot.current_joint_states.Position);
             end
@@ -269,6 +285,10 @@ classdef RobotControllerTwo< handle
         end
 
         function SetToolGripper(self)
+            if(self.robot.model.tool == self.robot.gripperTf)
+                disp("Tool is already set to camera");
+                return
+            end
             if(self.useRos)
                 self.robot.model.animate(self.realBot.current_joint_states.Position);
             end
@@ -276,12 +296,21 @@ classdef RobotControllerTwo< handle
             currentPose = self.robot.model.fkine(currentQ);
             newPose = currentPose * trotz(-pi/2);
             self.robot.model.tool = self.robot.gripperTf;
-    
+
             newQ = self.robot.model.ikcon(newPose, currentQ);
             traj = jtraj(currentQ, newQ, 30);
             self.ExecuteTrajectory(traj);
 
 
+        end
+
+        function desiredJointStatesCallback(self, ~, msg)
+            if(self.robot.robotBusy || self.robot.acceptCommand == false)
+                disp("robot is busy");
+                return;
+            end
+            traj = jtraj(self.realBot.current_joint_states.Position, msg.Position, 25);
+            self.ExecuteTrajectory(traj);
         end
     end
 end
