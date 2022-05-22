@@ -13,7 +13,7 @@ classdef urVisualServoing <handle
     methods
         function self = urVisualServoing(robot)
             self.robot = robot;
-            self.vsSubscriber =  rossubscriber('/ColourDetectionChatter_throttle',@self.subscriberCallBackVS);
+            self.vsSubscriber =  rossubscriber('/ColourDetectionChatter',@self.subscriberCallBackVS);
             self.jointStatesSubscriber = rossubscriber('/joint_states_throttle',@self.jointStatesCallback,"DataFormat","struct");
             %             self.jointStatesSubscriber = rossubscriber('/joint_states',"DataFormat","struct");
             self.jointPublisher = rospublisher('/desired_joint_state', 'sensor_msgs/JointState');

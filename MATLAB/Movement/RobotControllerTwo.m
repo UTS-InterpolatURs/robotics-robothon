@@ -9,7 +9,9 @@ classdef RobotControllerTwo< handle
         collisionComputer
         checkCollisionFlag
         controlFrequency
-        desiredJointStateSubscriber
+        %         desiredJointStateSubscriber
+        vsSubscriber
+        fps = 3
     end
 
     methods
@@ -25,7 +27,8 @@ classdef RobotControllerTwo< handle
             else
                 self.useRos = true;
                 self.realBot = realBot;
-                self.desiredJointStateSubscriber = rossubscriber('/desired_joint_state', @self.desiredJointStatesCallback, 'sensor_msgs/JointState',"DataFormat","struct");
+                %                 self.desiredJointStateSubscriber = rossubscriber('/desired_joint_state', @self.desiredJointStatesCallback, 'sensor_msgs/JointState',"DataFormat","struct");
+                self.vsSubscriber =  rossubscriber('/ColourDetectionChatter',@self.subscriberCallBackVS, 'std_msgs/Float32MultiArray');
 
             end
         end
@@ -57,7 +60,7 @@ classdef RobotControllerTwo< handle
             if(self.useRos)
                 self.robot.model.animate(self.realBot.current_joint_states.Position);
             end
-%             goalPoseAdjusted = self.robot.GetGoalPose(goalPose);
+            %             goalPoseAdjusted = self.robot.GetGoalPose(goalPose);
 
             model = self.robot.model;
             currentPose = model.fkine(model.getpos());
@@ -139,7 +142,7 @@ classdef RobotControllerTwo< handle
 
             qMatrix = self.GenerateLinearTrajectory(goalPose,duration, velocityMask);
             trplot(self.robot.model.fkine(qMatrix(end,:)))
-              self.ExecuteTrajectory(qMatrix);
+            self.ExecuteTrajectory(qMatrix);
         end
 
         function success = ExecuteTrajectory(self, qMatrix, object)
@@ -315,6 +318,48 @@ classdef RobotControllerTwo< handle
             end
             traj = jtraj(self.realBot.current_joint_states.Position, msg.Position, 25);
             self.ExecuteTrajectory(traj);
+        end
+
+        function subscriberCallBackVS(self,~,msg)
+            if(self.robot.acceptCommand)
+                self.robot.model.animate(self.realBot.current_joint_states.Position);
+                current_q = self.robot.model.getpos();
+                %             if self.hist_q ~= self.current_q
+                %             pause(3)
+                %             self.current_q = self.jointStatesSubscriber.LatestMessage.position;
+                %             self.robot.model.animate(self.current_q);
+
+                vc = msg.Data;
+                %             print(vc)
+                vcTemp = vc(1:6,1);
+                try
+                    J = self.robot.model.jacobn(current_q);
+                catch
+                    J = ones(6,6);
+                end
+                Jinv = pinv(J);
+                % get joint velocities
+                qp = Jinv*vcTemp;
+                ind=find(qp>pi);
+                if ~isempty(ind)
+                    qp(ind)=pi;
+                end
+                ind=find(qp<-pi);
+                if ~isempty(ind)
+                    qp(ind)=-pi;
+                end
+                new_q = current_q + (1/self.fps)*qp';
+                newQ = zeros(1,6);
+                for i = 1:6
+                    newQ(i) = new_q(i);
+                end
+
+                timescale = 0:self.controlFrequency:0.4;
+                traj = jtraj(current_q, newQ, timescale);
+                self.ExecuteTrajectory(traj);
+
+                %             end
+            end
         end
     end
 end
