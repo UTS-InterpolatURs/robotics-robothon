@@ -17,10 +17,12 @@ import message_filters
 from std_msgs.msg import Float32MultiArray
 import math
 
-index = 100
+index = 50
 Vc_array = np.zeros([index,6])
 vcCount = 0
 angle_flag = False
+stop_count = 0
+stop_flag = False
 
 class DetectandDraw:
 
@@ -256,11 +258,13 @@ def callback(image, depth,box_centre):
     global Vc_array
     global index
     global angle_flag
+    global stop_count
+    global stop_flag
 
     bridgeRGB = CvBridge()
     RGB = bridgeRGB.imgmsg_to_cv2(image, "bgr8")
     # edgeDetection(RGB)
-    print(box_centre)
+    # print(box_centre.y)
 
     # gray = cv.cvtColor(RGB,cv.COLOR_BGR2GRAY)
     # gray_float32 = np.float32(gray)
@@ -426,11 +430,11 @@ def callback(image, depth,box_centre):
     #test
 
     computed_angle = rotationChecker(x_centre,y_centre,Bx_centre,By_centre)
-    fdx = 918.7401
-    fdy = 918.3084
+    fdx = 915.1260
+    fdy = 913.8952
 
-    u0 = 647.2181
-    v0 = 345.8296
+    u0 = 647.3002
+    v0 = 349.3798
 
     
     
@@ -439,10 +443,10 @@ def callback(image, depth,box_centre):
     depthImage = bridgeDepth.imgmsg_to_cv2(depth, "32FC1" )
 
 
-    print(depthImage[719][1279])
+    # print(depthImage[359][639])
     tb = Depth_h(fdx,fdy,u0,v0,720,1280)
-    world_coor = tb.getGeometry(x_centre,y_centre,depthImage[y_centre][x_centre])
-    desired_height = 0.4
+    world_coor = tb.getGeometry(box_centre.x,box_centre.y,depthImage[y_centre][x_centre])
+    desired_height = 0.336
     computed_height = world_coor[2]-desired_height
     if world_coor[2] < 0.4:
         world_coor[2] = 0
@@ -450,38 +454,45 @@ def callback(image, depth,box_centre):
 
 
 
+    target_corner_1 = np.array([950,528]) 
+    target_corner_2 = np.array([346,528])                          
+    target_corner_3 = np.array([346,155])
+    target_corner_4 = np.array([950,155])
 
-    target_corner_1 = np.array([498,464]) 
-    target_corner_2 = np.array([912,278])                          
-    target_corner_3 = np.array([463,464])
+    # target_corner_1 = np.array([498,464]) 
+    # target_corner_2 = np.array([912,278])                          
+    # target_corner_3 = np.array([463,464])
     # target_corner_1 = np.array([Gx_centre,Gy_centre]) 
     # target_corner_2 = np.array([x_centre,y_centre]) 
     # target_corner_3 = np.array([Bx_centre,By_centre])
 
     # print(target_corner_1,target_corner_2,target_corner_3)
-    triangle_1 = np.array([[target_corner_1, target_corner_2, target_corner_3]], np.int32)
-    cv.polylines(copy_RGB, [triangle_1], True, (255,0,0), thickness=2)
+    # triangle_1 = np.array([[target_corner_1, target_corner_2, target_corner_3]], np.int32)
+    cv.rectangle(copy_RGB, (target_corner_3[0], target_corner_3[1]), (target_corner_1[0], target_corner_1[1]), (0, 0, 255), 2)
+    # triangle_1 = np.array([[target_corner_1, target_corner_2, target_corner_3,target_corner_4]], np.int32)
+    # cv.polylines(copy_RGB, [triangle_1], True, (255,0,0), thickness=2)
 
-    obs_corner_1 = np.array([Gx_centre,Gy_centre]) 
-    obs_corner_2 = np.array([x_centre,y_centre]) 
-    obs_corner_3 = np.array([Bx_centre,By_centre])
+    # obs_corner_1 = np.array([Gx_centre,Gy_centre]) 
+    # obs_corner_2 = np.array([x_centre,y_centre]) 
+    # obs_corner_3 = np.array([Bx_centre,By_centre])
 
-    triangle = np.array([[obs_corner_1, obs_corner_2, obs_corner_3]], np.int32)
-    cv.polylines(copy_RGB, [triangle], True, (0,255,0), thickness=2)
+    # triangle = np.array([[obs_corner_1, obs_corner_2, obs_corner_3]], np.int32)
+    # cv.polylines(copy_RGB, [triangle], True, (0,255,0), thickness=2)
 
     cv.imshow("bounding_box", copy_RGB)
     cv.waitKey(2)
 
-    x_ = np.array([(target_corner_1[0]-u0)/fdx,(target_corner_2[0]-u0)/fdx,(target_corner_3[0]-u0)/fdx]) #change here
-    y_ = np.array([(target_corner_1[1]-v0)/fdy,(target_corner_2[1]-v0)/fdy,(target_corner_3[1]-v0)/fdy])
+    # x_ = np.array([(target_corner_1[0]-u0)/fdx,(target_corner_2[0]-u0)/fdx,(target_corner_3[0]-u0)/fdx]) #change here
+    # y_ = np.array([(target_corner_1[1]-v0)/fdy,(target_corner_2[1]-v0)/fdy,(target_corner_3[1]-v0)/fdy])
 
-    x_obs = np.array([(obs_corner_1[0]-u0)/fdx,(obs_corner_2[0]-u0)/fdx,(obs_corner_3[0]-u0)/fdx]) #change here
-    y_obs = np.array([(obs_corner_1[1]-v0)/fdy,(obs_corner_2[1]-v0)/fdy,(obs_corner_3[1]-v0)/fdy]) 
+    # x_obs = np.array([(obs_corner_1[0]-u0)/fdx,(obs_corner_2[0]-u0)/fdx,(obs_corner_3[0]-u0)/fdx]) #change here
+    # y_obs = np.array([(obs_corner_1[1]-v0)/fdy,(obs_corner_2[1]-v0)/fdy,(obs_corner_3[1]-v0)/fdy]) 
 
-    lambda_ = 0.6
-    
+    # lambda_ = 0.6
+
     if abs(computed_angle) < 0.1 or angle_flag ==True:
         angle_flag = True
+        print("angle flag raised")
         try:
             # Z = np.array([depthImage[obs_corner_1[1]][obs_corner_1[0]],depthImage[obs_corner_2[1]][obs_corner_2[0]],depthImage[obs_corner_3[1]][obs_corner_3[0]]]) #change here
             # myZ = Z
@@ -512,13 +523,23 @@ def callback(image, depth,box_centre):
     for i in range(0,len(Vc)):
             if abs(Vc[i])<0.005:
                 Vc[i] = float(0)
+
     xy = [float(x_centre),float(y_centre)]
     Vc_array[:][vcCount] = Vc
     vcCount = vcCount + 1
     if vcCount == index:
         vcCount = 0
         newVc = filterData(Vc_array)
-        talker(newVc,xy)
+        if abs(newVc[0]) < 0.005 and abs(newVc[1]) <0.005 and abs(newVc[2]) < 0.005 and angle_flag == True:
+            stop_count = stop_count + 1
+        else:
+            stop_count = 0
+
+        if stop_count == 3:
+            stop_flag = True
+            print("stop flag raised")
+        if stop_flag == False:
+            talker(newVc,xy)
 
 
 ###########################################################################################################################################
