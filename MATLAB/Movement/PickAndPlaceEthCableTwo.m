@@ -41,9 +41,9 @@ traj = rc.GenerateJointTrajectory(goalPose,2);
 
 rc.ExecuteTrajectory(traj);
 
-rc.CloseGripper
+rc.CloseGripper(1000)
 
-rc.moveCartesian()
+rc.moveCartesian([0,0,0.05], 1)
 
 
 

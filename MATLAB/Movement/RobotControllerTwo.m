@@ -57,7 +57,7 @@ classdef RobotControllerTwo< handle
             if(self.useRos)
                 self.robot.model.animate(self.realBot.current_joint_states.Position);
             end
-            goalPoseAdjusted = self.robot.GetGoalPose(goalPose);
+%             goalPoseAdjusted = self.robot.GetGoalPose(goalPose);
 
             model = self.robot.model;
             currentPose = model.fkine(model.getpos());
@@ -77,10 +77,10 @@ classdef RobotControllerTwo< handle
 
 
             x1 = currentPose(1:3,4);
-            x2 = goalPoseAdjusted(1:3,4);
+            x2 = goalPose(1:3,4);
 
             a1 = tr2rpy(currentPose);
-            a2 = tr2rpy(goalPoseAdjusted);
+            a2 = tr2rpy(goalPose);
 
             s = lspb(0,1,steps);
 
@@ -129,13 +129,17 @@ classdef RobotControllerTwo< handle
         end
 
         function moveCartesian(self, x ,duration)
-            currentPose = self.robot.GetEndEffPose();
+            if(self.useRos)
+                self.robot.model.animate(self.realBot.current_joint_states.Position);
+            end
+            currentPose = self.robot.EndEffToGlobalPose(self.robot.model.fkine(self.robot.model.getpos()));
             goalPose = transl(x) * currentPose;
+            trplot(goalPose);
             velocityMask = [1,1,1,0,0,0];
 
             qMatrix = self.GenerateLinearTrajectory(goalPose,duration, velocityMask);
-
-            self.ExecuteTrajectory(qMatrix);
+            trplot(self.robot.model.fkine(qMatrix(end,:)))
+              self.ExecuteTrajectory(qMatrix);
         end
 
         function success = ExecuteTrajectory(self, qMatrix, object)

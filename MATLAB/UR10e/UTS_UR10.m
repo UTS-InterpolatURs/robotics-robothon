@@ -33,7 +33,7 @@ classdef UTS_UR10 < handle
             self.model.base = basePose;
             campos([-4.5 -2.5 3.0]);
 
-            self.realSenseTf = transl(0.10831,0,0.04361) * rpy2tr(0,deg2rad(-20),pi/2);
+            self.realSenseTf = transl(0.14231,-0.0295,0.04361) * rpy2tr(0,deg2rad(-20),pi/2);
             self.gripperTf = transl(0,0,0.12256);
             self.model.tool = self.gripperTf;
             self.PlotAndColourRobot();
@@ -140,6 +140,10 @@ classdef UTS_UR10 < handle
         end
 
         function pose = GlobalToEndEffPose(self, globalPose)
+            pose = globalPose * trotx(pi);
+        end
+
+        function pose = EndEffToGlobalPose(self, globalPose)
             pose = globalPose * trotx(pi);
         end
         

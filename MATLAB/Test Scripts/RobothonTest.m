@@ -23,7 +23,7 @@ realBot = urRosWrapper(robot);
 collisionComputer = TesturCollisionDetection(robot);
 rc = RobotControllerTwo(robot, collisionComputer, realBot);
 
-tb = Taskboard(transl(0,-0.65,0.1) * trotz(pi + pi/2));
+tb = Taskboard(transl(0,-0.65,0.1));
 tb.PlotTaskboard;
 
 
