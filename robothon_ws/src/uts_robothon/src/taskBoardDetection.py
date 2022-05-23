@@ -23,6 +23,8 @@ vcCount = 0
 angle_flag = False
 stop_count = 0
 stop_flag = False
+angle_flag_announced = False
+
 
 class DetectandDraw:
 
@@ -199,7 +201,7 @@ def filterData(data_array):
 
 def rotationChecker(xr,yr,xb,yb):
     try:
-        desired_angle  = 0.3653
+        desired_angle  = 0.3524
         computed_angle = math.atan2((yb-yr),(xr - xb))-desired_angle
     except:
         computed_angle = 0
@@ -260,6 +262,7 @@ def callback(image, depth,box_centre):
     global angle_flag
     global stop_count
     global stop_flag
+    global angle_flag_announced
 
     bridgeRGB = CvBridge()
     RGB = bridgeRGB.imgmsg_to_cv2(image, "bgr8")
@@ -492,7 +495,9 @@ def callback(image, depth,box_centre):
 
     if abs(computed_angle) < 0.1 or angle_flag ==True:
         angle_flag = True
-        print("angle flag raised")
+        if angle_flag_announced == False:
+            print("angle flag raised------------------------------------------------------------------")
+            angle_flag_announced = True
         try:
             # Z = np.array([depthImage[obs_corner_1[1]][obs_corner_1[0]],depthImage[obs_corner_2[1]][obs_corner_2[0]],depthImage[obs_corner_3[1]][obs_corner_3[0]]]) #change here
             # myZ = Z
@@ -533,11 +538,14 @@ def callback(image, depth,box_centre):
         if abs(newVc[0]) < 0.005 and abs(newVc[1]) <0.005 and abs(newVc[2]) < 0.005 and angle_flag == True:
             stop_count = stop_count + 1
         else:
+            stop_count = stop_count - 1
+
+        if stop_count < 0:
             stop_count = 0
 
         if stop_count == 2:
             stop_flag = True
-            print("stop flag raised")
+            print("stop talking flag raised ---------------------------------------------------")
         if stop_flag == False:
             talker(newVc,xy)
 
