@@ -5,14 +5,17 @@ classdef urRosWrapper < handle
     properties
         jointStatesSubscriber
         wrenchSubscriber
+        resultSubscriber
         publisher
         current_joint_states
         wrench
         robot
         jointPublisher
+        cancelPublisher
         callback_counter
         gripper
         robotBusy
+        cancelMsg
     end
 
     methods
@@ -23,8 +26,10 @@ classdef urRosWrapper < handle
             self.robot = robot;
             self.jointStatesSubscriber = rossubscriber('/joint_states_throttle',@self.jointStatesCallback,"DataFormat","struct");
             self.wrenchSubscriber = rossubscriber('/wrench_throttle',@self.wrenchCallback,"DataFormat","struct");
-            self.wrenchSubscriber = rossubscriber('/scaled_pos_joint_traj_controller/follow_joint_trajectory/result',@self.trajectoryResultCallback,'control_msgs/FollowJointTrajectoryActionResult');
+            self.resultSubscriber = rossubscriber('/scaled_pos_joint_traj_controller/follow_joint_trajectory/result',@self.trajectoryResultCallback,'control_msgs/FollowJointTrajectoryActionResult');
             self.jointPublisher = rospublisher('/scaled_pos_joint_traj_controller/follow_joint_trajectory/goal', 'control_msgs/FollowJointTrajectoryActionGoal');
+            self.cancelPublisher = rospublisher('/scaled_pos_joint_traj_controller/follow_joint_trajectory/cancel', 'actionlib_msgs/GoalID');
+            self.cancelMsg = rosmessage(self.cancelPublisher);
             self.callback_counter = 0;
             self.current_joint_states = zeros(1,6);
             self.robotBusy = false;
@@ -36,19 +41,19 @@ classdef urRosWrapper < handle
 
         function jointStatesCallback(self,~,msg)
 
-%              display (msg.Position)
+            %              display (msg.Position)
             self.current_joint_states = msg;
             currentJointState_321456 = (msg.Position)'; % Note the default order of the joints is 3,2,1,4,5,6
 
 
             self.current_joint_states.Position = [currentJointState_321456(3:-1:1),currentJointState_321456(4:6)];
-                         self.robot.model.animate(self.current_joint_states.Position);
-%                         test = isalmost(self.robot.model.getpos(),self.current_joint_states.Position, 0.001);
-%                         if all(test) == 0
-%                             self.robot.model.animate(self.current_joint_states.Position);
-                            drawnow();
-%                             %self.callback_counter = 0;
-%                         end
+            self.robot.model.animate(self.current_joint_states.Position);
+            %                         test = isalmost(self.robot.model.getpos(),self.current_joint_states.Position, 0.001);
+            %                         if all(test) == 0
+            %                             self.robot.model.animate(self.current_joint_states.Position);
+            drawnow();
+            %                             %self.callback_counter = 0;
+            %                         end
             %             self.callback_counter = self.callback_counter + 1;
             %            disp(self.callback_counter);
             %
@@ -58,7 +63,7 @@ classdef urRosWrapper < handle
         function wrenchCallback(self,~,msg)
 
             self.wrench = msg.Wrench;
-            %display(self.wrench.Force)
+%             display(self.wrench.Force)
         end
 
         function trajectoryResultCallback(self,~,~)
@@ -111,7 +116,11 @@ classdef urRosWrapper < handle
             call(sliderClient,req,"Timeout",1);
         end
 
+        function CancelTrajectory(self) 
+            self.cancelMsg.Stamp = rostime("now");
+            send(self.cancelPublisher, self.cancelMsg);
 
+        end
     end
 end
 

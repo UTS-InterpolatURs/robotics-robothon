@@ -4,28 +4,26 @@ currentPose = robot.model.fkine(robot.model.getpos());
 
 rc.SetToolGripper;
 
-rc.moveCartesian([0,0,-0.2], 3)
+rc.moveCartesian([0,0,-0.5], 50)
 
-forceThreshold = 10;
+forceThreshold = 5;
 
 tic;
-
-pause(0.1);
+pause(1)
 
 
 while (1)
-    rc.moveCartesian([0,0,-0.001], 0.1)
-    pause(rc.controlFrequency);
-
-    if(rc.useRos)
-        if(abs(rc.realBot.wrench.Force.Z) > forceThreshold)
-            break;
-        end
-    end
-
-    disp(toc);
-
-    if(toc >= 30)
+    disp(rc.realBot.wrench.Force.Z)
+    if(abs(rc.realBot.wrench.Force.Z) > forceThreshold)
+        rc.realBot.CancelTrajectory();
+        disp("canceling")
         break;
     end
+
+    if(rc.realBot.robotBusy == false)
+        break;
+    end
+    pause(0.001);
 end
+
+disp("exit")
