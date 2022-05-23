@@ -136,16 +136,13 @@ classdef URController< handle
         end
 
         function moveCartesian(self, x ,duration)
-            if(self.useRos)
-                self.robot.model.animate(self.realBot.current_joint_states.Position);
-            end
             currentPose = self.robot.EndEffToGlobalPose(self.robot.model.fkine(self.robot.model.getpos()));
             goalPose = transl(x) * currentPose;
-            trplot(goalPose);
+%             trplot(goalPose);
             velocityMask = [1,1,1,0,0,0];
 
             qMatrix = self.GenerateLinearTrajectory(goalPose,duration, velocityMask);
-            trplot(self.robot.model.fkine(qMatrix(end,:)))
+%             trplot(self.robot.model.fkine(qMatrix(end,:)))
             self.ExecuteTrajectory(qMatrix);
         end
 
@@ -315,7 +312,6 @@ classdef URController< handle
             newQ = self.robot.model.ikcon(newPose, currentQ);
             traj = jtraj(currentQ, newQ, 30);
             self.ExecuteTrajectory(traj);
-
 
         end
 
