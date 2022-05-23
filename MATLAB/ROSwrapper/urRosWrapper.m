@@ -12,17 +12,22 @@ classdef urRosWrapper < handle
         jointPublisher
         callback_counter
         gripper
+        robotBusy
     end
 
     methods
         function self = urRosWrapper(robot)
             %URROSWRAPPER Construct an instance of this class
+            try rosinit
+            end
             self.robot = robot;
             self.jointStatesSubscriber = rossubscriber('/joint_states_throttle',@self.jointStatesCallback,"DataFormat","struct");
             self.wrenchSubscriber = rossubscriber('/wrench_throttle',@self.wrenchCallback,"DataFormat","struct");
+            self.wrenchSubscriber = rossubscriber('/scaled_pos_joint_traj_controller/follow_joint_trajectory/result',@self.trajectoryResultCallback,'control_msgs/FollowJointTrajectoryActionResult');
             self.jointPublisher = rospublisher('/scaled_pos_joint_traj_controller/follow_joint_trajectory/goal', 'control_msgs/FollowJointTrajectoryActionGoal');
             self.callback_counter = 0;
             self.current_joint_states = zeros(1,6);
+            self.robotBusy = false;
             try self.gripper = Gripper();
             catch
                 disp("No Gripper Found");
@@ -37,13 +42,13 @@ classdef urRosWrapper < handle
 
 
             self.current_joint_states.Position = [currentJointState_321456(3:-1:1),currentJointState_321456(4:6)];
-            %             self.robot.model.animate(self.current_joint_states.Position);
-            %             test = isalmost(self.robot.model.getpos(),self.current_joint_states.Position, 0.001);
-            %             if all(test) == 0
-            %                 %self.robot.model.animate(self.current_joint_states.Position);
-            %                 drawnow();
-            %                 %self.callback_counter = 0;
-            %             end
+                         self.robot.model.animate(self.current_joint_states.Position);
+%                         test = isalmost(self.robot.model.getpos(),self.current_joint_states.Position, 0.001);
+%                         if all(test) == 0
+%                             self.robot.model.animate(self.current_joint_states.Position);
+                            drawnow();
+%                             %self.callback_counter = 0;
+%                         end
             %             self.callback_counter = self.callback_counter + 1;
             %            disp(self.callback_counter);
             %
@@ -54,6 +59,10 @@ classdef urRosWrapper < handle
 
             self.wrench = msg.Wrench;
             %display(self.wrench.Force)
+        end
+
+        function trajectoryResultCallback(self,~,~)
+            self.robotBusy = false;
         end
 
         function sendJointTrajectory(self,traj,controlFrequency)

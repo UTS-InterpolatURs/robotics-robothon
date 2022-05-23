@@ -16,7 +16,7 @@ import message_filters
 from std_msgs.msg import Float32MultiArray
 import math
 
-index = 100
+index = 15
 Vc_array = np.zeros([index,6])
 vcCount = 0
 

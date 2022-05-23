@@ -1,7 +1,7 @@
 function PickAndPlaceEthCableTwo(robot, rc, tb)
 %PICKANDPLACEETHCABLE Summary of this function goes here
 %   Detailed explanation goes here
-
+tic;
 
 goalPose = robot.GlobalToEndEffPose(tb.mainboard.GetPose * transl(0.07,0,0.25)* trotz(pi));
 
@@ -9,6 +9,9 @@ traj = rc.GenerateJointTrajectory(goalPose,3);
 
 rc.ExecuteTrajectory(traj);
 
+startTime = toc;
+
+while(toc < startTime)
 
 % #################REPLACE WITH PROBE Z HEIGHT#####################%
 
