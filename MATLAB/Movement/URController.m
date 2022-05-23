@@ -1,4 +1,4 @@
-classdef RobotControllerTwo< handle
+classdef URController< handle
     %TRAJECTORYGENERATOR Summary of this class goes here
     %   Detailed explanation goes here
 
@@ -16,7 +16,7 @@ classdef RobotControllerTwo< handle
     end
 
     methods
-        function self = RobotControllerTwo(robot, collisionComputer, realBot)
+        function self = URController(robot, collisionComputer, realBot)
             %TRAJECTORYGENERATOR Construct an instance of this class
             %   Detailed explanation goes here
             self.robot = robot;
@@ -155,9 +155,13 @@ classdef RobotControllerTwo< handle
             avoidanceFlag = 0;
             restartFlag = false;
             if(self.useRos)
-                self.robot.model.animate(self.realBot.current_joint_states.Position);
+                if(self.realBot.robotBusy == true)
+                    disp("robot is busy");
+                    return;
+                end
+                self.realBot.robotBusy = true;
                 self.realBot.sendJointTrajectory(qMatrix, self.controlFrequency);
-                drawnow();
+                return;
             end
 
 
