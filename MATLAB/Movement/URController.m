@@ -25,7 +25,7 @@ classdef URController< handle
             self.controlFrequency = 0.05;
             self.fps = 3;
             self.vsCounter = 0;
-      
+
             if ~exist('realBot','var') || isempty(realBot)
                 self.useRos=false;
             else
@@ -138,11 +138,22 @@ classdef URController< handle
         function moveCartesian(self, x ,duration)
             currentPose = self.robot.EndEffToGlobalPose(self.robot.model.fkine(self.robot.model.getpos()));
             goalPose = transl(x) * currentPose;
-%             trplot(goalPose);
+            %             trplot(goalPose);
             velocityMask = [1,1,1,0,0,0];
 
             qMatrix = self.GenerateLinearTrajectory(goalPose,duration, velocityMask);
-%             trplot(self.robot.model.fkine(qMatrix(end,:)))
+            %             trplot(self.robot.model.fkine(qMatrix(end,:)))
+            self.ExecuteTrajectory(qMatrix);
+        end
+
+        function moveEndEffector(self, x ,duration)
+            currentPose = self.robot.EndEffToGlobalPose(self.robot.model.fkine(self.robot.model.getpos()));
+            goalPose = currentPose * transl(x);
+            %             trplot(goalPose);
+            velocityMask = [1,1,1,0,0,0];
+
+            qMatrix = self.GenerateLinearTrajectory(goalPose,duration, velocityMask);
+            %             trplot(self.robot.model.fkine(qMatrix(end,:)))
             self.ExecuteTrajectory(qMatrix);
         end
 
@@ -275,6 +286,16 @@ classdef URController< handle
 
         end
 
+        function RotateSingleJoint(self, joint, angle, duration)
+                currentQ = self.robot.model.getpos();
+                newQ = currentQ;
+                newQ(joint) = newQ(joint) + angle;
+
+                timescale = 0:self.controlFrequency:duration;
+                traj = jtraj(currentQ, newQ, timescale);
+                self.ExecuteTrajectory(traj);
+        end
+
         function SetToolCamera(self)
             if(self.robot.model.tool == self.robot.realSenseTf)
                 disp("Tool is already set to camera");
@@ -322,6 +343,22 @@ classdef URController< handle
             end
             traj = jtraj(self.realBot.current_joint_states.Position, msg.Position, 25);
             self.ExecuteTrajectory(traj);
+        end
+
+        function waitForTrajToFinish(self, duration)
+            timeOut = duration + 2;
+            startTime = toc;
+            while(1)
+                if(self.realBot.robotBusy == false)
+                    break;
+                end
+                pause(0.1);
+                if(toc-startTime >= timeOut)
+                    disp("Trajectory Timed Out");
+                    break;
+                end
+            end
+
         end
 
         function subscriberCallBackVS(self,~,msg)
