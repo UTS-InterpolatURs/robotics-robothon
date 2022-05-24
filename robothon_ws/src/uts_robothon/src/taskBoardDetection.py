@@ -493,6 +493,8 @@ def callback(image, depth,box_centre):
 
     # lambda_ = 0.6
 
+    Vc = np.zeros(6)
+
     if abs(computed_angle) < 0.1:
         angle_flag = True
         if angle_flag_announced == False:

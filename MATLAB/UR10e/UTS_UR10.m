@@ -38,7 +38,7 @@ classdef UTS_UR10 < handle
             self.model.tool = self.gripperTf;
             self.PlotAndColourRobot();
             self.eStopStatus = 0;
-            self.neutralQ = [-pi/2,-pi/2,-pi/2,-pi/2,pi/2,pi/4];
+            self.neutralQ = [-1.5296   -1.6375   -1.7322   -1.3425    1.5712    0.8251];
             self.neutralPose = transl(-0.1639, -0.6873, 0.5278) * trotx(pi);
             self.robotBusy = false;
             self.acceptCommand = false;
@@ -100,7 +100,7 @@ classdef UTS_UR10 < handle
                     continue;
                 end
             end
-            self.model.animate([-pi/2,-pi/2,-pi/2,-pi/2,pi/2,pi/4]);
+            self.model.animate([-1.5296   -1.6375   -1.7322   -1.3425    1.5712    0.8251]);
         end
 
         function SetGripperState(self, args)

@@ -395,7 +395,7 @@ classdef URController< handle
                     newQ(i) = new_q(i);
                 end
 
-                timescale = 0:self.controlFrequency:0.4;
+                timescale = 0:self.controlFrequency:0.6;
                 traj = jtraj(current_q, newQ, timescale);
                 self.ExecuteTrajectory(traj);
 
