@@ -287,16 +287,22 @@ classdef URController< handle
         end
 
         function RotateSingleJoint(self, joint, angle, duration)
-                currentQ = self.robot.model.getpos();
-                newQ = currentQ;
-                newQ(joint) = newQ(joint) + angle;
+            currentQ = self.robot.model.getpos();
+            newQ = currentQ;
+            newQ(joint) = newQ(joint) + angle;
 
-                timescale = 0:self.controlFrequency:duration;
-                traj = jtraj(currentQ, newQ, timescale);
-                self.ExecuteTrajectory(traj);
+            timescale = 0:self.controlFrequency:duration;
+            traj = jtraj(currentQ, newQ, timescale);
+            self.ExecuteTrajectory(traj);
         end
 
         function SetToolCamera(self)
+            if(self.useRos)
+                if(self.realBot.robotBusy == true)
+                    disp("robot is busy");
+                    return;
+                end
+            end
             if(self.robot.model.tool == self.robot.realSenseTf)
                 disp("Tool is already set to camera");
                 return
@@ -318,8 +324,14 @@ classdef URController< handle
         end
 
         function SetToolGripper(self)
+            if(self.useRos)
+                if(self.realBot.robotBusy == true)
+                    disp("robot is busy");
+                    return;
+                end
+            end
             if(self.robot.model.tool == self.robot.gripperTf)
-                disp("Tool is already set to camera");
+                disp("Tool is already set to gripper");
                 return
             end
             if(self.useRos)

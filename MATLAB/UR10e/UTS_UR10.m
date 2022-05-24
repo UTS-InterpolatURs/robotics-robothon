@@ -33,7 +33,7 @@ classdef UTS_UR10 < handle
             self.model.base = basePose;
             campos([-4.5 -2.5 3.0]);
 
-            self.realSenseTf = transl(0.104845,-0.0333053,0.0541466) * rpy2tr(0,deg2rad(-20),pi/2);
+            self.realSenseTf = transl(0.123845,-0.0333053,0.0541466) * rpy2tr(0,deg2rad(-20),pi/2);
             self.gripperTf = transl(0,0,0.12256);
             self.model.tool = self.gripperTf;
             self.PlotAndColourRobot();
