@@ -163,7 +163,7 @@ def filterData(data_array):
 
 def rotationChecker(xr,yr,xb,yb):
     try:
-        desired_angle  = 0.403
+        desired_angle  = 0.39
         computed_angle = math.atan2((yb-yr),(xr - xb))-desired_angle
     except:
         computed_angle = 0
@@ -311,27 +311,40 @@ def callback(image, depth,box_centre):
     cv.waitKey(2)
 
     Vc = np.zeros(6)
-
-    if abs(computed_angle) < 0.08:
-        angle_flag = True
-        if angle_flag_announced == False:
-            print("angle flag raised------------------------------------------------------------------")
-            angle_flag_announced = True
-        try:
-            Vc = np.zeros(6)
-            Vc[0] = world_coor[0]
-            Vc[1] = world_coor[1]
-            Vc[2] = computed_height
-        except:
-            Vc = np.zeros(6)
-            print('error in Vc')
-    elif angle_flag == False:   
+    
+#############################################################################################################################
+    # if abs(computed_angle) < 0.08:
+    #     angle_flag = True
+    #     if angle_flag_announced == False:
+    #         print("angle flag raised------------------------------------------------------------------")
+    #         angle_flag_announced = True
+    #     try:
+    #         Vc = np.zeros(6)
+    #         Vc[0] = world_coor[0]
+    #         Vc[1] = world_coor[1]
+    #         Vc[2] = computed_height
+    #     except:
+    #         Vc = np.zeros(6)
+    #         print('error in Vc')
+    # elif angle_flag == False:   
+    #     Vc = np.zeros(6)
+    #     Vc[5] = -computed_angle
+###############################################################################################################################
+    angle_flag = True
+    try:
         Vc = np.zeros(6)
+        Vc[0] = world_coor[0]
+        Vc[1] = world_coor[1]
+        Vc[2] = computed_height
         Vc[5] = -computed_angle
+    except:
+        Vc = np.zeros(6)
+        print('error in Vc')
 
 
+###############################################################################################################################
     for i in range(0,len(Vc)):
-            if abs(Vc[i])<0.005:
+            if abs(Vc[i])<0.007:
                 Vc[i] = float(0)
 
     xy = [float(x_centre),float(y_centre)]
@@ -340,7 +353,7 @@ def callback(image, depth,box_centre):
     if vcCount == index:
         vcCount = 0
         newVc = filterData(Vc_array)
-        if abs(newVc[0]) < 0.005 and abs(newVc[1]) <0.005 and abs(newVc[2]) < 0.005 and angle_flag == True:
+        if abs(newVc[0]) < 0.007 and abs(newVc[1]) <0.007 and abs(newVc[2]) < 0.007 and angle_flag == True:
             stop_count = stop_count + 1
         else:
             stop_count = stop_count - 1
