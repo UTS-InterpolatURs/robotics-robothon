@@ -3,9 +3,6 @@
 
 
 from cmath import pi
-
-
-
 from sensor_msgs.msg import Image
 import rospy
 from cv_bridge import CvBridge
@@ -16,6 +13,7 @@ from geometry_msgs.msg import Point32
 import message_filters
 from std_msgs.msg import Float32MultiArray
 import math
+#####################################################################################################
 
 index = 50
 Vc_array = np.zeros([index,6])
@@ -25,6 +23,7 @@ stop_count = 0
 stop_flag = False
 angle_flag_announced = False
 
+#####################################################################################################
 
 class DetectandDraw:
 
@@ -109,7 +108,7 @@ class DetectandDraw:
         contours = contours[0] if len(contours) == 2 else contours[1]
         return contours
 
-
+#####################################################################################################
 
 class Depth_h:
     fdx = 0
@@ -136,7 +135,7 @@ class Depth_h:
         y_ = np.where(valid, z * (y - self.v0) / self.fdy, 0)
         return np.array([x_/1000,y_/1000,z/1000])
         
-
+#####################################################################################################
 
 def filterData(data_array):
     vx = 0
@@ -161,6 +160,8 @@ def filterData(data_array):
     newArray = [i/len(data_array[:][1]) for i in myArray]
     return newArray
 
+#####################################################################################################
+
 def rotationChecker(xr,yr,xb,yb):
     try:
         desired_angle  = 0.39
@@ -170,6 +171,7 @@ def rotationChecker(xr,yr,xb,yb):
         print('error in rotation checker')
     return computed_angle
 
+#####################################################################################################
 
 def callback(image, depth,box_centre):
     global vcCount
@@ -179,9 +181,12 @@ def callback(image, depth,box_centre):
     global stop_count
     global stop_flag
     global angle_flag_announced
+    #####################################################################################################
 
     bridgeRGB = CvBridge()
     RGB = bridgeRGB.imgmsg_to_cv2(image, "bgr8")
+
+    #####################################################################################################
 
     Obj = DetectandDraw(RGB)
     Obj.setRed()
@@ -192,7 +197,7 @@ def callback(image, depth,box_centre):
 
     copy_RGB= RGB.copy()
 
-    
+    #####################################################################################################
     try:
         contours = Obj.getContours()
         
@@ -221,7 +226,7 @@ def callback(image, depth,box_centre):
         w = 0
         h = 0
         print('error in red contour')
-
+    #####################################################################################################
 
     try:
         Bcontours = Blue_Obj.getContours()
@@ -252,6 +257,7 @@ def callback(image, depth,box_centre):
         Bh = 0
         print('error in blue contour')
 
+    #####################################################################################################
     try:
         Gcontours = Green_Obj.getContours()
         
@@ -282,7 +288,20 @@ def callback(image, depth,box_centre):
         print('error in green contour')
 
 
-###########################################################################################################################################
+    ########################################################################################################################################
+    obs_corner_1 = np.array([Gx_centre,Gy_centre]) 
+    obs_corner_2 = np.array([x_centre,y_centre]) 
+    obs_corner_3 = np.array([Bx_centre,By_centre])
+    triangle = np.array([[obs_corner_1, obs_corner_2, obs_corner_3]], np.int32)
+    cv.polylines(copy_RGB, [triangle], True, (0,255,0), thickness=2)
+
+    target_corner_1 = np.array([950,528]) 
+    target_corner_2 = np.array([346,528])                          
+    target_corner_3 = np.array([346,155])
+    triangle_1 = np.array([[target_corner_1, target_corner_2, target_corner_3]], np.int32)
+    cv.polylines(copy_RGB, [triangle_1], True, (255,0,0), thickness=2)
+
+    ###########################################################################################################################################
 
     computed_angle = rotationChecker(x_centre,y_centre,Bx_centre,By_centre)
     fdx = 915.1260
@@ -290,10 +309,10 @@ def callback(image, depth,box_centre):
 
     u0 = 647.3002
     v0 = 349.3798
-
+    #####################################################################################################
     bridgeDepth = CvBridge()
     depthImage = bridgeDepth.imgmsg_to_cv2(depth, "32FC1" )
-  
+    #####################################################################################################
     tb = Depth_h(fdx,fdy,u0,v0,720,1280)
     world_coor = tb.getGeometry(box_centre.x,box_centre.y,depthImage[y_centre][x_centre])
     desired_height = 0.336
