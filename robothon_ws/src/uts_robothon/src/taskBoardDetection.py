@@ -163,7 +163,7 @@ def filterData(data_array):
 
 def rotationChecker(xr,yr,xb,yb):
     try:
-        desired_angle  = 0.399
+        desired_angle  = 0.403
         computed_angle = math.atan2((yb-yr),(xr - xb))-desired_angle
     except:
         computed_angle = 0
@@ -312,7 +312,7 @@ def callback(image, depth,box_centre):
 
     Vc = np.zeros(6)
 
-    if abs(computed_angle) < 0.1:
+    if abs(computed_angle) < 0.08:
         angle_flag = True
         if angle_flag_announced == False:
             print("angle flag raised------------------------------------------------------------------")

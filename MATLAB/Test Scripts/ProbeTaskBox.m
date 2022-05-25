@@ -44,7 +44,7 @@ end
 
 pause(0.5);
 
-rc.moveCartesian([0,0,0.0005], 0.5);
+rc.moveCartesian([0,0,0.002], 0.5);
 
 rc.waitForTrajToFinish(0.5);
 
@@ -60,7 +60,7 @@ while (1)
         break;
     end
 
-    rc.moveCartesian([0,0,-0.0001], rc.controlFrequency*2);
+    rc.moveCartesian([0,0,-0.0005], rc.controlFrequency*2);
 
     if(toc-startTime >= timeout)
         break;
@@ -78,7 +78,7 @@ rc.moveCartesian([0,0,0.2], 3);
 
 rc.waitForTrajToFinish(3);
 
-rc.moveEndEffector([0.10,0,0], 3);
+rc.moveEndEffector([0.10,-0.05,0], 3);
 
 rc.waitForTrajToFinish(3);
 
@@ -109,7 +109,7 @@ end
 pause(0.5);
 
 
-rc.moveEndEffector([0.0005,0,0], 0.5);
+rc.moveEndEffector([0.002,0,0], 0.5);
 
 rc.waitForTrajToFinish(0.5);
 
@@ -125,7 +125,7 @@ while (1)
         break;
     end
 
-    rc.moveEndEffector([-0.0001,0,0], rc.controlFrequency*2);
+    rc.moveEndEffector([-0.0005,0,0], rc.controlFrequency*2);
 
     if(toc-startTime >= timeout)
         break;
@@ -141,13 +141,86 @@ augmentedPose = currentPose * transl([(-0.0079 - (0.152/2)), 0, 0]);
 
 augmentedPose(3,4) = Z;
 
-augmentedPose = augmentedPose * transl (0,0.2,0);
-
 P1 = augmentedPose(1:2,4);
 
-augmentedPose = augmentedPose * transl (0,-0.4,0);
+
+rc.moveEndEffector([0.01,0.1,0], 2);
+
+rc.waitForTrajToFinish(1);
+
+% trplot(augmentedPose);
+% Y = currentPose(1,4) + 0.0079 + (0.152/2);
+
+
+% rc.moveEndEffector([0.05,0.1,0], 2);
+% 
+% rc.waitForTrajToFinish(1);
+
+% rc.moveEndEffector([0.10,0.04,0], 3);
+% 
+% rc.waitForTrajToFinish(3);
+% 
+% rc.moveCartesian([0,0,-0.22], 3);
+% 
+% rc.waitForTrajToFinish(3);
+
+%######################## PROBE LONG SIDE (fast) #################################
+
+startTime = toc;
+
+while (1)
+    %     disp(rc.realBot.wrench.Force.Z)
+
+    if(abs(rc.realBot.wrench.Force.Y) > forceThreshold)
+        disp("canceling")
+        break;
+    end
+
+    rc.moveEndEffector([-0.001,0,0], rc.controlFrequency*2);
+
+    if(toc-startTime >= timeout)
+        break;
+    end
+    pause(0.2);
+end
+
+pause(0.5);
+
+
+rc.moveEndEffector([0.002,0,0], 0.5);
+
+rc.waitForTrajToFinish(0.5);
+
+%######################## PROBE LONG SIDE (slow) #################################
+
+startTime = toc;
+
+while (1)
+    %     disp(rc.realBot.wrench.Force.Z)
+
+    if(abs(rc.realBot.wrench.Force.Y) > forceThreshold)
+        disp("canceling")
+        break;
+    end
+
+    rc.moveEndEffector([-0.0005,0,0], rc.controlFrequency*2);
+
+    if(toc-startTime >= timeout)
+        break;
+    end
+    pause(0.2);
+end
+
+pause(0.5);
+
+currentPose = robot.model.fkine(robot.model.getpos());
+
+augmentedPose = currentPose * transl([(-0.0079 - (0.152/2)), 0, 0]);
+
+augmentedPose(3,4) = Z;
 
 P2 = augmentedPose(1:2,4);
+
 
 X1 = [P1(1), P2(1)];
 Y1 = [P1(2), P2(2)];
@@ -155,20 +228,11 @@ Y1 = [P1(2), P2(2)];
 poly1 = polyfit(X1,Y1,1);
 plot(X1,Y1)
 
-
-% trplot(augmentedPose);
-% Y = currentPose(1,4) + 0.0079 + (0.152/2);
-
-
-rc.moveEndEffector([0.05,0,0], 1);
-
-rc.waitForTrajToFinish(1);
-
 rc.moveCartesian([0,0,0.22], 3);
 
 rc.waitForTrajToFinish(3);
 
-rc.moveEndEffector([-0.15,0.16,0], 3);
+rc.moveEndEffector([-0.08,0.10,0], 3);
 
 rc.waitForTrajToFinish(3);
 
@@ -202,7 +266,7 @@ end
 
 pause(0.5)
 
-rc.moveEndEffector([0.0005,0,0], 0.5);
+rc.moveEndEffector([0.002,0,0], 0.5);
 
 rc.waitForTrajToFinish(0.5);
 
@@ -218,7 +282,7 @@ while (1)
         break;
     end
 
-    rc.moveEndEffector([-0.0001,0,0], rc.controlFrequency*2);
+    rc.moveEndEffector([-0.0005,0,0], rc.controlFrequency*2);
 
     if(toc-startTime >= timeout)
         break;
@@ -255,7 +319,7 @@ plot(x_intersect,y_intersect,'r*')
 
 tbPose = transl(x_intersect,y_intersect,Z) * trotx(startRot(1)) * troty(startRot(2)) * trotz(startRot(3));
 trplot(tbPose);
-tbPose = robot.EndEffToGlobalPose(tbPose);
+tbPose = robot.EndEffToGlobalPose(tbPose) * trotz(-pi/2);
 newTb = Taskboard(tbPose);
 newTb.PlotTaskboard;
 
@@ -276,6 +340,8 @@ traj = rc.GenerateLinearTrajectory(goalPose, 3);
 rc.ExecuteTrajectory(traj);
 
 rc.waitForTrajToFinish(2);
+
+homePose = robot.model.fkine(robot.model.getpos());
 
 
 
