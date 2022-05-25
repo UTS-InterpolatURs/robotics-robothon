@@ -80,7 +80,7 @@ rc.moveCartesian([0,0,0.2], 3);
 
 rc.waitForTrajToFinish(3);
 
-rc.moveEndEffector([0.09,-0.08,0], 3);
+rc.moveEndEffector([0.085,-0.08,0], 3);
 
 rc.waitForTrajToFinish(3);
 
@@ -234,7 +234,7 @@ rc.moveCartesian([0,0,0.22], 3);
 
 rc.waitForTrajToFinish(3);
 
-rc.moveEndEffector([-0.08,0.09,0], 3);
+rc.moveEndEffector([-0.08,0.07,0], 3);
 
 rc.waitForTrajToFinish(3);
 

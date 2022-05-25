@@ -13,7 +13,7 @@ traj = rc.GenerateJointTrajectory(homePose * homeToKeyTf,5);
 rc.ExecuteTrajectory(traj);
 rc.waitForTrajToFinish(5);
 
-rc.CloseGripper(1000);
+rc.CloseGripper(1100);
 
 traj = rc.GenerateJointTrajectory(aboveKeyTf,5);
 rc.ExecuteTrajectory(traj);
@@ -33,17 +33,17 @@ startTime = toc;
 while (1)
     %     disp(rc.realBot.wrench.Force.Z)
 
-    if(abs(rc.realBot.wrench.Force.Z) > 20)
+    if(abs(rc.realBot.wrench.Force.Z) > 15)
         disp("force reached")
         currentPose = robot.model.fkine(robot.model.getpos());
         currentZ = currentPose(3,4);
 
-        if(currentZ - Z < 0.021)
+        if(currentZ - Z < 0.019)
             disp("key inserted")
             break;
         else
 
-            rc.moveEndEffector([-0.0005,0,0.0035], 1);
+            rc.moveEndEffector([-0.001,0,0.004], 1);
             rc.waitForTrajToFinish(1);
         end
 
@@ -51,9 +51,9 @@ while (1)
 
     rc.moveCartesian([0,0,-0.001], rc.controlFrequency*2);
 
-    if(toc-startTime >= timeout)
-        break;
-    end
+%     if(toc-startTime >= timeout)
+%         break;
+%     end
     pause(0.2);
 end
 
