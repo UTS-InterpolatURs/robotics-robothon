@@ -78,7 +78,7 @@ rc.moveCartesian([0,0,0.2], 3);
 
 rc.waitForTrajToFinish(3);
 
-rc.moveEndEffector([0.10,-0.05,0], 3);
+rc.moveEndEffector([0.09,-0.05,0], 3);
 
 rc.waitForTrajToFinish(3);
 
@@ -232,7 +232,7 @@ rc.moveCartesian([0,0,0.22], 3);
 
 rc.waitForTrajToFinish(3);
 
-rc.moveEndEffector([-0.08,0.10,0], 3);
+rc.moveEndEffector([-0.08,0.09,0], 3);
 
 rc.waitForTrajToFinish(3);
 
@@ -325,9 +325,13 @@ newTb.PlotTaskboard;
 
 
 
-rc.moveEndEffector([0.05,0,0], 1);
+rc.moveEndEffector([0.10,0,0], 2);
 
-rc.waitForTrajToFinish(1);
+rc.waitForTrajToFinish(2);
+
+rc.RotateSingleJoint(6,pi/1.5,2);
+
+rc.waitForTrajToFinish(2);
 
 rc.moveEndEffector([0,0,0.2], 2);
 
