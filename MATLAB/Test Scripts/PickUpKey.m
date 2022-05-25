@@ -1,5 +1,5 @@
 load("homeToKeyTf.mat");
-load("homeToKeyHoleTf.mat");
+load("homeToAboveKeyHoleTf.mat");
 rc.OpenGripper;
 
 aboveKeyTf = homePose * homeToKeyTf * transl(0,0,-0.04);
@@ -19,14 +19,14 @@ traj = rc.GenerateJointTrajectory(aboveKeyTf,5);
 rc.ExecuteTrajectory(traj);
 rc.waitForTrajToFinish(5);
 
-aboveKeyHoleTf = homePose * homeToKeyHoleTf * transl(0,0,-0.015);
+aboveKeyHoleTf = homePose * homeToAboveKeyHoleTf;
 
 traj = rc.GenerateJointTrajectory(aboveKeyHoleTf,5);
 rc.ExecuteTrajectory(traj);
 rc.waitForTrajToFinish(5);
 
-rc.moveEndEffector([0.001,0,0], 1);
-rc.waitForTrajToFinish(1)
+% rc.moveEndEffector([0.001,0,0], 1);
+% rc.waitForTrajToFinish(1)
 
 startTime = toc;
 
@@ -38,7 +38,7 @@ while (1)
         currentPose = robot.model.fkine(robot.model.getpos());
         currentZ = currentPose(3,4);
 
-        if(currentZ - Z < 0.020)
+        if(currentZ - Z < 0.021)
             disp("key inserted")
             break;
         else
@@ -59,7 +59,7 @@ end
 
 pause(0.5);
 
-rc.RotateSingleJoint(6,deg2rad(49),5);
+rc.RotateSingleJoint(6,deg2rad(55),5);
 
 pause(5);
 

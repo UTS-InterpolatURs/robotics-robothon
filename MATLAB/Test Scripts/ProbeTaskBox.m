@@ -1,7 +1,6 @@
 rc.SetToolGripper;
 pause(3);
-startPose = robot.model.fkine(robot.model.getpos());
-startRot = tr2rpy(startPose);
+
 try rc.CloseGripper(800);
 catch 
     disp("No Gripper")
@@ -15,6 +14,9 @@ while(1)
     end
     pause(0.1);
 end
+
+startPose = robot.model.fkine(robot.model.getpos());
+startRot = tr2rpy(startPose);
 
 rc.moveCartesian([0,0,-0.33], 4)
 
@@ -78,7 +80,7 @@ rc.moveCartesian([0,0,0.2], 3);
 
 rc.waitForTrajToFinish(3);
 
-rc.moveEndEffector([0.09,-0.05,0], 3);
+rc.moveEndEffector([0.09,-0.08,0], 3);
 
 rc.waitForTrajToFinish(3);
 
@@ -144,7 +146,7 @@ augmentedPose(3,4) = Z;
 P1 = augmentedPose(1:2,4);
 
 
-rc.moveEndEffector([0.01,0.1,0], 2);
+rc.moveEndEffector([0.01,0.16,0], 2);
 
 rc.waitForTrajToFinish(1);
 
@@ -317,7 +319,11 @@ y_intersect = polyval(poly1,x_intersect);
 plot(X2,Y2)
 plot(x_intersect,y_intersect,'r*')
 
-tbPose = transl(x_intersect,y_intersect,Z) * trotx(startRot(1)) * troty(startRot(2)) * trotz(startRot(3));
+tbPose = startPose;
+tbPose(1,4) = x_intersect;
+tbPose(2,4) = y_intersect;
+tbPose(3,4) = Z;
+
 trplot(tbPose);
 tbPose = robot.EndEffToGlobalPose(tbPose) * trotz(-pi/2);
 newTb = Taskboard(tbPose);
@@ -337,17 +343,29 @@ rc.moveEndEffector([0,0,0.2], 2);
 
 rc.waitForTrajToFinish(2);
 
-goalPose = robot.GlobalToEndEffPose(tbPose *transl([0,0,0.2]));
 
-traj = rc.GenerateLinearTrajectory(goalPose, 3);
+homePose = startPose;
+homePose(1,4) = x_intersect;
+homePose(2,4) = y_intersect;
+homePose(3,4) = Z + 0.2;
+homePose = homePose * trotz(pi/2);
 
+
+traj = rc.GenerateJointTrajectory(homePose, 3);
 rc.ExecuteTrajectory(traj);
 
 rc.waitForTrajToFinish(2);
-
-homePose = robot.model.fkine(robot.model.getpos());
-
-
+% 
+% deltax = abs((X1(2) - X1(1)));
+% deltay = abs((Y1(2) - Y1(1)));
+% d = deltay/deltax;
+% 
+% if(Y1(1) >= Y1(2))
+%     theta = atan(d);
+% else
+%     theta = -atan(d);
+% end
+% 
 
 
 
