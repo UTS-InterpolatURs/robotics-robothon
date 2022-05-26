@@ -1,17 +1,17 @@
 load("homeToKeyTf.mat");
 load("homeToAboveKeyHoleTf.mat");
-rc.OpenGripper;
-
-aboveKeyTf = homePose * homeToKeyTf * transl(0,0,-0.04);
-
-traj = rc.GenerateJointTrajectory(aboveKeyTf,2);
-rc.ExecuteTrajectory(traj);
-rc.waitForTrajToFinish(2);
-
-
-traj = rc.GenerateJointTrajectory(homePose * homeToKeyTf,1);
-rc.ExecuteTrajectory(traj);
-rc.waitForTrajToFinish(1);
+% rc.OpenGripper;
+% 
+% aboveKeyTf = homePose * homeToKeyTf * transl(0,0,-0.04);
+% 
+% traj = rc.GenerateJointTrajectory(aboveKeyTf,2);
+% rc.ExecuteTrajectory(traj);
+% rc.waitForTrajToFinish(2);
+% 
+% 
+% traj = rc.GenerateJointTrajectory(homePose * homeToKeyTf,1);
+% rc.ExecuteTrajectory(traj);
+% rc.waitForTrajToFinish(1);
 
 rc.CloseGripper(1100);
 
