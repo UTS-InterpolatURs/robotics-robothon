@@ -292,12 +292,13 @@ def callback(image, depth,box_centre):
     obs_corner_1 = np.array([Gx_centre,Gy_centre]) 
     obs_corner_2 = np.array([x_centre,y_centre]) 
     obs_corner_3 = np.array([Bx_centre,By_centre])
+    # print(obs_corner_1,obs_corner_2,obs_corner_3)
     triangle = np.array([[obs_corner_1, obs_corner_2, obs_corner_3]], np.int32)
     cv.polylines(copy_RGB, [triangle], True, (0,255,0), thickness=2)
 
-    target_corner_1 = np.array([950,528]) 
-    target_corner_2 = np.array([346,528])                          
-    target_corner_3 = np.array([346,155])
+    target_corner_1 = np.array([468,470]) 
+    target_corner_2 = np.array([920,267])                          
+    target_corner_3 = np.array([427,469])
     triangle_1 = np.array([[target_corner_1, target_corner_2, target_corner_3]], np.int32)
     cv.polylines(copy_RGB, [triangle_1], True, (255,0,0), thickness=2)
 

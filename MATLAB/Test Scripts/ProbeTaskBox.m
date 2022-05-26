@@ -1,5 +1,5 @@
 rc.SetToolGripper;
-pause(3);
+pause(2);
 
 try rc.CloseGripper(800);
 catch 
@@ -18,9 +18,9 @@ end
 startPose = robot.model.fkine(robot.model.getpos());
 startRot = tr2rpy(startPose);
 
-rc.moveCartesian([0,0,-0.33], 4)
+rc.moveCartesian([0,0,-0.33], 3)
 
-rc.waitForTrajToFinish(4);
+rc.waitForTrajToFinish(3);
 
 
 forceThreshold = 10;
@@ -76,17 +76,17 @@ currentPose = robot.model.fkine(robot.model.getpos());
 % trplot(currentPose);
 Z = currentPose(3,4);
 
-rc.moveCartesian([0,0,0.2], 3);
+rc.moveCartesian([0,0,0.2], 2);
 
-rc.waitForTrajToFinish(3);
+rc.waitForTrajToFinish(2);
 
-rc.moveEndEffector([0.085,-0.08,0], 3);
+rc.moveEndEffector([0.085,-0.08,0], 2);
 
-rc.waitForTrajToFinish(3);
+rc.waitForTrajToFinish(2);
 
-rc.moveCartesian([0,0,-0.22], 3);
+rc.moveCartesian([0,0,-0.22], 2);
 
-rc.waitForTrajToFinish(3);
+rc.waitForTrajToFinish(2);
 
 %######################## PROBE LONG SIDE (fast) #################################
 
@@ -145,8 +145,11 @@ augmentedPose(3,4) = Z;
 
 P1 = augmentedPose(1:2,4);
 
+rc.moveEndEffector([0.01,0,0], 0.5);
 
-rc.moveEndEffector([0.01,0.16,0], 2);
+rc.waitForTrajToFinish(0.0);
+
+rc.moveEndEffector([0.0,0.16,0], 1);
 
 rc.waitForTrajToFinish(1);
 
@@ -230,21 +233,21 @@ Y1 = [P1(2), P2(2)];
 poly1 = polyfit(X1,Y1,1);
 plot(X1,Y1)
 
-rc.moveCartesian([0,0,0.22], 3);
+rc.moveCartesian([0,0,0.22], 2);
 
-rc.waitForTrajToFinish(3);
+rc.waitForTrajToFinish(2);
 
-rc.moveEndEffector([-0.08,0.07,0], 3);
+rc.moveEndEffector([-0.08,0.07,0], 2);
 
-rc.waitForTrajToFinish(3);
+rc.waitForTrajToFinish(2);
 
 rc.RotateSingleJoint(6,-pi/2,2);
 
 rc.waitForTrajToFinish(2);
 
-rc.moveCartesian([0,0,-0.22], 3);
+rc.moveCartesian([0,0,-0.22], 2);
 
-rc.waitForTrajToFinish(3);
+rc.waitForTrajToFinish(2);
 
 %######################## PROBE SHORT SIDE #################################
 
@@ -351,7 +354,7 @@ homePose(3,4) = Z + 0.2;
 homePose = homePose * trotz(pi/2);
 
 
-traj = rc.GenerateJointTrajectory(homePose, 3);
+traj = rc.GenerateJointTrajectory(homePose, 2);
 rc.ExecuteTrajectory(traj);
 
 rc.waitForTrajToFinish(2);

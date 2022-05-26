@@ -317,7 +317,9 @@ classdef URController< handle
             self.robot.model.tool = self.robot.realSenseTf;
 
             newQ = self.robot.model.ikcon(newPose, currentQ);
-            traj = jtraj(currentQ, newQ, 30);
+            time = 0:self.controlFrequency:2;
+
+            traj = jtraj(currentQ, newQ, time);
             self.ExecuteTrajectory(traj);
 
 
@@ -343,7 +345,8 @@ classdef URController< handle
             self.robot.model.tool = self.robot.gripperTf;
 
             newQ = self.robot.model.ikcon(newPose, currentQ);
-            traj = jtraj(currentQ, newQ, 30);
+            time = 0:self.controlFrequency:2;
+            traj = jtraj(currentQ, newQ, time);
             self.ExecuteTrajectory(traj);
 
         end
