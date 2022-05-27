@@ -801,12 +801,14 @@ function start_button_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+handles.robotController.vsFlag = false;
 
 if (handles.eStop == 1 && handles.e_stop.Value == 0)
     handles.eStop = 0;
     handles.robot.eStopStatus = 0;
     guidata(hObject,handles);
     disp("Program Resumed");
+    
 
 end
 
@@ -863,6 +865,7 @@ function reset_button_Callback(hObject, eventdata, handles)
 if handles.usingRealBot == true
     handles.robot.model.animate(handles.realBot.current_joint_states.Position);
     handles.taskboard.ResetComponents();
+    handles.robotController.vsFlag = true;
 else
 
 handles.taskboard.ResetComponents();

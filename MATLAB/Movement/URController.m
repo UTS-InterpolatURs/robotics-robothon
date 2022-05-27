@@ -13,6 +13,8 @@ classdef URController< handle
         vsSubscriber
         fps
         vsCounter
+        vsFlagSubscriber
+        vsFlag
     end
 
     methods
@@ -25,6 +27,7 @@ classdef URController< handle
             self.controlFrequency = 0.05;
             self.fps = 3;
             self.vsCounter = 0;
+            self.vsFlag = true;
 
             if ~exist('realBot','var') || isempty(realBot)
                 self.useRos=false;
@@ -33,6 +36,7 @@ classdef URController< handle
                 self.realBot = realBot;
                 %                 self.desiredJointStateSubscriber = rossubscriber('/desired_joint_state', @self.desiredJointStatesCallback, 'sensor_msgs/JointState',"DataFormat","struct");
                 self.vsSubscriber =  rossubscriber('/ColourDetectionChatter',@self.subscriberCallBackVS, 'std_msgs/Float32MultiArray');
+                self.vsFlagSubscriber =  rossubscriber('/localisation_flag',@self.subscriberCallBackVSFlag, 'std_msgs/Bool');
 
             end
         end
@@ -377,7 +381,7 @@ classdef URController< handle
         end
 
         function subscriberCallBackVS(self,~,msg)
-            if(self.robot.acceptCommand)
+            if(self.vsFlag == false)
                 self.robot.model.animate(self.realBot.current_joint_states.Position);
                 current_q = self.robot.model.getpos();
                 %             if self.hist_q ~= self.current_q
@@ -416,6 +420,10 @@ classdef URController< handle
 
                 %             end
             end
+        end
+
+        function subscriberCallBackVSFlag(self,~,msg)
+            self.vsFlag = msg.Data;
         end
     end
 end

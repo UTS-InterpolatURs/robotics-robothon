@@ -593,7 +593,7 @@ bool DynamixelInterfaceController::initialise()
 
   // advertise the joint state input and output topics
   joint_state_publisher_ = nh_->advertise<sensor_msgs::JointState>("gripper_joint_states", 1);
-  joint_state_subscriber_ = nh_->subscribe<sensor_msgs::JointState>("griper_desired_joint_states", recv_queue_size_,
+  joint_state_subscriber_ = nh_->subscribe<sensor_msgs::JointState>("gripper_desired_joint_states", recv_queue_size_,
                                                                     &DynamixelInterfaceController::jointStateCallback,
                                                                     this, ros::TransportHints().tcpNoDelay());
 
