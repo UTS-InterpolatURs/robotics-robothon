@@ -81,12 +81,12 @@ class DetectandDraw:
     def setColourRed(self):
         if self.colour_ == 2:
             self.channel1Min_ = 0
-            self.channel1Max_ = 5
+            self.channel1Max_ = 20
             self.channel2Min_ = 100
             self.channel2Max_ = 255
             self.channel3Min_ = 100
             self.channel3Max_ = 255
-            channel1Min2_ = 175
+            channel1Min2_ = 160
             channel1Max2_ = 180
             channel2Min2_ = 100
             channel2Max2_ = 255
@@ -197,6 +197,12 @@ def callback(image, depth,box_centre):
     Green_Obj.setRed()
 
     copy_RGB= RGB.copy()
+    test_RGB = RGB.copy()
+    mask = Obj.getMask()
+    res = cv.bitwise_and(copy_RGB,copy_RGB,mask = mask)
+    cv.imshow("Image Window", res)
+    cv.waitKey(2)
+    # cv.imshow("RGB",copy_RGB)
 
     #####################################################################################################
     try:
@@ -328,8 +334,8 @@ def callback(image, depth,box_centre):
     # target_corner_4 = np.array([950,155])
     # cv.rectangle(copy_RGB, (target_corner_3[0], target_corner_3[1]), (target_corner_1[0], target_corner_1[1]), (0, 0, 255), 2)
 
-    cv.imshow("bounding_box", copy_RGB)
-    cv.waitKey(2)
+    # cv.imshow("bounding_box", copy_RGB)
+    # cv.waitKey(2)
 
     Vc = np.zeros(6)
     
@@ -374,7 +380,7 @@ def callback(image, depth,box_centre):
     if vcCount == index:
         vcCount = 0
         newVc = filterData(Vc_array)
-        if abs(newVc[0]) < 0.007 and abs(newVc[1]) <0.007 and abs(newVc[2]) < 0.007 and angle_flag == True:
+        if abs(newVc[0]) < 0.01 and abs(newVc[1]) <0.01 and abs(newVc[2]) < 0.007 and angle_flag == True:
             stop_count = stop_count + 1
         else:
             stop_count = stop_count - 1
