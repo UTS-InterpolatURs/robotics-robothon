@@ -12,6 +12,7 @@ from geometry_msgs.msg import PointStamped
 from geometry_msgs.msg import Point32
 import message_filters
 from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import Bool
 import math
 #####################################################################################################
 
@@ -383,6 +384,7 @@ def callback(image, depth,box_centre):
 
         if stop_count == 2:
             stop_flag = True
+            stopflag(stop_flag)
             print("stop talking flag raised ---------------------------------------------------")
         if stop_flag == False:
             talker(newVc,xy)
@@ -390,7 +392,14 @@ def callback(image, depth,box_centre):
 
 ###########################################################################################################################################
 
-            
+def stopflag(stopped):
+    pub = rospy.Publisher('localisation_flag', Bool)
+    pub_data = stopped
+    rospy.loginfo(pub_data)
+    pub.publish(pub_data)
+
+############################################################################################################################################  
+#          
 def talker(Vc,xy):
     global vcCount
     global Vc_array
