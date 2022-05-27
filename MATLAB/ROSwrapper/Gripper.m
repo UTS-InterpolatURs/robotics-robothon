@@ -48,7 +48,7 @@ classdef Gripper < handle
                 currentJointPos = self.jointStates.Position;
                 currentJointEffort = abs(self.jointStates.Effort);
 
-                if currentJointPos(1) >= 0.1 && currentJointPos(2) >= 0.1
+                if currentJointPos(1) >= 0.15 && currentJointPos(2) >= 0.15
                     break;
                 end
                 if abs(currentJointEffort(1)) >= closingEffort && abs(currentJointEffort(2)) >= closingEffort

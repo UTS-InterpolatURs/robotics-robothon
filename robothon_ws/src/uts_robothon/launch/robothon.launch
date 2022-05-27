@@ -1,15 +1,7 @@
 <launch>
 
-    <arg name="robot_ip"               default="127.0.0.1"/>
-    <include file="$(find ur_robot_driver)/launch/ur10e_bringup.launch">
-        <arg name="robot_ip" value="$(arg robot_ip)" />
+    <node name="edge_detector" pkg="edge_detector" type='edge_detector'/>
 
-    </include>
-
-    <node name="joint_throttle" pkg="topic_tools" type="throttle"
-          args="'messages' 'joint_states' 20"/>
-    <node name="wrench_throttle" pkg="topic_tools" type="throttle"
-          args="'messages' 'wrench' 20"/>
-
+    <node name="taskBoardDetection" pkg="uts_robothon" type='taskBoardDetection.py'/>
 
 </launch>
