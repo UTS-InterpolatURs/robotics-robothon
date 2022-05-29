@@ -1,7 +1,7 @@
-% cla
-% clf
-% clear all
-% hold on;
+cla
+clf
+clear all
+hold on;
 
 tic;
 

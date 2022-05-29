@@ -2,4 +2,4 @@
 source_root_dir = '/home/rohan/git/robotics-robothon/robothon_ws/src'
 whitelisted_packages = ''.split(';') if '' != '' else []
 blacklisted_packages = ''.split(';') if '' != '' else []
-underlay_workspaces = '/home/rohan/catkin_ws/devel;/opt/ros/melodic'.split(';') if '/home/rohan/catkin_ws/devel;/opt/ros/melodic' != '' else []
+underlay_workspaces = '/home/rohan/git/robotics-robothon/robothon_ws/devel;/opt/ros/melodic'.split(';') if '/home/rohan/git/robotics-robothon/robothon_ws/devel;/opt/ros/melodic' != '' else []

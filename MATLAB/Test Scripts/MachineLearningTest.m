@@ -4,7 +4,7 @@ load("keyStartToAboveHoleTf.mat");
 load("MlGripperToEthPose.mat");
 load("MlGripperToEthTargetPose.mat");
 % 
-% MachineLearningClient = rossvcclient("/get_feature","DataFormat","struct");
+% MachineLearningClient = rossvcclient("/get_features","DataFormat","struct");
 % pause(0.1);
 % 
 % MlRequest = rosmessage(MachineLearningClient);
@@ -12,17 +12,21 @@ load("MlGripperToEthTargetPose.mat");
 % 
 % 
 
+MlSub =  rossubscriber('/task_detect/detected_points', 'geometry_msgs/Point32', "DataFormat","struct");
+pause(2);
+x = double(MlSub.LatestMessage.X);
+y = double(MlSub.LatestMessage.Y);
 
 startPose = robot.model.fkine(robot.model.getpos());
 
-MlPose = robot.model.fkine(robot.model.getpos()) * transl([0.0610185 , -0.0215065 , 0]);
+MlPose = robot.model.fkine(robot.model.getpos()) * transl([x, y, 0]);
 
 traj = rc.GenerateJointTrajectory(MlPose, 1);
 rc.ExecuteTrajectory(traj);
 rc.waitForTrajToFinish(1)
 
 rc.SetToolGripper;
-pause(3);
+pause(2);
 
 MlGripperPose = robot.model.fkine(robot.model.getpos());
 
@@ -38,7 +42,7 @@ rc.waitForTrajToFinish(1);
 
 rc.OpenGripper();
 
-timeout = 20;
+timeout = 100;
 
 
 while(1)
@@ -114,7 +118,7 @@ currentPose = robot.model.fkine(robot.model.getpos());
 
 Z = currentPose(3,4);
 
-keyHolePose =  currentPose * keyStartToAboveHoleTf *transl([-0.001,0,0]);
+keyHolePose =  currentPose * keyStartToAboveHoleTf *transl([-0.002,0,0]);
 
 traj = rc.GenerateJointTrajectory(keyHolePose, 3);
 rc.ExecuteTrajectory(traj);
@@ -126,14 +130,15 @@ directionCounter = 0;
 xMove = -0.0008;
 
 while (1)
-        disp(rc.realBot.wrench.Force.Z)
+%         disp(rc.realBot.wrench.Force.Z)
     
-
+    
     if(abs(rc.realBot.wrench.Force.Z) > 19)
         disp("force reached")
         currentPose = robot.model.fkine(robot.model.getpos());
         currentZ = currentPose(3,4);
         directionCounter = directionCounter + 1;
+        disp(abs(currentZ - Z))
 
         if(abs(currentZ - Z) > 0.026)
             disp("key inserted")
@@ -175,10 +180,10 @@ rc.ExecuteTrajectory(traj);
 rc.waitForTrajToFinish(3);
 
 
-ethPose = MlGripperPose * MlGripperToEthPose * transl([0,0,-0.001]);
+ethPose = MlGripperPose * MlGripperToEthPose * transl([0,0,0.001]);
 ethTargetPose = MlGripperPose * MlGripperToEthTargetPose;
 directionCounter = 0;
-xMove = -0.0008;
+xMove = 0.0008;
 
 rc.moveEndEffector([0,0.2,0], 2);
 rc.waitForTrajToFinish(2);
@@ -202,9 +207,9 @@ while (1)
         currentPose = robot.model.fkine(robot.model.getpos());
         currentZ = currentPose(3,4);
         directionCounter = directionCounter + 1;
-        disp(currentZ);
+        disp(abs(currentZ - Z));
 
-        if(abs(currentZ - Z) > 0.024)
+        if(abs(currentZ - Z) > 0.0285 || abs(rc.realBot.wrench.Force.Z) > 25)
             disp("cable inserted")
             break;
         elseif (directionCounter > 0)

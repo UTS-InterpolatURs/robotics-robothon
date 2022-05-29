@@ -3,6 +3,7 @@
 
 
 from cmath import pi
+import time
 from sensor_msgs.msg import Image
 import rospy
 from cv_bridge import CvBridge
@@ -23,6 +24,7 @@ angle_flag = False
 stop_count = 0
 stop_flag = False
 angle_flag_announced = False
+count_flag = 0
 
 #####################################################################################################
 
@@ -182,6 +184,7 @@ def callback(image, depth,box_centre):
     global stop_count
     global stop_flag
     global angle_flag_announced
+    global count_flag
     #####################################################################################################
 
     bridgeRGB = CvBridge()
@@ -197,11 +200,11 @@ def callback(image, depth,box_centre):
     Green_Obj.setRed()
 
     copy_RGB= RGB.copy()
-    test_RGB = RGB.copy()
-    mask = Obj.getMask()
-    res = cv.bitwise_and(copy_RGB,copy_RGB,mask = mask)
-    cv.imshow("Image Window", res)
-    cv.waitKey(2)
+    # test_RGB = RGB.copy()
+    # mask = Obj.getMask()
+    # res = cv.bitwise_and(copy_RGB,copy_RGB,mask = mask)
+    # cv.imshow("Image Window", res)
+    # cv.waitKey(2)
     # cv.imshow("RGB",copy_RGB)
 
     #####################################################################################################
@@ -390,8 +393,10 @@ def callback(image, depth,box_centre):
 
         if stop_count == 2:
             stop_flag = True
-            stopflag(stop_flag)
-            print("stop talking flag raised ---------------------------------------------------")
+            for j in range(0,10):
+                stopflag(stop_flag)
+                print("stop talking flag raised ---------------------------------------------------")
+                time.sleep(0.05)
         if stop_flag == False:
             talker(newVc,xy)
 
@@ -399,7 +404,7 @@ def callback(image, depth,box_centre):
 ###########################################################################################################################################
 
 def stopflag(stopped):
-    pub = rospy.Publisher('localisation_flag', Bool)
+    pub = rospy.Publisher('localisation_flag', Bool, queue_size=0)
     pub_data = stopped
     rospy.loginfo(pub_data)
     pub.publish(pub_data)

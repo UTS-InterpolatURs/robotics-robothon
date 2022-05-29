@@ -28,8 +28,8 @@ classdef urRosWrapper < handle
             self.wrenchSubscriber = rossubscriber('/wrench_throttle',@self.wrenchCallback,"DataFormat","struct");
             self.resultSubscriber = rossubscriber('/scaled_pos_joint_traj_controller/follow_joint_trajectory/result',@self.trajectoryResultCallback,'control_msgs/FollowJointTrajectoryActionResult');
             self.jointPublisher = rospublisher('/scaled_pos_joint_traj_controller/follow_joint_trajectory/goal', 'control_msgs/FollowJointTrajectoryActionGoal');
-            self.cancelPublisher = rospublisher('/scaled_pos_joint_traj_controller/follow_joint_trajectory/cancel', 'actionlib_msgs/GoalID');
-            self.cancelMsg = rosmessage(self.cancelPublisher);
+%             self.cancelPublisher = rospublisher('/scaled_pos_joint_traj_controller/follow_joint_trajectory/cancel', 'actionlib_msgs/GoalID');
+%             self.cancelMsg = rosmessage(self.cancelPublisher);
             self.callback_counter = 0;
             self.current_joint_states = zeros(1,6);
             self.robotBusy = false;

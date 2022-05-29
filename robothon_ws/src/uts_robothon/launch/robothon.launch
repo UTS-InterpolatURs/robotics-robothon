@@ -1,6 +1,7 @@
 <launch>
 
     <node name="edge_detector" pkg="edge_detector" type='edge_detector'/>
+    <node name="task_detector" pkg="task_detector" type='task_detector'/>
 
     <node name="taskBoardDetection" pkg="uts_robothon" type='taskBoardDetection.py'/>
 

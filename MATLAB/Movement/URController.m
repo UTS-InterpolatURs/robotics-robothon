@@ -424,6 +424,7 @@ classdef URController< handle
 
         function subscriberCallBackVSFlag(self,~,msg)
             self.vsFlag = msg.Data;
+            disp("vs flag raised")
         end
     end
 end
