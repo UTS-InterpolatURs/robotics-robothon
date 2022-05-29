@@ -3,9 +3,9 @@ lidPose = MlGripperPose * MlGripperToBatteryLidPose * transl([0,0,-0.01]);
 rc.OpenGripper;
 
 
-traj = rc.GenerateJointTrajectory(lidPose, 3);
+traj = rc.GenerateJointTrajectory(lidPose, 1);
 rc.ExecuteTrajectory(traj);
-rc.waitForTrajToFinish(3);
+rc.waitForTrajToFinish(1);
 
 forceThreshold = 25;
 
@@ -28,6 +28,6 @@ rc.moveEndEffector([0,-0.08,0], 2);
 
 rc.waitForTrajToFinish(2);
 
-traj = rc.GenerateJointTrajectory(MlGripperPose, 3);
+traj = rc.GenerateJointTrajectory(MlGripperPose, 2);
 rc.ExecuteTrajectory(traj);
-rc.waitForTrajToFinish(3);
+rc.waitForTrajToFinish(2);

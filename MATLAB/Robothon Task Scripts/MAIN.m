@@ -10,3 +10,4 @@ PressBlueButton;
 PickAndPlaceEthCable;
 PickAndPlaceKey;
 SlideBatteryLid;
+PressRedButton;

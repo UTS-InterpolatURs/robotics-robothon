@@ -25,3 +25,6 @@ pause(2);
 
 MlGripperPose = robot.model.fkine(robot.model.getpos());
 pause(0.5);
+
+rc.moveCartesian([0,0,-0.2], 2)
+rc.waitForTrajToFinish(2);

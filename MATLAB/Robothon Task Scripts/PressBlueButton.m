@@ -1,14 +1,14 @@
 
-blueButtonPose = MlGripperPose * MlGripperToBlueButtonPose * transl([0.005,0,0]);
+blueButtonPose = MlGripperPose * MlGripperToBlueButtonPose;
 
-blueButtonPose(3,4) = startPose(3,4);
+blueButtonPose(3,4) = startPose(3,4) - 0.2;
 
 traj = rc.GenerateJointTrajectory(blueButtonPose, 1);
 rc.ExecuteTrajectory(traj);
 rc.waitForTrajToFinish(1);
 
 
-rc.CloseGripper(800);
+rc.CloseGripper(600);
 
 timeout = 100;
 
@@ -20,9 +20,9 @@ while(1)
     pause(0.1);
 end
 
-rc.moveEndEffector([0,-0.005,-0.335], 3)
+rc.moveEndEffector([0,-0.005,-0.13], 2)
 
-rc.waitForTrajToFinish(3);
+rc.waitForTrajToFinish(2);
 
 
 forceThreshold = 5;
@@ -77,7 +77,7 @@ Z = currentPose(3,4);
 pause(0.5);
 
 
-rc.moveEndEffector([0,-0.005,0.01], 1)
+rc.moveEndEffector([0,-0.004,0.01], 1)
 rc.waitForTrajToFinish(1);
 
 rc.OpenGripper();
@@ -105,6 +105,6 @@ rc.moveCartesian([0,0,0.1], 2);
 rc.waitForTrajToFinish(2);
 
 
-traj = rc.GenerateJointTrajectory(MlGripperPose, 2);
+traj = rc.GenerateJointTrajectory(MlGripperPose * transl([0,0,0.2]), 1);
 rc.ExecuteTrajectory(traj);
-rc.waitForTrajToFinish(2);
+rc.waitForTrajToFinish(1);

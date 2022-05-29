@@ -1,7 +1,7 @@
 
 keyPose = MlGripperPose * MlGripperToKeyPose;
 
-keyPose(3,4) = startPose(3,4);
+keyPose(3,4) = startPose(3,4) - 0.2;
 
 traj = rc.GenerateJointTrajectory(keyPose, 1);
 rc.ExecuteTrajectory(traj);
@@ -10,7 +10,7 @@ rc.waitForTrajToFinish(1);
 
 rc.OpenGripper();
 
-timeout = 100;
+timeout = 60;
 
 
 while(1)
@@ -20,9 +20,9 @@ while(1)
     pause(0.1);
 end
 
-rc.moveCartesian([0,0,-0.34], 3)
-
-rc.waitForTrajToFinish(3);
+% rc.moveCartesian([0,0,-0.14], 1)
+% 
+% rc.waitForTrajToFinish(1);
 
 keyPose(3,4) = Z + 0.01;
 
@@ -82,7 +82,7 @@ forceThreshold = 10;
 % 
 % rc.moveCartesian([0,0,0.015], 1);
 
-rc.CloseGripper(1000);
+rc.CloseGripper(950);
 
 rc.moveCartesian([0,0,0.04], 1);
 
@@ -92,22 +92,22 @@ currentPose = robot.model.fkine(robot.model.getpos());
 
 Z = currentPose(3,4);
 
-keyHolePose =  currentPose * keyStartToAboveHoleTf *transl([-0.002,0,0]);
+keyHolePose =  currentPose * keyStartToAboveHoleTf *transl([-0.003,0,0]);
 
-traj = rc.GenerateJointTrajectory(keyHolePose, 3);
+traj = rc.GenerateJointTrajectory(keyHolePose, 1);
 rc.ExecuteTrajectory(traj);
-rc.waitForTrajToFinish(3);
+rc.waitForTrajToFinish(1);
 
 startTime = toc;
 
 directionCounter = 0;
-xMove = -0.0008;
+xMove = -0.00085;
 
 while (1)
 %         disp(rc.realBot.wrench.Force.Z)
     
     
-    if(abs(rc.realBot.wrench.Force.Z) > 19)
+    if(abs(rc.realBot.wrench.Force.Z) > 25)
         disp("force reached")
         currentPose = robot.model.fkine(robot.model.getpos());
         currentZ = currentPose(3,4);
@@ -119,7 +119,7 @@ while (1)
             break;
         elseif (directionCounter > 0)
 
-        if(directionCounter >= 6)
+        if(directionCounter >= 8)
             traj = rc.GenerateJointTrajectory((keyHolePose * transl([-xMove,0,0])),2);
             rc.ExecuteTrajectory(traj);
             rc.waitForTrajToFinish(2);
@@ -127,7 +127,7 @@ while (1)
             directionCounter = 0;
         end
             
-            rc.moveEndEffector([xMove,0,0.004], 1);
+            rc.moveEndEffector([xMove,0,0.005], 1);
             rc.waitForTrajToFinish(1);
         end
 
@@ -143,13 +143,13 @@ end
 
 pause(0.5);
 
-rc.RotateSingleJoint(6,deg2rad(55),3);
+rc.RotateSingleJoint(6,deg2rad(55),2);
 
-pause(3);
+pause(2);
 
 rc.OpenGripper;
 
-traj = rc.GenerateJointTrajectory(MlGripperPose, 3);
+traj = rc.GenerateJointTrajectory(MlGripperPose * transl([0,0,0.2]), 1);
 rc.ExecuteTrajectory(traj);
-rc.waitForTrajToFinish(3);
+rc.waitForTrajToFinish(1);
 

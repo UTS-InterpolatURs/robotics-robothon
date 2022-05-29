@@ -4,14 +4,14 @@ ethTargetPose = MlGripperPose * MlGripperToEthTargetPose * transl([0,-0.0015,0])
 directionCounter = 0;
 xMove = 0.0008;
 
-rc.moveEndEffector([0,0.2,0], 2);
-rc.waitForTrajToFinish(2);
+rc.moveEndEffector([0,0.2,0], 0.75);
+rc.waitForTrajToFinish(0.75);
 
-traj = rc.GenerateJointTrajectory(ethPose, 3);
+traj = rc.GenerateJointTrajectory(ethPose, 1);
 rc.ExecuteTrajectory(traj);
-rc.waitForTrajToFinish(3);
+rc.waitForTrajToFinish(1);
 
-rc.CloseGripper(1000);
+rc.CloseGripper(800);
 
 rc.moveCartesian([0,0,0.02], 2);
 rc.waitForTrajToFinish(2);
@@ -72,6 +72,6 @@ end
 
 rc.OpenGripper;
 
-traj = rc.GenerateJointTrajectory(MlGripperPose, 3);
+traj = rc.GenerateJointTrajectory(MlGripperPose * transl([0,0,0.2]), 1);
 rc.ExecuteTrajectory(traj);
-rc.waitForTrajToFinish(3);
+rc.waitForTrajToFinish(1);
