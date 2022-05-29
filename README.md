@@ -25,7 +25,16 @@ gh repo clone UTS-InterpolatURs/edge_detector
 ## Initialise MATLAB node
 Open `MAIN.m` file in `robotics-robothon/MATLAB/Robothon Task Scripts` folder, and RUN the code, this will initialise the MATLAB node
 ## Initialise ROS nodes
-1. Launch RealSense node: `roslaunch realsense_camera rs_camera.launch align_depth:=true`
+1. Launch RealSense node:
+```
+roslaunch realsense_camera rs_camera.launch align_depth:=true
+```
 2. Launch Robot node:
+```
+```
 3. Launch Gripper node:
-4. Launch Robothon node: 
+```
+```
+4. Launch Robothon node:
+```
+```
