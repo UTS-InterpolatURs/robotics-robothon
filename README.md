@@ -9,10 +9,16 @@ Members:
 
 ## Clone Repository
 Clone the robotics-robothon repository:
-`gh repo clone UTS-InterpolatURs/robotics-robothon`
+```
+gh repo clone UTS-InterpolatURs/robotics-robothon
+```
 Clone the taskboard detector packages: 
-`gh repo clone UTS-InterpolatURs/task_detector`
-`gh repo clone UTS-InterpolatURs/edge_detector`
+```
+gh repo clone UTS-InterpolatURs/task_detector
+```
+```
+gh repo clone UTS-InterpolatURs/edge_detector
+```
 ## Install Dependencies
 1. Install dependencies packages:
 2. Make the package: `catkin_make` or `catkin_build`
