@@ -21,6 +21,8 @@ gh repo clone UTS-InterpolatURs/edge_detector
 ```
 ## Install Dependencies
 1. Install dependencies packages:
+```
+```
 2. Make the package: `catkin_make` or `catkin_build`
 ## Initialise MATLAB node
 Open `MAIN.m` file in `robotics-robothon/MATLAB/Robothon Task Scripts` folder, and RUN the code, this will initialise the MATLAB node
