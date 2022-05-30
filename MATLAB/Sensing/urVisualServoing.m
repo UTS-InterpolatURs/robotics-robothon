@@ -15,27 +15,23 @@ classdef urVisualServoing <handle
             self.robot = robot;
             self.vsSubscriber =  rossubscriber('/ColourDetectionChatter',@self.subscriberCallBackVS);
             self.jointStatesSubscriber = rossubscriber('/joint_states_throttle',@self.jointStatesCallback,"DataFormat","struct");
-            %             self.jointStatesSubscriber = rossubscriber('/joint_states',"DataFormat","struct");
             self.jointPublisher = rospublisher('/desired_joint_state', 'sensor_msgs/JointState');
             self.hist_q = zeros(1,6);
         end
         function subscriberCallBackVS(self,~,msg)
-            if self.hist_q ~= self.current_q
-                %             pause(3)
-                %             self.current_q = self.jointStatesSubscriber.LatestMessage.position;
-                %             self.robot.model.animate(self.current_q);
-                
+            if self.hist_q ~= self.current_q           
                 vc = msg.Data;
-                %             print(vc)
                 vcTemp = vc(1:6,1);
+                
                 try
                     J = self.robot.model.jacobn(self.current_q);
                 catch
                     J = ones(6,6);
                 end
                 Jinv = pinv(J);
-                % get joint velocities
+                % Get error q
                 qp = Jinv*vcTemp;
+                %Maximum angular velocity cannot exceed 180 degrees/s
                 ind=find(qp>pi);
                 if ~isempty(ind)
                     qp(ind)=pi;
@@ -44,39 +40,22 @@ classdef urVisualServoing <handle
                 if ~isempty(ind)
                     qp(ind)=-pi;
                 end
+                %Update joints 
                 self.new_q = self.current_q + (1/self.fps)*qp';
+                % Send joints
                 self.sendJointTrajectory();
                 self.hist_q = self.current_q;
             end
             
-            
-            %             vcTr = transl(vc(1,1),vc(2,1),vc(3,1))*rpy2tr(vc(4,1),vc(5,1),vc(6,1));
-            %             tr = self.robot.model.fkine(self.robot.model.getpos()); %% change to camera pose
-            %
-            %             self.newTr = tr*vcTr;
         end
         function jointStatesCallback(self,~,msg)
-            
-            % display (msg.Data)
-            
+                       
             currentJointState_321456 = (msg.position); % Note the default order of the joints is 3,2,1,4,5,6
-            %             disp(msg.position)
             
             self.current_q = [currentJointState_321456(3:-1:1),currentJointState_321456(4:6)];
             %             disp(self.current_q)
             self.robot.model.animate(self.current_q);
             
-            %             test = isalmost(self.robot.model.getpos(),self.current_joint_states.Position, 0.001);
-            %             if all(test) == 0
-            %                 %self.robot.model.animate(self.current_joint_states.Position);
-            %                 drawnow();
-            %                 %self.callback_counter = 0;
-            %             end
-            %             self.callback_counter = self.callback_counter + 1;
-            %            disp(self.callback_counter);
-            %
-            %
-            %             display(test);
         end
         
         function sendJointTrajectory(self)

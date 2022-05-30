@@ -1,1 +1,0 @@
-cd ~/git/robotics-robothon/MATLAB/Sensing/bagfiles

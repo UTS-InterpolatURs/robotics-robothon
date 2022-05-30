@@ -21,6 +21,7 @@ classdef TesturCollisionDetection < handle
     methods
         function self = TesturCollisionDetection(robot)
             self.robot = robot;
+            % Set link parameters for the robots
             [d_1 d_2 d_3 d_4 d_5 d_6] = self.robot.model.links.d;
             self.d_ur = [d_1 d_2 d_3 d_4 d_5 d_6];
             [a_1 a_2 a_3 a_4 a_5 a_6] = self.robot.model.links.a;
@@ -29,6 +30,7 @@ classdef TesturCollisionDetection < handle
             self.alpha_ur = [alpha_1 alpha_2 alpha_3 alpha_4 alpha_5 alpha_6];
             self.centrePoints = zeros(self.robot.model.n+1,3);
             self.radiis = zeros(self.robot.model.n+1,3);
+            % Set volume and centre points for the elipsoids 
             self.radiis(1,:) = [0.10,0.10,0.3];
             self.radiis(2,:) = [0.10,0.10,0.3];
             self.radiis(3,:) = [0.5,0.10,0.10];
@@ -43,13 +45,6 @@ classdef TesturCollisionDetection < handle
             self.centrePoints(5,:) = [0,0,0];
             self.centrePoints(6,:) = [0,0,0];
             self.centrePoints(7,:) = [0,0,0];
-
-
-            %             self.jointStatesCallback();
-            %             self.imageSubcriber = rossubscriber('/camera/aligned_depth_to_color/image_raw_throttle',@self.imageCallback);
-            %                         self.imageSubcriber = rossubscriber('/camera/aligned_depth_to_color/image_raw');
-            %                         pause(0.4);
-            %                         self.imageCallback();
         end
 
         function drawEllipsoid(self)
@@ -79,15 +74,10 @@ classdef TesturCollisionDetection < handle
             check = 0;
             points2Check = self.getObstaclePoints();
             col_flag = false;
-            %             updatedPoints = self.getLightcurtain();
             centrePoints_ = [0,-1.2,0];
             radi = [1,0.01,1];
-%             [X,Y,Z] = ellipsoid( centrePoints_ (1), centrePoints_ (2), centrePoints_ (3), radi(1), radi(2), radi(3) );
-%             hold on;
-%             ellipsoidAtOrigin_h = surf(X,Y,Z);
             algebraicDist = self.GetAlgebraicDist(points2Check, centrePoints_, radi);
             pointsInside = find(algebraicDist < 1);
-            %                     display(['There are ', num2str(size(pointsInside,1)),' points inside the ',num2str(i),'th ellipsoid']);
             if pointsInside > 0
                 col_flag = true;
             end
@@ -99,15 +89,19 @@ classdef TesturCollisionDetection < handle
         end
 
         function generatePointClouds(self)
+            % subcribe depth information
             self.imageSubcriber = rossubscriber('/camera/aligned_depth_to_color/image_raw');
             pause(0.4);
             msg_array = ImageStorage(self.rows,self.cols,self.num_image);
             depthImage = readImage(self.imageSubcriber.LatestMessage);
+            % Add depth image to a storage
             msg_array.addDepthImage(double(depthImage),self.num_image);
             pc = PointCloud();
             pc.setExtrinsic(918.7401,918.3084,647.22,345.83,720,1280);
+            % Get point clouds
             testpc = rmmissing(pc.getUR10PointCloud(msg_array.getDepthImage(1)));
             pClouds = zeros(length(testpc),3,self.num_image);
+            % Filter point clouds
             for i = 1:self.num_image
                 pClouds(:,:,i) = rmmissing(pc.getUR10PointCloud(msg_array.getDepthImage(i)));
             end
@@ -116,8 +110,10 @@ classdef TesturCollisionDetection < handle
             Z_w(:,1) = pClouds(:,3,1);
             self.pClouds_mask = [X_cor(:), Y_cor(:), Z_w(:)]/1000;
             tr = self.robot.model.fkine(self.robot.model.getpos()); %% change to camera pose
+            % Transform to robot base 
             pointsAndOnes = [tr * [self.pClouds_mask,ones(size(self.pClouds_mask,1),1)]']';
             self.pClouds_mask = pointsAndOnes(:,1:3);
+            % Add point cloud as obstacle 
             self.setObstaclePoints(self.pClouds_mask);
         end
         function [pcs] = getPointClouds(self)
@@ -136,6 +132,7 @@ classdef TesturCollisionDetection < handle
         function [col_array] = checkCollision(self,qmatrix)
             self.setJointStates(qmatrix);
             col_array = zeros(length(self.qmatrix(:,1)),1);
+            % Get points to check for collision
             points2Check = self.getObstaclePoints();
             for q = 1 : length(self.qmatrix(:,1))
                 col_flag = false;
@@ -145,11 +142,12 @@ classdef TesturCollisionDetection < handle
                     tr(:,:,i+1) = tr(:,:,i) * trotz(self.qmatrix(q,i)) * transl(self.a_ur(i), 0, self.d_ur(i)) * trotx(self.alpha_ur(i));
                 end
                 for i = 1: size(tr,3)
+                    % Transform object to the robot links/ not moving the
+                    % robot to the object
                     pointsAndOnes = [inv(tr(:,:,i)) * [points2Check,ones(size(points2Check,1),1)]']';
                     updatedPoints = pointsAndOnes(:,1:3);
                     algebraicDist = self.GetAlgebraicDist(updatedPoints, self.centrePoints(i,:), self.radiis(i,:));
                     pointsInside = find(algebraicDist < 1);
-                    %                     display(['There are ', num2str(size(pointsInside,1)),' points inside the ',num2str(i),'th ellipsoid']);
                     if pointsInside > 0
                         col_flag = true;
                     end
@@ -169,17 +167,6 @@ classdef TesturCollisionDetection < handle
         end
 
         function setJointStates(self,qmatrix_)
-            %             q0 = [pi, -pi / 2, pi / 2, -pi / 2, -pi / 2, 0];
-            %
-            %             q1 = deg2rad([180 -45 90 -135 -90 0]);
-            %             Tr = [0.9985 -0.0094 -0.0531 0.5938;
-            %                 -0.0096 -0.9999 -0.0034 -0.0014
-            %                 -0.0530 0.0039 -0.9986 0.3474
-            %                 0 0 0 1.0000];
-            %
-            %             q2 = self.robot.model.ikcon(Tr,q0);
-
-            % q2 = [0.0000 -0.5946 -5.1732 4.1970 4.7124 6.2832];
             self.qmatrix = qmatrix_;
         end
 

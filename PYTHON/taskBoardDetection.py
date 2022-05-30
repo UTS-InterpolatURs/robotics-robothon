@@ -255,50 +255,7 @@ def callback(image, depth):
     global index
     bridgeRGB = CvBridge()
     RGB = bridgeRGB.imgmsg_to_cv2(image, "bgr8")
-    # edgeDetection(RGB)
-
-    # gray = cv.cvtColor(RGB,cv.COLOR_BGR2GRAY)
-    # gray_float32 = np.float32(gray)
-    # gray_uint8 = np.uint8(gray)
-    # dst = cv.cornerHarris(gray_float32,2,3,0.2)
-    # dst = cv.dilate(dst,None)
-    # ret, dst = cv.threshold(dst,0.01*dst.max(),255,0)
-    # dst = np.uint8(dst)
-    # dst = cv.Canny(gray_uint8,100,200)
     
-    # cdst = cv.cvtColor(dst, cv.COLOR_GRAY2BGR)
-    # cdstP = np.copy(cdst)
-    
-    # lines = cv.HoughLines(dst, 1, np.pi / 180, 150, None, 0, 0)
-    
-    # if lines is not None:
-    #     for i in range(0, len(lines)):
-    #         rho = lines[i][0][0]
-    #         theta = lines[i][0][1]
-    #         a = math.cos(theta)
-    #         b = math.sin(theta)
-    #         x0 = a * rho
-    #         y0 = b * rho
-    #         pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
-    #         pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
-    #         cv.line(cdst, pt1, pt2, (0,0,255), 3, cv.LINE_AA)
-    
-    
-    # linesP = cv.HoughLinesP(dst, 1, np.pi / 180, 50, None, 50, 10)
-    
-    # if linesP is not None:
-    #     for i in range(0, len(linesP)):
-    #         l = linesP[i][0]
-    #         cv.line(cdstP, (l[0], l[1]), (l[2], l[3]), (0,0,255), 3, cv.LINE_AA)
-
-    # contours = cv.findContours(cdstP, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-    # contours = contours[0] if len(contours) == 2 else contours[1]
-
-
-
-    # cv.imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst)
-    # cv.imshow("Detected Lines (in red) - Probabilistic Line Transform", cdstP)
-    # cv.waitKey(2)
 
 
     Obj = DetectandDraw(RGB)
@@ -312,12 +269,6 @@ def callback(image, depth):
 
     copy_RGB= RGB.copy()
 
-    # test_RGB = RGB.copy()
-    # mask = Blue_Obj.getMask()
-    # res = cv.bitwise_and(copy_RGB,copy_RGB,mask = mask)
-    # cv.imshow("Image Window", res)
-    # cv.imshow("RGB",copy_RGB)
-    # cv.waitKey(2)
     
     try:
         contours = Obj.getContours()
@@ -474,25 +425,16 @@ def callback(image, depth):
     y_obs = np.array([(obs_corner_1[1]-v0)/fdy,(obs_corner_2[1]-v0)/fdy,(obs_corner_3[1]-v0)/fdy]) 
 
     lambda_ = 0.6
+    Vc = np.zeros(6)
     if abs(computed_angle) < 0.1:
         try:
-            # Z = np.array([depthImage[obs_corner_1[1]][obs_corner_1[0]],depthImage[obs_corner_2[1]][obs_corner_2[0]],depthImage[obs_corner_3[1]][obs_corner_3[0]]]) #change here
-            # myZ = Z
-            # newZ = [i/1000 for i in myZ]
-            # # print(newZ)
-            # Target = np.array([[x_[0],y_[0]],[x_[1],y_[1]],[x_[2],y_[2]]])
-            # Obs = np.array([[x_obs[0],y_obs[0]],[x_obs[1],y_obs[1]],[x_obs[2],y_obs[2]]])
-            # Vc = VServoing(Target,Obs,newZ,lambda_)
-            # Vc[3] = 0
-            # Vc[4] = 0
-            Vc = np.zeros(6)
-            Vc[0] = world_coor[0]
-            Vc[1] = world_coor[1]
-            Vc[2] = computed_height
-            # print(Vc[2])
-
-
-
+            Z = np.array([depthImage[obs_corner_1[1]][obs_corner_1[0]],depthImage[obs_corner_2[1]][obs_corner_2[0]],depthImage[obs_corner_3[1]][obs_corner_3[0]]]) #change here
+            myZ = Z
+            newZ = [i/1000 for i in myZ]
+            # print(newZ)
+            Target = np.array([[x_[0],y_[0]],[x_[1],y_[1]],[x_[2],y_[2]]])
+            Obs = np.array([[x_obs[0],y_obs[0]],[x_obs[1],y_obs[1]],[x_obs[2],y_obs[2]]])
+            Vc = VServoing(Target,Obs,newZ,lambda_)
         except:
             Vc = np.zeros(6)
             print('error in Vc')
@@ -517,181 +459,6 @@ def callback(image, depth):
 ###########################################################################################################################################
 
 
-
-
-###########################################################################################################################################
-    #test
-    # computed_angle = rotationChecker(x_centre,y_centre,Bx_centre,By_centre)
-    # fdx = 918.7401
-    # fdy = 918.3084
-
-    # u0 = 647.2181
-    # v0 = 345.8296
-
-    # bridgeDepth = CvBridge()
-    # depthImage = bridgeDepth.imgmsg_to_cv2(depth, "32FC1" )
-    # target_corner_1 = np.array([416,249]) 
-    # target_corner_2 = np.array([885,293])                          
-    # target_corner_3 = np.array([428,473])
-    # # print(target_corner_1,target_corner_2,target_corner_3)
-    # triangle = np.array([[target_corner_1, target_corner_2, target_corner_3]], np.int32)
-    # cv.polylines(copy_RGB, [triangle], True, (255,0,0), thickness=3)
-
-    # obs_corner_1 = np.array([Gx_centre,Gy_centre]) 
-    # obs_corner_2 = np.array([x_centre,y_centre]) 
-    # obs_corner_3 = np.array([Bx_centre,By_centre])
-
-    # triangle = np.array([[obs_corner_1, obs_corner_2, obs_corner_3]], np.int32)
-    # cv.polylines(copy_RGB, [triangle], True, (0,255,0), thickness=3)
-
-    # cv.imshow("bounding_box", copy_RGB)
-    # cv.waitKey(2)
-
-    # x_ = np.array([(target_corner_1[0]-u0)/fdx,(target_corner_2[0]-u0)/fdx,(target_corner_3[0]-u0)/fdx]) #change here
-    # y_ = np.array([(target_corner_1[1]-v0)/fdy,(target_corner_2[1]-v0)/fdy,(target_corner_3[1]-v0)/fdy])
-
-    # x_obs = np.array([(obs_corner_1[0]-u0)/fdx,(obs_corner_2[0]-u0)/fdx,(obs_corner_3[0]-u0)/fdx]) #change here
-    # y_obs = np.array([(obs_corner_1[1]-v0)/fdy,(obs_corner_2[1]-v0)/fdy,(obs_corner_3[1]-v0)/fdy]) 
-
-    # lambda_ = 0.6
-    # if abs(computed_angle) < 0.1:
-    #     try:
-    #         Z = np.array([depthImage[obs_corner_1[1]][obs_corner_1[0]],depthImage[obs_corner_2[1]][obs_corner_2[0]],depthImage[obs_corner_3[1]][obs_corner_3[0]]]) #change here
-    #         myZ = Z
-    #         newZ = [i/1000 for i in myZ]
-    #         # print(newZ)
-    #         Target = np.array([[x_[0],y_[0]],[x_[1],y_[1]],[x_[2],y_[2]]])
-    #         Obs = np.array([[x_obs[0],y_obs[0]],[x_obs[1],y_obs[1]],[x_obs[2],y_obs[2]]])
-    #         Vc = VServoing(Target,Obs,newZ,lambda_)
-    #     except:
-    #         Vc = np.zeros(6)
-    #         print('error in Vc')
-    # else:   
-    #     Vc = np.zeros(6)
-    #     Vc[5] = computed_angle
-
-    # xy = [float(x_centre),float(y_centre)]
-    # Vc_array[:][vcCount] = Vc
-    # vcCount = vcCount + 1
-    # if vcCount == index:
-    #     vcCount = 0
-    #     newVc = filterData(Vc_array)
-    #     talker(newVc,xy)
-
-
-###########################################################################################################################################
-
-    # computed_angle = rotationChecker(x_centre,y_centre,Bx_centre,By_centre)
-    # # print(computed_angle)
-
-
-    # fdx = 918.7401
-    # fdy = 918.3084
-
-    # u0 = 647.2181
-    # v0 = 345.8296
-
-    # # h = 480
-    # # w = 848
-    
-    # # fdx = 554.2547
-    # # fdy = 554.2547
-
-    # # u0 = 320.5
-    # # v0 = 240.5
-
-    # # h = 480
-    # # w = 640
-    # # print(box)
-
-    # bridgeDepth = CvBridge()
-    # depthImage = bridgeDepth.imgmsg_to_cv2(depth, "32FC1" )
-    # target_corner_1 = np.array([860+2,356-2]) 
-    # target_corner_2 = np.array([860+2,233+2])                          
-    # target_corner_3 = np.array([927-2,223+2])
-    # target_corner_4 = np.array([927-2,356-2])
-
-    # cv.rectangle(copy_RGB, (target_corner_2[0], target_corner_2[1]), (target_corner_4[0], target_corner_4[1]), (0, 0, 255), 2)
-    # cv.imshow("bounding_box", copy_RGB)
-    # cv.waitKey(2)
-
-    # # obs_corner_1 = np.array([x,y])
-    # # obs_corner_2 = np.array([x+w,y])                        
-    # # obs_corner_3 = np.array([x,y+h])
-    # # obs_corner_4 = np.array([x+w,y+h])
-    # obs_corner_1 = box[0]
-    # obs_corner_2 = box[1]                    
-    # obs_corner_3 = box[2]
-    # obs_corner_4 = box[3]
-
-    # x_ = np.array([(target_corner_1[0]-u0)/fdx,(target_corner_2[0]-u0)/fdx,(target_corner_3[0]-u0)/fdx,(target_corner_4[0]-u0)/fdx]) #change here
-    # y_ = np.array([(target_corner_1[1]-v0)/fdy,(target_corner_2[1]-v0)/fdy,(target_corner_3[1]-v0)/fdy,(target_corner_4[1]-v0)/fdy])
-
-    # x_obs = np.array([(obs_corner_1[0]-u0)/fdx,(obs_corner_2[0]-u0)/fdx,(obs_corner_3[0]-u0)/fdx,(obs_corner_4[0]-u0)/fdx]) #change here
-    # y_obs = np.array([(obs_corner_1[1]-v0)/fdy,(obs_corner_2[1]-v0)/fdy,(obs_corner_3[1]-v0)/fdy,(obs_corner_4[1]-v0)/fdy]) 
-
-    # lambda_ = 0.01
-    
-    # if abs(computed_angle) < 0.1:
-    #     try:
-    #         Z = np.array([depthImage[obs_corner_1[1]-2][obs_corner_1[0]+2],depthImage[obs_corner_2[1]+2][obs_corner_2[0]+2],depthImage[obs_corner_3[1]+2][obs_corner_3[0]-2],depthImage[obs_corner_4[1]-2][obs_corner_4[0]-2]]) #change here
-    #         myZ = Z
-    #         newZ = [i/1000 for i in myZ]
-    #         print(newZ)
-    #         Target = np.array([[x_[0],y_[0]],[x_[1],y_[1]],[x_[2],y_[2]],[x_[3],y_[3]]])
-    #         Obs = np.array([[x_obs[0],y_obs[0]],[x_obs[1],y_obs[1]],[x_obs[2],y_obs[2]],[x_obs[3],y_obs[3]]])
-    #         Vc = VServoing(Target,Obs,newZ,lambda_)
-    #     except:
-    #         Vc = np.zeros(6)
-    #         print('error in Vc')
-    # else:   
-    #     Vc = np.zeros(6)
-    #     Vc[5] = computed_angle
-    # # for i in range(0,len(Vc)):
-    # #         if abs(Vc[i])<0.005:
-    # #             Vc[i] = float(0)
-
-    
-    # # for i in range(0,len(Vc_array[:][1])):
-    # # newVc = filterData(Vc_array)
-    # xy = [float(x_centre),float(y_centre)]
-    # Vc_array[:][vcCount] = Vc
-    # vcCount = vcCount + 1
-    # if vcCount == index:
-    #     vcCount = 0
-    #     newVc = filterData(Vc_array)
-    #     talker(newVc,xy)
-
-    
-    # # try:
-    # #     Z = np.array([depthImage[obs_corner_1[1]][obs_corner_1[0]],depthImage[obs_corner_2[1]][obs_corner_2[0]],depthImage[obs_corner_3[1]][obs_corner_3[0]],depthImage[obs_corner_4[1]][obs_corner_4[0]]]) #change here
-    # #     Target = np.array([[x_[0],y_[0]],[x_[1],y_[1]],[x_[2],y_[2]],[x_[3],y_[3]]])
-    # #     Obs = np.array([[x_obs[0],y_obs[0]],[x_obs[1],y_obs[1]],[x_obs[2],y_obs[2]],[x_obs[3],y_obs[3]]])
-    # #     Vc = VServoing(Target,Obs,Z,lambda_)
-        
-            
-    # # except:
-    # #     Vc = np.zeros(6)
-    # # for i in range(0,len(Vc)):
-    # #     if abs(Vc[i])<0.000001:
-    # #         Vc[i] = float(0)
-
-    # # print(Vc)
-    # # xy = [float(x_centre),float(y_centre)]
-    
-    # # talker(Vc,xy)
-    
-    # # pub = rospy.Publisher('/colourChatter', PointStamped, queue_size=10)
-    # # point = PointStamped()
-    # # rate = rospy.Rate(10) 
-
-    # # point.header.stamp = rospy.Time.now()
-    # # point.header.frame_id = "/odom"
-    # # point.point.x = x_centre
-    # # point.point.y = y_centre
-    # # point.point.z = 0
-    # # pub.publish(point)
-    # # rate.sleep()
             
 def talker(Vc,xy):
     global vcCount
