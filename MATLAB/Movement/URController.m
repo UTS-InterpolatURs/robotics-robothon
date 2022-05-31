@@ -20,7 +20,8 @@ classdef URController< handle
     methods
         function self = URController(robot, collisionComputer, realBot)
             %TRAJECTORYGENERATOR Construct an instance of this class
-            %   Detailed explanation goes here
+            % Initialises robot controller with collision computer,
+            % simulation robot and real robot class (if present)
             self.robot = robot;
             self.collisionComputer = collisionComputer;
             self.checkCollisionFlag = false;
@@ -40,40 +41,32 @@ classdef URController< handle
 
             end
         end
-        function qMatrix = GenerateJointTrajectory(self,goalPose,duration,jointMask)
+        %Generates a joint trajectory using jtraj quintic polynomial
+        % IF mask is passed, ikine is used, otherwise ikcon is used
+        function qMatrix = GenerateJointTrajectory(self,goalPose,duration,mask)
             timescale = 0:self.controlFrequency:duration;
-            %             goalPoseAdjusted = self.robot.GetGoalPose(goalPose);
             robotQ = self.robot.model.getpos();
             if exist("jointMask", "var")
-                goalQ = self.robot.model.ikine(goalPose, robotQ, jointMask);
+                goalQ = self.robot.model.ikine(goalPose, robotQ, mask);
             else
                 goalQ = self.robot.model.ikcon(goalPose, robotQ);
 
             end
 
-            %             baseToOriginTR = inv(self.robot.model.base);
-            %             robotToObject = baseToOriginTR * goalPoseAdjusted;
-            %             viaQ = robotq;
-            %
-            %             viaQ(1) = atan2(robotToObject(2,4),robotToObject(1,4)) - pi;
-            %
-            %             qMatrix = jtraj(robotq,viaQ,steps);
-
-            %             targetQ = self.robot.model.ikcon(goalPoseAdjusted, self.robot.model.getpos());
-            %             qMatrix = [qMatrix; jtraj(qMatrix(end,:), targetQ, steps)];
             qMatrix = jtraj(robotQ, goalQ, timescale);
         end
-
+        
+        %Generates a linear trajectory using RMRC (trapazoidal velocity
+        %profile). Optional weighting matrix (velocity mask) can be passed
+        %to limit motion 
         function qMatrix = GenerateLinearTrajectory(self,goalPose,duration, velocityMask)
             if(self.useRos)
                 self.robot.model.animate(self.realBot.current_joint_states.Position);
             end
-            %             goalPoseAdjusted = self.robot.GetGoalPose(goalPose);
-
             model = self.robot.model;
             currentPose = model.fkine(model.getpos());
-            deltaT = self.controlFrequency;      % Control frequency
-            steps = duration/deltaT;             % Total time (s)
+            deltaT = self.controlFrequency;       %Control frequency
+            steps = duration/deltaT;             %Steps needed to achieve a given duration 
 
             qMatrix = zeros(steps,6);
 
@@ -81,21 +74,24 @@ classdef URController< handle
 
             W = diag([1 1 1 0.15 0.15 0.15]);    % Weighting matrix for the velocity vector
             if exist('velocityMask','var')
-                W = diag(velocityMask);
+                W = diag(velocityMask); %OPTIONAL mask passed in by user
             end
             epsilon = 0.01;      % Threshold value for manipulability/Damped Least Squares
             theta = zeros(3,steps);         % Array for roll-pitch-yaw angles
 
-
+            %establish starting point and angle
             x1 = currentPose(1:3,4);
             x2 = goalPose(1:3,4);
 
             a1 = tr2rpy(currentPose);
             a2 = tr2rpy(goalPose);
-
+            
+            %trajectory scalar
             s = lspb(0,1,steps);
 
             for i = 1:steps
+                %apply trajectory scalar to interpolate from start to
+                %finish
                 X(1,i) = x1(1)*(1-s(i)) + s(i)*x2(1);
                 X(2,i) = x1(2)*(1-s(i)) + s(i)*x2(2);
                 X(3,i) = x1(3)*(1-s(i)) + s(i)*x2(3);
@@ -103,7 +99,7 @@ classdef URController< handle
                 theta(2,i) = a1(2)*(1-s(i)) + s(i)*a2(2);            % Pitch angle
                 theta(3,i) = a1(3)*(1-s(i)) + s(i)*a2(3);                % Yaw angle
             end
-
+            %establish first q as current position to avoid initial jerk
             qMatrix(1,:) = model.getpos();
 
             for i = 1:steps-1
@@ -111,7 +107,7 @@ classdef URController< handle
                 deltaX = X(:,i+1) - T(1:3,4);                                         	% Get position error from next waypoint
                 Rd = rpy2r(theta(1,i+1),theta(2,i+1),theta(3,i+1));                     % Get next RPY angles, convert to rotation matrix
                 Ra = T(1:3,1:3);                                                        % Current end-effector rotation matrix
-                Rdot = (1/deltaT)*(Rd - Ra);                                                % Calculate rotation matrix error
+                Rdot = (1/deltaT)*(Rd - Ra);                                            % Calculate rotation matrix error
                 S = Rdot*Ra';                                                           % Skew symmetric!
                 linear_velocity = (1/deltaT)*deltaX;
                 angular_velocity = [S(3,2);S(1,3);S(2,1)];                              % Check the structure of Skew Symmetric matrix!!
@@ -139,9 +135,10 @@ classdef URController< handle
 
         end
 
-        function moveCartesian(self, x ,duration)
+        %calls RMRC function using a mask to ensure motion in XYZ only
+        function moveCartesian(self, X ,duration)
             currentPose = self.robot.EndEffToGlobalPose(self.robot.model.fkine(self.robot.model.getpos()));
-            goalPose = transl(x) * currentPose;
+            goalPose = transl(X) * currentPose;
             %             trplot(goalPose);
             velocityMask = [1,1,1,0,0,0];
 
@@ -150,41 +147,45 @@ classdef URController< handle
             self.ExecuteTrajectory(qMatrix);
         end
 
-        function moveEndEffector(self, x ,duration)
+        %uses RMRC to control end effector in end effector frame
+        function moveEndEffector(self, X ,duration)
             currentPose = self.robot.EndEffToGlobalPose(self.robot.model.fkine(self.robot.model.getpos()));
-            goalPose = currentPose * transl(x);
-            %             trplot(goalPose);
+            goalPose = currentPose * transl(X);
             velocityMask = [1,1,1,0,0,0];
 
             qMatrix = self.GenerateLinearTrajectory(goalPose,duration, velocityMask);
-            %             trplot(self.robot.model.fkine(qMatrix(end,:)))
             self.ExecuteTrajectory(qMatrix);
         end
+        
+        %function that takes trajectory and sends it to the real robot
+        %and/or animates the simulation robot
 
         function success = ExecuteTrajectory(self, qMatrix, object)
             self.robot.robotBusy = true;
-            trajPatchIndex = 0;
-            avoidanceFlag = 0;
-            restartFlag = false;
-            if(self.useRos)
+            trajPatchIndex = 0; %counter for collision avoidance
+            avoidanceFlag = 0; %flag for collision avoidance
+            restartFlag = false; %flag for e-stop resume
+            if(self.useRos) %check to see if real robot is currently executing a trajecotry
                 if(self.realBot.robotBusy == true)
                     disp("robot is busy");
                     return;
                 end
+                %send trajectory to real robot
                 self.realBot.robotBusy = true;
                 self.realBot.sendJointTrajectory(qMatrix, self.controlFrequency);
                 return;
             end
 
-
+            %begin iteration for sim robot
             for i=1:size(qMatrix,1)
-                if(self.robot.eStopStatus == 1)
+                if(self.robot.eStopStatus == 1) %check if e-stop has been triggered
                     if(self.useRos)
                         self.realBot.pause();
                         restartFlag = true;
                     end
 
                 end
+                %#######LOOP TO BLOCK WHILE E_STOP IS PRESSED#############
                 %                 tic
                 %                 while(toc < 30)
                 %                     if(self.robot.eStopStatus == 0)
@@ -199,26 +200,35 @@ classdef URController< handle
                 %                 end
 
 
-                if restartFlag == true
+                if restartFlag == true %resume real robot trajectory if program has been resumed
                     self.realBot.play();
                 end
-
+                
+                %The following loop executes if user has selected the
+                %option to check collisions 
                 if(self.checkCollisionFlag == true)
-                    result = false;
+                    result = false; 
                     try result = self.collisionComputer.checkCollision(qMatrix(i,:));
                     end
-
+                    
+                    %if a collsion is detected....
                     if(result == true)
                         disp("COLLISION IMMINENT - COLLISION AVOIDANCE ACTIVATED!")
                         traj = self.robot.model.getpos;
+                        %first move robot backwards along trajectory 5
+                        %steps...
                         for j = 1:5
                             traj = [traj; qMatrix(i-j,:)];
                         end
                         self.ExecuteTrajectory(traj);
-
+                        %then move robot up 30cm (to clear obstacle like a
+                        %hand)
                         traj = self.moveCartesian([0,0,0.3], 20);
                         self.ExecuteTrajectory(traj);
-
+                        
+                        %check all remaining points in trajectory for
+                        %collision and translate all collision points up by
+                        %30cm
                         checkMatrix = qMatrix(i:end,:);
                         resultMatrix = self.collisionComputer.checkCollision(checkMatrix);
 
@@ -235,16 +245,21 @@ classdef URController< handle
                     end
 
                 end
-
+                %after ammended trajectory is executed, patch the old and
+                %new trajectories together to achieve a smooth transisition
                 if(avoidanceFlag == true && i == trajPatchIndex + 1)
                     traj = jtraj(qMatrix(i-1,:),qMatrix(i,:), 20);
                     self.ExecuteTrajectory(traj);
                 end
-
+                
+                %Animate robot model 
+                %if object is passes, move object with end effector
                 self.robot.model.animate(qMatrix(i,:))
                 if exist('object','var')
                     object.MoveModel(self.robot.GetEndEffPose() * trotx(pi));
                 end
+                %pause for controlFrequency to have real robot and sim
+                %robot move simutanioulsy 
                 drawnow();
                 pause(self.controlFrequency);
 

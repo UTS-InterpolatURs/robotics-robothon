@@ -21,16 +21,16 @@ workbench.PlotModel();
 % 
 % danger_sign = surface_plot('Envi/warning_sign.jpg', [-3,-3;-2,-2],[-3.13,-3.13;-3.13,-3.13],[1,2;1,2]);
 
-realBot = urRosWrapper(robot);
+% realBot = urRosWrapper(robot);
 collisionComputer = TesturCollisionDetection(robot);
-rc = URController(robot, collisionComputer, realBot);
+rc = URController(robot, collisionComputer);
 
 tb = Taskboard(transl(0,-0.65,10));
 tb.PlotTaskboard;
 
 
 
-RobothonSimGui(robot, rc, tb, realBot);
+RobothonSimGui(robot, rc, tb);
 
 
 
